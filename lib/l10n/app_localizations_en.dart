@@ -114,6 +114,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get editClient => 'Edit Client';
 
   @override
+  String get editInvoice => 'Edit Invoice';
+
+  @override
   String get clientDetails => 'Client Details';
 
   @override
@@ -273,6 +276,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get thisMonth => 'This Month';
 
   @override
+  String get thisWeek => 'This Week';
+
+  @override
+  String get lastMonth => 'Last Month';
+
+  @override
+  String get issued => 'Issued';
+
+  @override
   String get recentInvoices => 'Recent Invoices';
 
   @override
@@ -294,6 +306,40 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get paymentTerms => 'Payment Terms: Net 30 days.';
+
+  @override
+  String get pdfDownloadedAndOpened => 'PDF downloaded and opened:';
+
+  @override
+  String get error => 'Error';
+
+  @override
+  String get errorGeneratingPdf => 'Error generating PDF';
+
+  @override
+  String get notesOptional => 'Notes (optional)';
+
+  @override
+  String get paymentNotesHint => 'e.g. Bank transfer, Cash';
+
+  @override
+  String get record => 'Record';
+
+  @override
+  String get changeStatus => 'Change status';
+
+  @override
+  String get unknownClient => 'Unknown Client';
+
+  @override
+  String get invoiceSavedSuccessfully => 'Invoice saved successfully';
+
+  @override
+  String get addAtLeastOnePricedItem =>
+      'Please add at least one item with a price';
+
+  @override
+  String get errorSavingInvoice => 'Error saving invoice';
 
   @override
   String get searchClients => 'Search clients...';

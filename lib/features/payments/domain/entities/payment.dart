@@ -1,6 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:invoice_app/features/clients/domain/entities/client.dart';
-import 'package:invoice_app/features/invoices/domain/entities/invoice.dart';
+import 'package:hissab_dz/features/clients/domain/entities/client.dart';
+import 'package:hissab_dz/features/invoices/domain/entities/invoice.dart';
 
 part 'payment.freezed.dart';
 part 'payment.g.dart';

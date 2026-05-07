@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:invoice_app/l10n/app_localizations.dart';
-import 'package:invoice_app/core/widgets/app_drawer.dart';
-import 'package:invoice_app/features/articles/presentation/providers/article_providers.dart';
+import 'package:hissab_dz/l10n/app_localizations.dart';
+import 'package:hissab_dz/core/widgets/app_drawer.dart';
+import 'package:hissab_dz/features/articles/presentation/providers/article_providers.dart';
 
 class ArticleListScreen extends ConsumerWidget {
   const ArticleListScreen({super.key});

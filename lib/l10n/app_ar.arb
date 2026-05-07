@@ -93,7 +93,9 @@
   "overdueAlert": "{count} فاتورة متأخرة",
   "@overdueAlert": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "immediateAction": "مطلوب اتخاذ إجراء فوري",
@@ -135,5 +137,20 @@
   "m3": "م٣",
   "pieces": "قطعة",
   "physical": "مادي",
-  "service": "خدمة"
+  "service": "خدمة",
+  "thisWeek": "هذا الأسبوع",
+  "lastMonth": "الشهر الماضي",
+  "issued": "صادرة",
+  "pdfDownloadedAndOpened": "تم تحميل ملف PDF وفتحه:",
+  "error": "خطأ",
+  "errorGeneratingPdf": "خطأ أثناء إنشاء PDF",
+  "notesOptional": "ملاحظات (اختياري)",
+  "paymentNotesHint": "مثال: تحويل بنكي، نقدا",
+  "record": "تسجيل",
+  "changeStatus": "تغيير الحالة",
+  "unknownClient": "عميل غير معروف",
+  "invoiceSavedSuccessfully": "تم حفظ الفاتورة بنجاح",
+  "addAtLeastOnePricedItem": "يرجى إضافة بند واحد على الأقل مع سعر",
+  "errorSavingInvoice": "خطأ أثناء حفظ الفاتورة",
+  "editInvoice": "تعديل الفاتورة"
 }

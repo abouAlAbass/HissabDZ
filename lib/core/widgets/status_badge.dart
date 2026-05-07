@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:invoice_app/core/theme/theme.dart';
+import 'package:hissab_dz/core/theme/theme.dart';
 import '../../features/invoices/domain/entities/invoice_status.dart';
 import '../../l10n/app_localizations.dart';
 

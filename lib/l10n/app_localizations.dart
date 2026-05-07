@@ -310,6 +310,12 @@ abstract class AppLocalizations {
   /// **'Edit Client'**
   String get editClient;
 
+  /// No description provided for @editInvoice.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Invoice'**
+  String get editInvoice;
+
   /// No description provided for @clientDetails.
   ///
   /// In en, this message translates to:
@@ -628,6 +634,24 @@ abstract class AppLocalizations {
   /// **'This Month'**
   String get thisMonth;
 
+  /// No description provided for @thisWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'This Week'**
+  String get thisWeek;
+
+  /// No description provided for @lastMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Last Month'**
+  String get lastMonth;
+
+  /// No description provided for @issued.
+  ///
+  /// In en, this message translates to:
+  /// **'Issued'**
+  String get issued;
+
   /// No description provided for @recentInvoices.
   ///
   /// In en, this message translates to:
@@ -669,6 +693,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Payment Terms: Net 30 days.'**
   String get paymentTerms;
+
+  /// No description provided for @pdfDownloadedAndOpened.
+  ///
+  /// In en, this message translates to:
+  /// **'PDF downloaded and opened:'**
+  String get pdfDownloadedAndOpened;
+
+  /// No description provided for @error.
+  ///
+  /// In en, this message translates to:
+  /// **'Error'**
+  String get error;
+
+  /// No description provided for @errorGeneratingPdf.
+  ///
+  /// In en, this message translates to:
+  /// **'Error generating PDF'**
+  String get errorGeneratingPdf;
+
+  /// No description provided for @notesOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes (optional)'**
+  String get notesOptional;
+
+  /// No description provided for @paymentNotesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Bank transfer, Cash'**
+  String get paymentNotesHint;
+
+  /// No description provided for @record.
+  ///
+  /// In en, this message translates to:
+  /// **'Record'**
+  String get record;
+
+  /// No description provided for @changeStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Change status'**
+  String get changeStatus;
+
+  /// No description provided for @unknownClient.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown Client'**
+  String get unknownClient;
+
+  /// No description provided for @invoiceSavedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Invoice saved successfully'**
+  String get invoiceSavedSuccessfully;
+
+  /// No description provided for @addAtLeastOnePricedItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Please add at least one item with a price'**
+  String get addAtLeastOnePricedItem;
+
+  /// No description provided for @errorSavingInvoice.
+  ///
+  /// In en, this message translates to:
+  /// **'Error saving invoice'**
+  String get errorSavingInvoice;
 
   /// No description provided for @searchClients.
   ///

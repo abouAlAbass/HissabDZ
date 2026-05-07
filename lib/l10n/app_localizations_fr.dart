@@ -114,6 +114,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get editClient => 'Modifier le client';
 
   @override
+  String get editInvoice => 'Modifier la facture';
+
+  @override
   String get clientDetails => 'Détails du client';
 
   @override
@@ -273,6 +276,15 @@ class AppLocalizationsFr extends AppLocalizations {
   String get thisMonth => 'Ce mois';
 
   @override
+  String get thisWeek => 'Cette semaine';
+
+  @override
+  String get lastMonth => 'Le mois dernier';
+
+  @override
+  String get issued => 'Emises';
+
+  @override
   String get recentInvoices => 'Factures récentes';
 
   @override
@@ -294,6 +306,41 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get paymentTerms => 'Conditions de paiement : 30 jours net.';
+
+  @override
+  String get pdfDownloadedAndOpened => 'PDF téléchargé et ouvert :';
+
+  @override
+  String get error => 'Erreur';
+
+  @override
+  String get errorGeneratingPdf => 'Erreur lors de la génération du PDF';
+
+  @override
+  String get notesOptional => 'Notes (facultatif)';
+
+  @override
+  String get paymentNotesHint => 'ex. virement bancaire, espèces';
+
+  @override
+  String get record => 'Enregistrer';
+
+  @override
+  String get changeStatus => 'Changer le statut';
+
+  @override
+  String get unknownClient => 'Client inconnu';
+
+  @override
+  String get invoiceSavedSuccessfully => 'Facture enregistrée avec succès';
+
+  @override
+  String get addAtLeastOnePricedItem =>
+      'Veuillez ajouter au moins un article avec un prix';
+
+  @override
+  String get errorSavingInvoice =>
+      'Erreur lors de l\'enregistrement de la facture';
 
   @override
   String get searchClients => 'Rechercher des clients...';

@@ -12,6 +12,7 @@ import '../../features/settings/presentation/pages/settings_screen.dart';
 import '../../features/payments/presentation/pages/payment_list_screen.dart';
 import '../../features/articles/presentation/pages/article_list_screen.dart';
 import '../../features/articles/presentation/pages/add_edit_article_screen.dart';
+import '../widgets/app_drawer.dart';
 
 final rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
 final shellNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'shell');
@@ -92,6 +93,16 @@ class AppRouter {
         builder: (context, state) => const CreateInvoiceScreen(),
       ),
       GoRoute(
+        path: '/invoices/:id/edit',
+        name: 'edit_invoice',
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) {
+          final idString = state.pathParameters['id'];
+          final id = int.tryParse(idString ?? '') ?? 0;
+          return CreateInvoiceScreen(invoiceId: id);
+        },
+      ),
+      GoRoute(
         path: '/invoices/:id',
         name: 'invoice_details',
         parentNavigatorKey: rootNavigatorKey,
@@ -123,94 +134,71 @@ class ScaffoldWithBottomNavBar extends StatelessWidget {
 
     return Scaffold(
       extendBody: true, // Allow body to flow under bottom nav if needed
+      drawer: const AppDrawer(),
       body: child,
-      bottomNavigationBar: Container(
-        height: 70,
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          border: Border(top: BorderSide(color: Color(0xFFE2E8F0), width: 1)),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            _buildNavItem(
-              context,
-              icon: Icons.description_rounded,
-              label: l10n.invoices,
-              isActive: selectedIndex == 0,
-              onTap: () => context.goNamed('invoices'),
-            ),
-            _buildCreateButton(context),
-            _buildNavItem(
-              context,
-              icon: Icons.person_rounded,
-              label: l10n.settings == 'Settings' ? 'Account' : l10n.settings,
-              isActive: selectedIndex == 2,
-              onTap: () => context.goNamed('settings'),
-            ),
-          ],
-        ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => context.pushNamed('create_invoice'),
+        backgroundColor: AppTheme.primaryIndigo,
+        foregroundColor: Colors.white,
+        child: const Icon(Icons.add),
       ),
-    );
-  }
-
-  Widget _buildNavItem(BuildContext context, {required IconData icon, required String label, required bool isActive, required VoidCallback onTap}) {
-    final color = isActive ? AppTheme.primaryIndigo : AppTheme.textSecondary;
-    return InkWell(
-      onTap: onTap,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-            decoration: isActive ? BoxDecoration(
-              color: AppTheme.primaryIndigo.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(16),
-            ) : null,
-            child: Icon(icon, color: color, size: 24),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: selectedIndex,
+        type: BottomNavigationBarType.fixed,
+        selectedItemColor: AppTheme.primaryIndigo,
+        unselectedItemColor: AppTheme.textSecondary,
+        showUnselectedLabels: true,
+        onTap: (index) {
+          switch (index) {
+            case 0:
+              context.goNamed('dashboard');
+              break;
+            case 1:
+              context.goNamed('clients');
+              break;
+            case 2:
+              context.goNamed('invoices');
+              break;
+            case 3:
+              context.goNamed('payments');
+              break;
+            case 4:
+              context.goNamed('articles');
+              break;
+          }
+        },
+        items: [
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.dashboard_rounded),
+            label: l10n.dashboard,
           ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: TextStyle(
-              color: color,
-              fontSize: 10,
-              fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
-            ),
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.people_rounded),
+            label: l10n.clients,
+          ),
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.description_rounded),
+            label: l10n.invoices,
+          ),
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.payments_rounded),
+            label: l10n.payments,
+          ),
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.inventory_2_rounded),
+            label: l10n.articles,
           ),
         ],
       ),
     );
   }
 
-  Widget _buildCreateButton(BuildContext context) {
-    return GestureDetector(
-      onTap: () => context.pushNamed('create_invoice'),
-      child: Transform.translate(
-        offset: const Offset(0, -15),
-        child: Container(
-          width: 50,
-          height: 50,
-          decoration: BoxDecoration(
-            color: AppTheme.primaryIndigo,
-            borderRadius: BorderRadius.circular(14),
-            boxShadow: [
-              BoxShadow(
-                color: AppTheme.primaryIndigo.withValues(alpha: 0.3),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: const Icon(Icons.add, color: Colors.white, size: 30),
-        ),
-      ),
-    );
-  }
-
   int _calculateSelectedIndex(String location) {
-    if (location.startsWith('/invoices')) return 0;
-    if (location.startsWith('/settings')) return 2;
-    return 0; // Default to invoices
+    if (location == '/') return 0;
+    if (location.startsWith('/clients')) return 1;
+    if (location.startsWith('/invoices')) return 2;
+    if (location.startsWith('/payments')) return 3;
+    if (location.startsWith('/articles')) return 4;
+    return 0;
   }
 }

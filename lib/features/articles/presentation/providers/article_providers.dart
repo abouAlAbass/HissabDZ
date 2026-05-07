@@ -1,6 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:invoice_app/features/articles/data/repositories/article_repository.dart';
-import 'package:invoice_app/features/articles/domain/entities/article.dart';
+import 'package:hissab_dz/features/articles/data/repositories/article_repository.dart';
+import 'package:hissab_dz/features/articles/domain/entities/article.dart';
 
 part 'article_providers.g.dart';
 

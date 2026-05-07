@@ -19,7 +19,7 @@ class MainApp extends ConsumerWidget {
     final locale = ref.watch(appLocaleProvider);
 
     return MaterialApp.router(
-      title: 'Invoice Pro',
+      title: 'HissabDZ',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,

@@ -114,6 +114,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get editClient => 'تعديل العميل';
 
   @override
+  String get editInvoice => 'تعديل الفاتورة';
+
+  @override
   String get clientDetails => 'تفاصيل العميل';
 
   @override
@@ -273,6 +276,15 @@ class AppLocalizationsAr extends AppLocalizations {
   String get thisMonth => 'هذا الشهر';
 
   @override
+  String get thisWeek => 'هذا الأسبوع';
+
+  @override
+  String get lastMonth => 'الشهر الماضي';
+
+  @override
+  String get issued => 'صادرة';
+
+  @override
   String get recentInvoices => 'الفواتير الأخيرة';
 
   @override
@@ -294,6 +306,39 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get paymentTerms => 'شروط الدفع: صافي 30 يوماً.';
+
+  @override
+  String get pdfDownloadedAndOpened => 'تم تحميل ملف PDF وفتحه:';
+
+  @override
+  String get error => 'خطأ';
+
+  @override
+  String get errorGeneratingPdf => 'خطأ أثناء إنشاء PDF';
+
+  @override
+  String get notesOptional => 'ملاحظات (اختياري)';
+
+  @override
+  String get paymentNotesHint => 'مثال: تحويل بنكي، نقدا';
+
+  @override
+  String get record => 'تسجيل';
+
+  @override
+  String get changeStatus => 'تغيير الحالة';
+
+  @override
+  String get unknownClient => 'عميل غير معروف';
+
+  @override
+  String get invoiceSavedSuccessfully => 'تم حفظ الفاتورة بنجاح';
+
+  @override
+  String get addAtLeastOnePricedItem => 'يرجى إضافة بند واحد على الأقل مع سعر';
+
+  @override
+  String get errorSavingInvoice => 'خطأ أثناء حفظ الفاتورة';
 
   @override
   String get searchClients => 'البحث عن عملاء...';

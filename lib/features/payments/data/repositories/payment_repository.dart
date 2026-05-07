@@ -1,9 +1,9 @@
 import 'package:drift/drift.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:invoice_app/core/database/database.dart';
-import 'package:invoice_app/core/database/database_provider.dart';
-import 'package:invoice_app/features/payments/domain/entities/payment.dart';
-import 'package:invoice_app/features/clients/domain/entities/client.dart';
+import 'package:hissab_dz/core/database/database.dart';
+import 'package:hissab_dz/core/database/database_provider.dart';
+import 'package:hissab_dz/features/payments/domain/entities/payment.dart';
+import 'package:hissab_dz/features/clients/domain/entities/client.dart';
 
 abstract class PaymentRepository {
   Stream<List<Payment>> watchPayments();

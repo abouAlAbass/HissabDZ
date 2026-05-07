@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:invoice_app/l10n/app_localizations.dart';
-import 'package:invoice_app/features/articles/domain/entities/article.dart';
-import 'package:invoice_app/features/articles/data/repositories/article_repository.dart';
-import 'package:invoice_app/features/articles/presentation/providers/article_providers.dart';
+import 'package:hissab_dz/l10n/app_localizations.dart';
+import 'package:hissab_dz/features/articles/domain/entities/article.dart';
+import 'package:hissab_dz/features/articles/data/repositories/article_repository.dart';
+import 'package:hissab_dz/features/articles/presentation/providers/article_providers.dart';
 
 class AddEditArticleScreen extends ConsumerStatefulWidget {
   final int? articleId;
