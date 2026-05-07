@@ -1,0 +1,122 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import '../../l10n/app_localizations.dart';
+import '../theme/theme.dart';
+import '../providers/locale_provider.dart';
+
+class AppDrawer extends ConsumerWidget {
+  const AppDrawer({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final currentLocale = ref.watch(appLocaleProvider);
+
+    return Drawer(
+      child: Column(
+        children: [
+          DrawerHeader(
+            decoration: BoxDecoration(gradient: AppTheme.primaryGradient),
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Image.asset(
+                      'assets/images/iconHissabDZ.jpg',
+                      width: 60,
+                      height: 60,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    l10n.appTitle,
+                    style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.dashboard),
+            title: Text(l10n.dashboard),
+            onTap: () { Navigator.pop(context); context.go('/'); },
+          ),
+          ListTile(
+            leading: const Icon(Icons.people),
+            title: Text(l10n.clients),
+            onTap: () { Navigator.pop(context); context.go('/clients'); },
+          ),
+          ListTile(
+            leading: const Icon(Icons.description),
+            title: Text(l10n.invoices),
+            onTap: () { Navigator.pop(context); context.go('/invoices'); },
+          ),
+          ListTile(
+            leading: const Icon(Icons.payments),
+            title: Text(l10n.payments),
+            onTap: () { Navigator.pop(context); context.go('/payments'); },
+          ),
+          ListTile(
+            leading: const Icon(Icons.inventory_2),
+            title: Text(l10n.articles),
+            onTap: () { Navigator.pop(context); context.go('/articles'); },
+          ),
+          const Divider(),
+          ListTile(
+            leading: const Icon(Icons.settings),
+            title: Text(l10n.settings),
+            onTap: () { Navigator.pop(context); context.pushNamed('settings'); },
+          ),
+          // ── Language Switcher ──
+          ListTile(
+            leading: const Icon(Icons.language),
+            title: Text(l10n.selectLanguage),
+            trailing: Text(
+              supportedLocalesInfo.firstWhere(
+                (m) => (m['locale'] as Locale).languageCode == currentLocale.languageCode,
+                orElse: () => supportedLocalesInfo.first,
+              )['flag'] as String,
+              style: const TextStyle(fontSize: 22),
+            ),
+            onTap: () => _showLanguageDialog(context, ref, l10n, currentLocale),
+          ),
+          const Spacer(),
+          const Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Text('Invoice Pro v1.0', style: TextStyle(color: Colors.grey, fontSize: 12)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showLanguageDialog(BuildContext context, WidgetRef ref, AppLocalizations l10n, Locale current) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.selectLanguage),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: supportedLocalesInfo.map((info) {
+            final locale = info['locale'] as Locale;
+            final isSelected = locale.languageCode == current.languageCode;
+            return ListTile(
+              leading: Text(info['flag'] as String, style: const TextStyle(fontSize: 22)),
+              title: Text(info['native'] as String),
+              trailing: isSelected ? const Icon(Icons.check_circle, color: Colors.green) : null,
+              onTap: () {
+                ref.read(appLocaleProvider.notifier).setLocale(locale);
+                Navigator.pop(ctx);
+                Navigator.pop(context); // close drawer
+              },
+            );
+          }).toList(),
+        ),
+      ),
+    );
+  }
+}

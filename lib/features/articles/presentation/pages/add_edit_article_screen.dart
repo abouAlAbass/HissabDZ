@@ -1,0 +1,187 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:invoice_app/l10n/app_localizations.dart';
+import 'package:invoice_app/features/articles/domain/entities/article.dart';
+import 'package:invoice_app/features/articles/data/repositories/article_repository.dart';
+import 'package:invoice_app/features/articles/presentation/providers/article_providers.dart';
+
+class AddEditArticleScreen extends ConsumerStatefulWidget {
+  final int? articleId;
+  const AddEditArticleScreen({super.key, this.articleId});
+
+  @override
+  ConsumerState<AddEditArticleScreen> createState() => _AddEditArticleScreenState();
+}
+
+class _AddEditArticleScreenState extends ConsumerState<AddEditArticleScreen> {
+  final _formKey = GlobalKey<FormState>();
+  late TextEditingController _nameController;
+  late TextEditingController _codeController;
+  late TextEditingController _priceController;
+  String _selectedUnit = 'pieces';
+  String _selectedType = 'physical';
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController();
+    _codeController = TextEditingController();
+    _priceController = TextEditingController();
+
+    if (widget.articleId != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final articles = ref.read(articlesListProvider).value ?? [];
+        final article = articles.firstWhere((a) => a.id == widget.articleId);
+        _nameController.text = article.name;
+        _codeController.text = article.code ?? '';
+        _priceController.text = article.price.toString();
+        setState(() {
+          _selectedUnit = article.unit;
+          _selectedType = article.type;
+        });
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _codeController.dispose();
+    _priceController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _save() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    final article = Article(
+      id: widget.articleId,
+      name: _nameController.text,
+      code: _codeController.text.isEmpty ? null : _codeController.text,
+      price: double.tryParse(_priceController.text) ?? 0.0,
+      unit: _selectedUnit,
+      type: _selectedType,
+    );
+
+    if (widget.articleId == null) {
+      await ref.read(articleRepositoryProvider).addArticle(article);
+    } else {
+      await ref.read(articleRepositoryProvider).updateArticle(article);
+    }
+
+    if (mounted) context.pop();
+  }
+
+  Future<void> _delete() async {
+    final l10n = AppLocalizations.of(context)!;
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.confirmDelete),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(l10n.no)),
+          TextButton(onPressed: () => Navigator.pop(ctx, true), child: Text(l10n.yes, style: const TextStyle(color: Colors.red))),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      await ref.read(articleRepositoryProvider).deleteArticle(widget.articleId!);
+      if (mounted) context.pop();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final isEditing = widget.articleId != null;
+    final units = {
+      'kg': l10n.kg,
+      'm2': l10n.m2,
+      'm3': l10n.m3,
+      'pieces': l10n.pieces,
+    };
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(isEditing ? l10n.editArticle : l10n.addArticle),
+        actions: [
+          if (isEditing)
+            IconButton(
+              icon: const Icon(Icons.delete_outline, color: Colors.red),
+              onPressed: _delete,
+            ),
+        ],
+      ),
+      body: Form(
+        key: _formKey,
+        child: ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
+            // ── Type Selector ──
+            SegmentedButton<String>(
+              segments: [
+                ButtonSegment(value: 'physical', label: Text(l10n.physical), icon: const Icon(Icons.inventory_2)),
+                ButtonSegment(value: 'service', label: Text(l10n.service), icon: const Icon(Icons.build_circle)),
+              ],
+              selected: {_selectedType},
+              onSelectionChanged: (val) => setState(() => _selectedType = val.first),
+            ),
+            const SizedBox(height: 24),
+            TextFormField(
+              controller: _nameController,
+              decoration: InputDecoration(
+                labelText: l10n.name,
+                border: const OutlineInputBorder(),
+              ),
+              validator: (v) => (v == null || v.isEmpty) ? l10n.noData : null,
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _codeController,
+              decoration: InputDecoration(
+                labelText: l10n.code,
+                border: const OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _priceController,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              decoration: InputDecoration(
+                labelText: l10n.price,
+                prefixText: '${l10n.currencySymbol} ',
+                border: const OutlineInputBorder(),
+              ),
+              validator: (v) => (v == null || v.isEmpty) ? l10n.noData : null,
+            ),
+            const SizedBox(height: 16),
+            DropdownButtonFormField<String>(
+              initialValue: _selectedUnit,
+              decoration: InputDecoration(
+                labelText: l10n.unit,
+                border: const OutlineInputBorder(),
+              ),
+              items: units.entries.map((e) => DropdownMenuItem(
+                value: e.key,
+                child: Text(e.value),
+              )).toList(),
+              onChanged: (v) => setState(() => _selectedUnit = v!),
+            ),
+            const SizedBox(height: 32),
+            ElevatedButton(
+              onPressed: _save,
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                backgroundColor: Theme.of(context).colorScheme.primary,
+                foregroundColor: Theme.of(context).colorScheme.onPrimary,
+              ),
+              child: Text(l10n.save, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
