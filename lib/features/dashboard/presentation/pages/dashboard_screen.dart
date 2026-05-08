@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../providers/dashboard_providers.dart';
 import '../../../invoices/domain/entities/invoice.dart';
+import '../../../clients/presentation/pages/client_list_screen.dart';
+import '../../../projects/presentation/widgets/expense_form_sheet.dart';
 import '../../../../core/widgets/status_badge.dart';
 import '../../../../core/widgets/app_drawer.dart';
 import '../../../../l10n/app_localizations.dart';
@@ -17,43 +19,156 @@ class DashboardScreen extends ConsumerWidget {
     final statsAsync = ref.watch(dashboardStatsProvider);
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.dashboard)),
-      drawer: const AppDrawer(),
+      appBar: AppBar(
+        title: Text(l10n.dashboard),
+        actions: [
+          IconButton(
+            tooltip: l10n.globalSearch,
+            icon: const Icon(Icons.search),
+            onPressed: () => context.pushNamed('global_search'),
+          ),
+        ],
+      ),
+      drawer: MediaQuery.sizeOf(context).width >= 1100
+          ? null
+          : const AppDrawer(),
       body: statsAsync.when(
         data: (stats) => RefreshIndicator(
           onRefresh: () => ref.refresh(dashboardStatsProvider.future),
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildSummaryGrid(context, l10n, stats),
-                const SizedBox(height: 24),
-                if ((stats['overdueInvoices'] as List).isNotEmpty) ...[
-                  _buildOverdueAlert(
-                    context,
-                    l10n,
-                    stats['overdueInvoices'] as List<Invoice>,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final width = constraints.maxWidth;
+              final horizontalPadding = width >= 1100 ? 28.0 : 16.0;
+              return SingleChildScrollView(
+                padding: EdgeInsets.fromLTRB(
+                  horizontalPadding,
+                  16,
+                  horizontalPadding,
+                  width < 720 ? 112 : 28,
+                ),
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 1280),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildQuickActions(context, l10n),
+                        const SizedBox(height: 20),
+                        _buildSummaryGrid(context, l10n, stats),
+                        const SizedBox(height: 24),
+                        if ((stats['overdueInvoices'] as List).isNotEmpty) ...[
+                          _buildOverdueAlert(
+                            context,
+                            l10n,
+                            stats['overdueInvoices'] as List<Invoice>,
+                          ),
+                          const SizedBox(height: 24),
+                        ],
+                        Text(
+                          l10n.recentInvoices,
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
+                        const SizedBox(height: 8),
+                        _buildRecentInvoices(
+                          context,
+                          l10n,
+                          stats['recentInvoices'] as List<Invoice>,
+                        ),
+                      ],
+                    ),
                   ),
-                  const SizedBox(height: 24),
-                ],
-                Text(
-                  l10n.recentInvoices,
-                  style: Theme.of(context).textTheme.titleLarge,
                 ),
-                const SizedBox(height: 8),
-                _buildRecentInvoices(
-                  context,
-                  l10n,
-                  stats['recentInvoices'] as List<Invoice>,
-                ),
-              ],
-            ),
+              );
+            },
           ),
         ),
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, st) => Center(child: Text('Error: $e')),
+        error: (e, st) => Center(child: Text('${l10n.error}: $e')),
       ),
+    );
+  }
+
+  Widget _buildQuickActions(BuildContext context, AppLocalizations l10n) {
+    final actions = [
+      (
+        label: l10n.createQuote,
+        icon: Icons.request_quote_outlined,
+        color: Colors.indigo,
+        onTap: () => context.pushNamed('create_quote'),
+      ),
+      (
+        label: l10n.addExpense,
+        icon: Icons.receipt_long_outlined,
+        color: Colors.red,
+        onTap: () => _showExpenseSheet(context),
+      ),
+      (
+        label: l10n.quickClient,
+        icon: Icons.person_add_alt_1_outlined,
+        color: Colors.blue,
+        onTap: () => _showClientSheet(context),
+      ),
+      (
+        label: l10n.quickArticle,
+        icon: Icons.add_box_outlined,
+        color: Colors.green,
+        onTap: () => context.pushNamed('add_article'),
+      ),
+    ];
+
+    final width = MediaQuery.sizeOf(context).width;
+    final crossAxisCount = width >= 1100 ? 4 : 2;
+    final childAspectRatio = width >= 1100 ? 3.2 : 2.45;
+
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: actions.length,
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: crossAxisCount,
+        crossAxisSpacing: 12,
+        mainAxisSpacing: 12,
+        childAspectRatio: childAspectRatio,
+      ),
+      itemBuilder: (context, index) {
+        final action = actions[index];
+        return FilledButton.icon(
+          onPressed: action.onTap,
+          icon: Icon(action.icon, size: 24),
+          label: Text(
+            action.label,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+          ),
+          style: FilledButton.styleFrom(
+            backgroundColor: action.color,
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _showExpenseSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (context) => const ExpenseFormSheet(),
+    );
+  }
+
+  void _showClientSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) =>
+          const Padding(padding: EdgeInsets.all(16), child: AddClientForm()),
     );
   }
 
@@ -64,19 +179,27 @@ class DashboardScreen extends ConsumerWidget {
   ) {
     final currencyFormat = NumberFormat.currency(symbol: l10n.currencySymbol);
 
+    final width = MediaQuery.sizeOf(context).width;
+    final crossAxisCount = width >= 1100
+        ? 3
+        : width >= 720
+        ? 3
+        : 2;
+    final childAspectRatio = width >= 720 ? 2.0 : 1.45;
+
     return GridView.count(
-      crossAxisCount: 2,
+      crossAxisCount: crossAxisCount,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      crossAxisSpacing: 16,
-      mainAxisSpacing: 16,
-      childAspectRatio: 1.5,
+      crossAxisSpacing: 12,
+      mainAxisSpacing: 12,
+      childAspectRatio: childAspectRatio,
       children: [
         _buildStatCard(
           context,
-          l10n.totalRevenue,
-          currencyFormat.format(stats['totalRevenue']),
-          Icons.attach_money,
+          l10n.collectedThisMonth,
+          currencyFormat.format(stats['collectedThisMonth']),
+          Icons.account_balance_wallet_outlined,
           Colors.green,
         ),
         _buildStatCard(
@@ -88,17 +211,31 @@ class DashboardScreen extends ConsumerWidget {
         ),
         _buildStatCard(
           context,
-          l10n.totalClients,
-          '${stats['totalClients']}',
-          Icons.people,
+          l10n.monthlyExpenses,
+          currencyFormat.format(stats['expensesThisMonth']),
+          Icons.receipt_long_outlined,
+          Colors.red,
+        ),
+        _buildStatCard(
+          context,
+          l10n.estimatedProfit,
+          currencyFormat.format(stats['estimatedProfit']),
+          Icons.trending_up,
+          Colors.purple,
+        ),
+        _buildStatCard(
+          context,
+          l10n.ongoingProjects,
+          '${stats['ongoingProjects']}',
+          Icons.construction_outlined,
           Colors.blue,
         ),
         _buildStatCard(
           context,
-          l10n.thisMonth,
-          '${stats['invoicesThisMonth']}',
-          Icons.description,
-          Colors.purple,
+          l10n.overdueInvoices,
+          '${stats['overdueInvoiceCount']}',
+          Icons.warning_amber_rounded,
+          Colors.deepOrange,
         ),
       ],
     );

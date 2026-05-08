@@ -19,40 +19,57 @@ class ArticleRepositoryImpl implements ArticleRepository {
   @override
   Stream<List<Article>> watchArticles() {
     return _db.select(_db.articles).watch().map((rows) {
-      return rows.map((data) => Article(
-        id: data.id,
-        name: data.name,
-        code: data.code,
-        price: data.price,
-        unit: data.unit,
-        type: data.type,
-        createdAt: data.createdAt,
-      )).toList();
+      return rows
+          .map(
+            (data) => Article(
+              id: data.id,
+              name: data.name,
+              code: data.code,
+              price: data.price,
+              unit: data.unit,
+              type: data.type,
+              category: data.category,
+              taxRate: data.taxRate,
+              marginRate: data.marginRate,
+              createdAt: data.createdAt,
+            ),
+          )
+          .toList();
     });
   }
 
   @override
   Future<int> addArticle(Article article) {
-    return _db.into(_db.articles).insert(
-      ArticlesCompanion.insert(
-        name: article.name,
-        code: Value(article.code),
-        price: Value(article.price),
-        unit: article.unit,
-        type: Value(article.type),
-      ),
-    );
+    return _db
+        .into(_db.articles)
+        .insert(
+          ArticlesCompanion.insert(
+            name: article.name,
+            code: Value(article.code),
+            price: Value(article.price),
+            unit: article.unit,
+            type: Value(article.type),
+            category: Value(article.category),
+            taxRate: Value(article.taxRate),
+            marginRate: Value(article.marginRate),
+          ),
+        );
   }
 
   @override
   Future<void> updateArticle(Article article) {
-    return (_db.update(_db.articles)..where((t) => t.id.equals(article.id!))).write(
+    return (_db.update(
+      _db.articles,
+    )..where((t) => t.id.equals(article.id!))).write(
       ArticlesCompanion(
         name: Value(article.name),
         code: Value(article.code),
         price: Value(article.price),
         unit: Value(article.unit),
         type: Value(article.type),
+        category: Value(article.category),
+        taxRate: Value(article.taxRate),
+        marginRate: Value(article.marginRate),
       ),
     );
   }

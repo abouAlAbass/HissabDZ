@@ -11,7 +11,8 @@ class AddEditArticleScreen extends ConsumerStatefulWidget {
   const AddEditArticleScreen({super.key, this.articleId});
 
   @override
-  ConsumerState<AddEditArticleScreen> createState() => _AddEditArticleScreenState();
+  ConsumerState<AddEditArticleScreen> createState() =>
+      _AddEditArticleScreenState();
 }
 
 class _AddEditArticleScreenState extends ConsumerState<AddEditArticleScreen> {
@@ -19,8 +20,11 @@ class _AddEditArticleScreenState extends ConsumerState<AddEditArticleScreen> {
   late TextEditingController _nameController;
   late TextEditingController _codeController;
   late TextEditingController _priceController;
+  late TextEditingController _taxRateController;
+  late TextEditingController _marginRateController;
   String _selectedUnit = 'pieces';
   String _selectedType = 'physical';
+  String _selectedCategory = 'materials';
 
   @override
   void initState() {
@@ -28,6 +32,8 @@ class _AddEditArticleScreenState extends ConsumerState<AddEditArticleScreen> {
     _nameController = TextEditingController();
     _codeController = TextEditingController();
     _priceController = TextEditingController();
+    _taxRateController = TextEditingController(text: '0');
+    _marginRateController = TextEditingController(text: '0');
 
     if (widget.articleId != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -36,9 +42,12 @@ class _AddEditArticleScreenState extends ConsumerState<AddEditArticleScreen> {
         _nameController.text = article.name;
         _codeController.text = article.code ?? '';
         _priceController.text = article.price.toString();
+        _taxRateController.text = article.taxRate.toString();
+        _marginRateController.text = article.marginRate.toString();
         setState(() {
           _selectedUnit = article.unit;
           _selectedType = article.type;
+          _selectedCategory = article.category;
         });
       });
     }
@@ -49,6 +58,8 @@ class _AddEditArticleScreenState extends ConsumerState<AddEditArticleScreen> {
     _nameController.dispose();
     _codeController.dispose();
     _priceController.dispose();
+    _taxRateController.dispose();
+    _marginRateController.dispose();
     super.dispose();
   }
 
@@ -62,6 +73,9 @@ class _AddEditArticleScreenState extends ConsumerState<AddEditArticleScreen> {
       price: double.tryParse(_priceController.text) ?? 0.0,
       unit: _selectedUnit,
       type: _selectedType,
+      category: _selectedCategory,
+      taxRate: double.tryParse(_taxRateController.text) ?? 0.0,
+      marginRate: double.tryParse(_marginRateController.text) ?? 0.0,
     );
 
     if (widget.articleId == null) {
@@ -80,14 +94,22 @@ class _AddEditArticleScreenState extends ConsumerState<AddEditArticleScreen> {
       builder: (ctx) => AlertDialog(
         title: Text(l10n.confirmDelete),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(l10n.no)),
-          TextButton(onPressed: () => Navigator.pop(ctx, true), child: Text(l10n.yes, style: const TextStyle(color: Colors.red))),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(l10n.no),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(l10n.yes, style: const TextStyle(color: Colors.red)),
+          ),
         ],
       ),
     );
 
     if (confirm == true) {
-      await ref.read(articleRepositoryProvider).deleteArticle(widget.articleId!);
+      await ref
+          .read(articleRepositoryProvider)
+          .deleteArticle(widget.articleId!);
       if (mounted) context.pop();
     }
   }
@@ -101,6 +123,14 @@ class _AddEditArticleScreenState extends ConsumerState<AddEditArticleScreen> {
       'm2': l10n.m2,
       'm3': l10n.m3,
       'pieces': l10n.pieces,
+    };
+    final categories = {
+      'labor': l10n.laborCategory,
+      'materials': l10n.materialsCategory,
+      'travel': l10n.travelCategory,
+      'rental': l10n.rentalCategory,
+      'service': l10n.service,
+      'supply': l10n.supplyCategory,
     };
 
     return Scaffold(
@@ -122,11 +152,20 @@ class _AddEditArticleScreenState extends ConsumerState<AddEditArticleScreen> {
             // ── Type Selector ──
             SegmentedButton<String>(
               segments: [
-                ButtonSegment(value: 'physical', label: Text(l10n.physical), icon: const Icon(Icons.inventory_2)),
-                ButtonSegment(value: 'service', label: Text(l10n.service), icon: const Icon(Icons.build_circle)),
+                ButtonSegment(
+                  value: 'physical',
+                  label: Text(l10n.physical),
+                  icon: const Icon(Icons.inventory_2),
+                ),
+                ButtonSegment(
+                  value: 'service',
+                  label: Text(l10n.service),
+                  icon: const Icon(Icons.build_circle),
+                ),
               ],
               selected: {_selectedType},
-              onSelectionChanged: (val) => setState(() => _selectedType = val.first),
+              onSelectionChanged: (val) =>
+                  setState(() => _selectedType = val.first),
             ),
             const SizedBox(height: 24),
             TextFormField(
@@ -148,7 +187,9 @@ class _AddEditArticleScreenState extends ConsumerState<AddEditArticleScreen> {
             const SizedBox(height: 16),
             TextFormField(
               controller: _priceController,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
               decoration: InputDecoration(
                 labelText: l10n.price,
                 prefixText: '${l10n.currencySymbol} ',
@@ -158,16 +199,61 @@ class _AddEditArticleScreenState extends ConsumerState<AddEditArticleScreen> {
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<String>(
+              initialValue: _selectedCategory,
+              decoration: InputDecoration(
+                labelText: l10n.articleCategory,
+                border: const OutlineInputBorder(),
+              ),
+              items: categories.entries
+                  .map(
+                    (e) => DropdownMenuItem(value: e.key, child: Text(e.value)),
+                  )
+                  .toList(),
+              onChanged: (v) => setState(() => _selectedCategory = v!),
+            ),
+            const SizedBox(height: 16),
+            DropdownButtonFormField<String>(
               initialValue: _selectedUnit,
               decoration: InputDecoration(
                 labelText: l10n.unit,
                 border: const OutlineInputBorder(),
               ),
-              items: units.entries.map((e) => DropdownMenuItem(
-                value: e.key,
-                child: Text(e.value),
-              )).toList(),
+              items: units.entries
+                  .map(
+                    (e) => DropdownMenuItem(value: e.key, child: Text(e.value)),
+                  )
+                  .toList(),
               onChanged: (v) => setState(() => _selectedUnit = v!),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: TextFormField(
+                    controller: _taxRateController,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    decoration: InputDecoration(
+                      labelText: l10n.defaultTax,
+                      border: const OutlineInputBorder(),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: TextFormField(
+                    controller: _marginRateController,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    decoration: InputDecoration(
+                      labelText: l10n.margin,
+                      border: const OutlineInputBorder(),
+                    ),
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 32),
             ElevatedButton(
@@ -177,7 +263,13 @@ class _AddEditArticleScreenState extends ConsumerState<AddEditArticleScreen> {
                 backgroundColor: Theme.of(context).colorScheme.primary,
                 foregroundColor: Theme.of(context).colorScheme.onPrimary,
               ),
-              child: Text(l10n.save, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              child: Text(
+                l10n.save,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
           ],
         ),

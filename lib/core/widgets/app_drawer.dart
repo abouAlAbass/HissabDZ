@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../l10n/app_localizations.dart';
-import '../theme/theme.dart';
 import '../providers/locale_provider.dart';
+import '../theme/theme.dart';
 
 class AppDrawer extends ConsumerWidget {
   const AppDrawer({super.key});
@@ -14,87 +14,157 @@ class AppDrawer extends ConsumerWidget {
     final currentLocale = ref.watch(appLocaleProvider);
 
     return Drawer(
-      child: Column(
-        children: [
-          DrawerHeader(
-            decoration: BoxDecoration(gradient: AppTheme.primaryGradient),
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: Image.asset(
-                      'assets/images/iconHissabDZ.jpg',
-                      width: 60,
-                      height: 60,
-                      fit: BoxFit.cover,
+      child: SafeArea(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            Container(
+              height: 180,
+              decoration: BoxDecoration(gradient: AppTheme.primaryGradient),
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.asset(
+                        'assets/images/iconHissabDZ.jpg',
+                        width: 60,
+                        height: 60,
+                        fit: BoxFit.cover,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    l10n.appTitle,
-                    style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                ],
+                    const SizedBox(height: 12),
+                    Text(
+                      l10n.appTitle,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-          ListTile(
-            leading: const Icon(Icons.dashboard),
-            title: Text(l10n.dashboard),
-            onTap: () { Navigator.pop(context); context.go('/'); },
-          ),
-          ListTile(
-            leading: const Icon(Icons.people),
-            title: Text(l10n.clients),
-            onTap: () { Navigator.pop(context); context.go('/clients'); },
-          ),
-          ListTile(
-            leading: const Icon(Icons.description),
-            title: Text(l10n.invoices),
-            onTap: () { Navigator.pop(context); context.go('/invoices'); },
-          ),
-          ListTile(
-            leading: const Icon(Icons.payments),
-            title: Text(l10n.payments),
-            onTap: () { Navigator.pop(context); context.go('/payments'); },
-          ),
-          ListTile(
-            leading: const Icon(Icons.inventory_2),
-            title: Text(l10n.articles),
-            onTap: () { Navigator.pop(context); context.go('/articles'); },
-          ),
-          const Divider(),
-          ListTile(
-            leading: const Icon(Icons.settings),
-            title: Text(l10n.settings),
-            onTap: () { Navigator.pop(context); context.pushNamed('settings'); },
-          ),
-          // ── Language Switcher ──
-          ListTile(
-            leading: const Icon(Icons.language),
-            title: Text(l10n.selectLanguage),
-            trailing: Text(
-              supportedLocalesInfo.firstWhere(
-                (m) => (m['locale'] as Locale).languageCode == currentLocale.languageCode,
-                orElse: () => supportedLocalesInfo.first,
-              )['flag'] as String,
-              style: const TextStyle(fontSize: 22),
+            ListTile(
+              leading: const Icon(Icons.search),
+              title: Text(l10n.globalSearch),
+              onTap: () {
+                Navigator.pop(context);
+                context.pushNamed('global_search');
+              },
             ),
-            onTap: () => _showLanguageDialog(context, ref, l10n, currentLocale),
-          ),
-          const Spacer(),
-          const Padding(
-            padding: EdgeInsets.all(16.0),
-            child: Text('Invoice Pro v1.0', style: TextStyle(color: Colors.grey, fontSize: 12)),
-          ),
-        ],
+            const Divider(),
+            ListTile(
+              leading: const Icon(Icons.dashboard),
+              title: Text(l10n.dashboard),
+              onTap: () {
+                Navigator.pop(context);
+                context.go('/');
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.folder_open),
+              title: Text(l10n.projects),
+              onTap: () {
+                Navigator.pop(context);
+                context.go('/projects');
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.people),
+              title: Text(l10n.clients),
+              onTap: () {
+                Navigator.pop(context);
+                context.go('/clients');
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.request_quote),
+              title: Text(l10n.quotes),
+              onTap: () {
+                Navigator.pop(context);
+                context.go('/quotes');
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.description),
+              title: Text(l10n.invoices),
+              onTap: () {
+                Navigator.pop(context);
+                context.go('/invoices');
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.payments),
+              title: Text(l10n.payments),
+              onTap: () {
+                Navigator.pop(context);
+                context.go('/payments');
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.receipt_long),
+              title: Text(l10n.expenses),
+              onTap: () {
+                Navigator.pop(context);
+                context.go('/expenses');
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.inventory_2),
+              title: Text(l10n.articles),
+              onTap: () {
+                Navigator.pop(context);
+                context.go('/articles');
+              },
+            ),
+            const Divider(),
+            ListTile(
+              leading: const Icon(Icons.settings),
+              title: Text(l10n.settings),
+              onTap: () {
+                Navigator.pop(context);
+                context.pushNamed('settings');
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.language),
+              title: Text(l10n.selectLanguage),
+              trailing: Text(
+                supportedLocalesInfo.firstWhere(
+                      (m) =>
+                          (m['locale'] as Locale).languageCode ==
+                          currentLocale.languageCode,
+                      orElse: () => supportedLocalesInfo.first,
+                    )['flag']
+                    as String,
+                style: const TextStyle(fontSize: 22),
+              ),
+              onTap: () =>
+                  _showLanguageDialog(context, ref, l10n, currentLocale),
+            ),
+            const Padding(
+              padding: EdgeInsets.all(16.0),
+              child: Text(
+                'Invoice Pro v1.0',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.grey, fontSize: 12),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  void _showLanguageDialog(BuildContext context, WidgetRef ref, AppLocalizations l10n, Locale current) {
+  void _showLanguageDialog(
+    BuildContext context,
+    WidgetRef ref,
+    AppLocalizations l10n,
+    Locale current,
+  ) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -105,13 +175,18 @@ class AppDrawer extends ConsumerWidget {
             final locale = info['locale'] as Locale;
             final isSelected = locale.languageCode == current.languageCode;
             return ListTile(
-              leading: Text(info['flag'] as String, style: const TextStyle(fontSize: 22)),
+              leading: Text(
+                info['flag'] as String,
+                style: const TextStyle(fontSize: 22),
+              ),
               title: Text(info['native'] as String),
-              trailing: isSelected ? const Icon(Icons.check_circle, color: Colors.green) : null,
+              trailing: isSelected
+                  ? const Icon(Icons.check_circle, color: Colors.green)
+                  : null,
               onTap: () {
                 ref.read(appLocaleProvider.notifier).setLocale(locale);
                 Navigator.pop(ctx);
-                Navigator.pop(context); // close drawer
+                Navigator.pop(context);
               },
             );
           }).toList(),

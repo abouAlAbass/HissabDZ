@@ -27,6 +27,9 @@ mixin _$Article {
   double get price => throw _privateConstructorUsedError;
   String get unit => throw _privateConstructorUsedError; // kg, m2, m3, pieces
   String get type => throw _privateConstructorUsedError; // physical, service
+  String get category => throw _privateConstructorUsedError;
+  double get taxRate => throw _privateConstructorUsedError;
+  double get marginRate => throw _privateConstructorUsedError;
   DateTime? get createdAt => throw _privateConstructorUsedError;
 
   /// Serializes this Article to a JSON map.
@@ -50,6 +53,9 @@ abstract class $ArticleCopyWith<$Res> {
     double price,
     String unit,
     String type,
+    String category,
+    double taxRate,
+    double marginRate,
     DateTime? createdAt,
   });
 }
@@ -75,6 +81,9 @@ class _$ArticleCopyWithImpl<$Res, $Val extends Article>
     Object? price = null,
     Object? unit = null,
     Object? type = null,
+    Object? category = null,
+    Object? taxRate = null,
+    Object? marginRate = null,
     Object? createdAt = freezed,
   }) {
     return _then(
@@ -103,6 +112,18 @@ class _$ArticleCopyWithImpl<$Res, $Val extends Article>
                 ? _value.type
                 : type // ignore: cast_nullable_to_non_nullable
                       as String,
+            category: null == category
+                ? _value.category
+                : category // ignore: cast_nullable_to_non_nullable
+                      as String,
+            taxRate: null == taxRate
+                ? _value.taxRate
+                : taxRate // ignore: cast_nullable_to_non_nullable
+                      as double,
+            marginRate: null == marginRate
+                ? _value.marginRate
+                : marginRate // ignore: cast_nullable_to_non_nullable
+                      as double,
             createdAt: freezed == createdAt
                 ? _value.createdAt
                 : createdAt // ignore: cast_nullable_to_non_nullable
@@ -128,6 +149,9 @@ abstract class _$$ArticleImplCopyWith<$Res> implements $ArticleCopyWith<$Res> {
     double price,
     String unit,
     String type,
+    String category,
+    double taxRate,
+    double marginRate,
     DateTime? createdAt,
   });
 }
@@ -152,6 +176,9 @@ class __$$ArticleImplCopyWithImpl<$Res>
     Object? price = null,
     Object? unit = null,
     Object? type = null,
+    Object? category = null,
+    Object? taxRate = null,
+    Object? marginRate = null,
     Object? createdAt = freezed,
   }) {
     return _then(
@@ -180,6 +207,18 @@ class __$$ArticleImplCopyWithImpl<$Res>
             ? _value.type
             : type // ignore: cast_nullable_to_non_nullable
                   as String,
+        category: null == category
+            ? _value.category
+            : category // ignore: cast_nullable_to_non_nullable
+                  as String,
+        taxRate: null == taxRate
+            ? _value.taxRate
+            : taxRate // ignore: cast_nullable_to_non_nullable
+                  as double,
+        marginRate: null == marginRate
+            ? _value.marginRate
+            : marginRate // ignore: cast_nullable_to_non_nullable
+                  as double,
         createdAt: freezed == createdAt
             ? _value.createdAt
             : createdAt // ignore: cast_nullable_to_non_nullable
@@ -199,6 +238,9 @@ class _$ArticleImpl implements _Article {
     required this.price,
     required this.unit,
     this.type = 'physical',
+    this.category = 'materials',
+    this.taxRate = 0.0,
+    this.marginRate = 0.0,
     this.createdAt,
   });
 
@@ -221,11 +263,20 @@ class _$ArticleImpl implements _Article {
   final String type;
   // physical, service
   @override
+  @JsonKey()
+  final String category;
+  @override
+  @JsonKey()
+  final double taxRate;
+  @override
+  @JsonKey()
+  final double marginRate;
+  @override
   final DateTime? createdAt;
 
   @override
   String toString() {
-    return 'Article(id: $id, name: $name, code: $code, price: $price, unit: $unit, type: $type, createdAt: $createdAt)';
+    return 'Article(id: $id, name: $name, code: $code, price: $price, unit: $unit, type: $type, category: $category, taxRate: $taxRate, marginRate: $marginRate, createdAt: $createdAt)';
   }
 
   @override
@@ -239,14 +290,30 @@ class _$ArticleImpl implements _Article {
             (identical(other.price, price) || other.price == price) &&
             (identical(other.unit, unit) || other.unit == unit) &&
             (identical(other.type, type) || other.type == type) &&
+            (identical(other.category, category) ||
+                other.category == category) &&
+            (identical(other.taxRate, taxRate) || other.taxRate == taxRate) &&
+            (identical(other.marginRate, marginRate) ||
+                other.marginRate == marginRate) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, id, name, code, price, unit, type, createdAt);
+  int get hashCode => Object.hash(
+    runtimeType,
+    id,
+    name,
+    code,
+    price,
+    unit,
+    type,
+    category,
+    taxRate,
+    marginRate,
+    createdAt,
+  );
 
   /// Create a copy of Article
   /// with the given fields replaced by the non-null parameter values.
@@ -270,6 +337,9 @@ abstract class _Article implements Article {
     required final double price,
     required final String unit,
     final String type,
+    final String category,
+    final double taxRate,
+    final double marginRate,
     final DateTime? createdAt,
   }) = _$ArticleImpl;
 
@@ -287,6 +357,12 @@ abstract class _Article implements Article {
   String get unit; // kg, m2, m3, pieces
   @override
   String get type; // physical, service
+  @override
+  String get category;
+  @override
+  double get taxRate;
+  @override
+  double get marginRate;
   @override
   DateTime? get createdAt;
 

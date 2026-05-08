@@ -449,4 +449,284 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get service => 'Service';
+
+  @override
+  String get projects => 'Projets';
+
+  @override
+  String get project => 'Projet';
+
+  @override
+  String get projectDetails => 'Détails du projet';
+
+  @override
+  String get addProject => 'Ajouter un projet';
+
+  @override
+  String get noProjects => 'Aucun projet trouvé';
+
+  @override
+  String get projectName => 'Nom du projet';
+
+  @override
+  String get optionalProject => 'Projet (facultatif)';
+
+  @override
+  String get noProject => 'Aucun projet';
+
+  @override
+  String get expenses => 'Dépenses';
+
+  @override
+  String get expense => 'Dépense';
+
+  @override
+  String get addExpense => 'Ajouter une dépense';
+
+  @override
+  String get noExpenses => 'Aucune dépense trouvée';
+
+  @override
+  String get expenseType => 'Type de dépense';
+
+  @override
+  String get expenseTypes => 'Types de dépenses';
+
+  @override
+  String get expenseTypesSubtitle =>
+      'Gérez les catégories réutilisables de dépenses de projet.';
+
+  @override
+  String get relatedInvoices => 'Factures associées';
+
+  @override
+  String get notProvided => 'Non renseigné';
+
+  @override
+  String get requiredField => 'Obligatoire';
+
+  @override
+  String get updateClient => 'Mettre à jour le client';
+
+  @override
+  String get emailAddress => 'Adresse email';
+
+  @override
+  String get phoneNumber => 'Numéro de téléphone';
+
+  @override
+  String get companyLogo => 'Logo de l’entreprise';
+
+  @override
+  String get companyLogoSubtitle =>
+      'Apparaît sur toutes les factures PDF générées';
+
+  @override
+  String get noLogo => 'Aucun logo';
+
+  @override
+  String get changeLogo => 'Changer le logo';
+
+  @override
+  String get uploadLogo => 'Importer un logo';
+
+  @override
+  String get removeLogo => 'Supprimer le logo';
+
+  @override
+  String get logoHelp => 'PNG ou JPG, utilisé sur les factures PDF.';
+
+  @override
+  String get invoiceNotFound => 'Facture introuvable';
+
+  @override
+  String get invoiceNumberShort => 'Facture n°';
+
+  @override
+  String get addClientFirst => 'Ajoutez d’abord un client';
+
+  @override
+  String get quotes => 'Devis';
+
+  @override
+  String get quote => 'Devis';
+
+  @override
+  String get createQuote => 'Nouveau devis';
+
+  @override
+  String get editQuote => 'Modifier le devis';
+
+  @override
+  String get quoteDetails => 'Détails du devis';
+
+  @override
+  String get quoteNumber => 'Devis n°';
+
+  @override
+  String get validUntil => 'Valable jusqu’au';
+
+  @override
+  String get noQuotes => 'Aucun devis trouvé';
+
+  @override
+  String get convertToInvoice => 'Convertir en facture';
+
+  @override
+  String get quoteConverted => 'Devis converti en facture';
+
+  @override
+  String get approvalSignature => 'Signature d’accord client';
+
+  @override
+  String get goodForApproval => 'Bon pour accord';
+
+  @override
+  String get rejected => 'Refusé';
+
+  @override
+  String get quickTemplates => 'Modèles rapides';
+
+  @override
+  String get paintingRoom => 'Peinture chambre';
+
+  @override
+  String get plumbingRepair => 'Réparation plomberie';
+
+  @override
+  String get electricalJob => 'Travaux électriques';
+
+  @override
+  String get articleCategory => 'Catégorie';
+
+  @override
+  String get laborCategory => 'Main d’œuvre';
+
+  @override
+  String get materialsCategory => 'Matériaux';
+
+  @override
+  String get travelCategory => 'Déplacement';
+
+  @override
+  String get rentalCategory => 'Location matériel';
+
+  @override
+  String get supplyCategory => 'Fourniture';
+
+  @override
+  String get margin => 'Marge (%)';
+
+  @override
+  String get defaultTax => 'TVA par défaut (%)';
+
+  @override
+  String get surfacePreparation => 'Préparation support';
+
+  @override
+  String get plasterAndSanding => 'Enduit et ponçage';
+
+  @override
+  String get paintingLabor => 'Peinture main d’œuvre';
+
+  @override
+  String get leakDiagnosis => 'Diagnostic fuite';
+
+  @override
+  String get plumbingInstallation => 'Pose et réparation';
+
+  @override
+  String get wiringProtection => 'Câblage et protection';
+
+  @override
+  String get electricalLabor => 'Main d’œuvre électricité';
+
+  @override
+  String get siteAddress => 'Adresse du chantier';
+
+  @override
+  String get projectStatus => 'Statut du chantier';
+
+  @override
+  String get planned => 'Prévu';
+
+  @override
+  String get inProgress => 'En cours';
+
+  @override
+  String get completed => 'Terminé';
+
+  @override
+  String get awaitingPayment => 'En attente paiement';
+
+  @override
+  String get estimatedProfit => 'Bénéfice estimé';
+
+  @override
+  String get unpaidInvoices => 'Factures impayées';
+
+  @override
+  String get partialPayment => 'Paiement partiel';
+
+  @override
+  String get remainingToPay => 'Reste à payer';
+
+  @override
+  String get sendReminder => 'Relancer';
+
+  @override
+  String get lastReminder => 'Dernière relance';
+
+  @override
+  String get reminderLogged => 'Date de relance enregistrée';
+
+  @override
+  String get contactClient => 'Contacter le client';
+
+  @override
+  String get globalSearch => 'Recherche globale';
+
+  @override
+  String get searchEverything =>
+      'Rechercher clients, factures, projets, articles, paiements...';
+
+  @override
+  String get globalSearchHint =>
+      'Recherchez par client, numéro de facture, projet, article, méthode de paiement ou note.';
+
+  @override
+  String get noSearchResults => 'Aucun résultat correspondant';
+
+  @override
+  String get addToProject => 'Ajouter au projet';
+
+  @override
+  String get supplier => 'Fournisseur';
+
+  @override
+  String get attachReceipt => 'Joindre un re?u photo';
+
+  @override
+  String get changeReceipt => 'Changer le re?u';
+
+  @override
+  String get quickClient => 'Client rapide';
+
+  @override
+  String get quickArticle => 'Article rapide';
+
+  @override
+  String get mobileQuickActions => 'Actions rapides';
+
+  @override
+  String get draftAutoSaved => 'Brouillon sauvegard? automatiquement';
+
+  @override
+  String get collectedThisMonth => 'Total encaiss? ce mois';
+
+  @override
+  String get monthlyExpenses => 'D?penses du mois';
+
+  @override
+  String get ongoingProjects => 'Chantiers en cours';
 }

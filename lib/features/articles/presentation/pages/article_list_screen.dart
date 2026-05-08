@@ -23,18 +23,23 @@ class ArticleListScreen extends ConsumerWidget {
           child: Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
             child: TextField(
-              onChanged: (value) => ref.read(articleSearchQueryProvider.notifier).update(value),
+              onChanged: (value) =>
+                  ref.read(articleSearchQueryProvider.notifier).update(value),
               decoration: InputDecoration(
                 hintText: l10n.searchArticles,
                 prefixIcon: const Icon(Icons.search),
                 contentPadding: const EdgeInsets.symmetric(vertical: 0),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(30)),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(30),
+                ),
               ),
             ),
           ),
         ),
       ),
-      drawer: const AppDrawer(),
+      drawer: MediaQuery.sizeOf(context).width >= 1100
+          ? null
+          : const AppDrawer(),
       body: articlesAsync.when(
         data: (articles) {
           if (articles.isEmpty) {
@@ -42,55 +47,102 @@ class ArticleListScreen extends ConsumerWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.inventory_2_outlined, size: 64, color: Colors.grey),
+                  const Icon(
+                    Icons.inventory_2_outlined,
+                    size: 64,
+                    color: Colors.grey,
+                  ),
                   const SizedBox(height: 16),
-                  Text(l10n.noArticles, style: const TextStyle(color: Colors.grey)),
+                  Text(
+                    l10n.noArticles,
+                    style: const TextStyle(color: Colors.grey),
+                  ),
                 ],
               ),
             );
           }
 
           return ListView.builder(
-            padding: const EdgeInsets.all(8),
+            padding: const EdgeInsets.fromLTRB(8, 8, 8, 112),
             itemCount: articles.length,
             itemBuilder: (context, index) {
               final article = articles[index];
               final isService = article.type == 'service';
+              final categoryLabel = _categoryLabel(l10n, article.category);
               return Card(
                 child: ListTile(
                   leading: CircleAvatar(
-                    backgroundColor: isService ? Colors.orange.withValues(alpha: 0.1) : Colors.blue.withValues(alpha: 0.1),
-                    child: Icon(isService ? Icons.build_circle : Icons.inventory_2, color: isService ? Colors.orange : Colors.blue),
+                    backgroundColor: isService
+                        ? Colors.orange.withValues(alpha: 0.1)
+                        : Colors.blue.withValues(alpha: 0.1),
+                    child: Icon(
+                      isService ? Icons.build_circle : Icons.inventory_2,
+                      color: isService ? Colors.orange : Colors.blue,
+                    ),
                   ),
                   title: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Expanded(child: Text(article.name, style: const TextStyle(fontWeight: FontWeight.bold))),
+                      Expanded(
+                        child: Text(
+                          article.name,
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ),
                       Text(
                         currencyFormat.format(article.price),
-                        style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.green),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.green,
+                        ),
                       ),
                     ],
                   ),
                   subtitle: Text(
-                    '${article.code != null ? "${article.code} • " : ""}${article.unit} • ${isService ? l10n.service : l10n.physical}',
+                    '${article.code != null ? "${article.code} - " : ""}${article.unit} - $categoryLabel - ${isService ? l10n.service : l10n.physical}',
                     style: const TextStyle(fontSize: 12),
                   ),
                   trailing: const Icon(Icons.chevron_right),
-                  onTap: () => context.pushNamed('edit_article', pathParameters: {'id': article.id.toString()}),
+                  onTap: () => context.pushNamed(
+                    'edit_article',
+                    pathParameters: {'id': article.id.toString()},
+                  ),
                 ),
               );
             },
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, st) => Center(child: Text('Error: $e')),
+        error: (e, st) => Center(child: Text('${l10n.error}: $e')),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => context.pushNamed('add_article'),
-        tooltip: l10n.addArticle,
-        child: const Icon(Icons.add),
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 72),
+        child: FloatingActionButton(
+          onPressed: () => context.pushNamed('add_article'),
+          tooltip: l10n.addArticle,
+          child: const Icon(Icons.add),
+        ),
       ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
+  }
+
+  String _categoryLabel(AppLocalizations l10n, String category) {
+    switch (category) {
+      case 'labor':
+        return l10n.laborCategory;
+      case 'materials':
+        return l10n.materialsCategory;
+      case 'travel':
+        return l10n.travelCategory;
+      case 'rental':
+        return l10n.rentalCategory;
+      case 'service':
+        return l10n.service;
+      case 'supply':
+        return l10n.supplyCategory;
+      default:
+        return category;
+    }
   }
 }

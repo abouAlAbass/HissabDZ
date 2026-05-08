@@ -20,36 +20,49 @@ class ClientListScreen extends ConsumerWidget {
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(60),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16.0,
+              vertical: 8.0,
+            ),
             child: TextField(
-              onChanged: (value) => ref.read(clientSearchProvider.notifier).update(value),
+              onChanged: (value) =>
+                  ref.read(clientSearchProvider.notifier).update(value),
               decoration: InputDecoration(
                 hintText: l10n.searchClients,
                 prefixIcon: const Icon(Icons.search),
                 contentPadding: const EdgeInsets.symmetric(vertical: 0),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(30)),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(30),
+                ),
               ),
             ),
           ),
         ),
       ),
-      drawer: const AppDrawer(),
+      drawer: MediaQuery.sizeOf(context).width >= 1100
+          ? null
+          : const AppDrawer(),
       body: clientsAsync.when(
         data: (clients) => clients.isEmpty
             ? _buildEmptyState(context, l10n)
             : ListView.builder(
-                padding: const EdgeInsets.all(8),
+                padding: const EdgeInsets.fromLTRB(8, 8, 8, 112),
                 itemCount: clients.length,
-                itemBuilder: (context, index) => _buildClientCard(context, clients[index], l10n),
+                itemBuilder: (context, index) =>
+                    _buildClientCard(context, clients[index], l10n),
               ),
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, st) => Center(child: Text('Error: $e')),
+        error: (e, st) => Center(child: Text('${l10n.error}: $e')),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _showAddClientSheet(context),
-        tooltip: l10n.addClient,
-        child: const Icon(Icons.add),
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 72),
+        child: FloatingActionButton(
+          onPressed: () => _showAddClientSheet(context),
+          tooltip: l10n.addClient,
+          child: const Icon(Icons.add),
+        ),
       ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 
@@ -60,7 +73,10 @@ class ClientListScreen extends ConsumerWidget {
         children: [
           const Icon(Icons.people_outline, size: 80, color: Colors.grey),
           const SizedBox(height: 16),
-          Text(l10n.noClients, style: const TextStyle(fontSize: 18, color: Colors.grey)),
+          Text(
+            l10n.noClients,
+            style: const TextStyle(fontSize: 18, color: Colors.grey),
+          ),
           const SizedBox(height: 24),
           ElevatedButton(
             onPressed: () => _showAddClientSheet(context),
@@ -71,20 +87,32 @@ class ClientListScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildClientCard(BuildContext context, Client client, AppLocalizations l10n) {
+  Widget _buildClientCard(
+    BuildContext context,
+    Client client,
+    AppLocalizations l10n,
+  ) {
     return Card(
       child: ListTile(
         leading: CircleAvatar(
           backgroundColor: Theme.of(context).colorScheme.primaryContainer,
           child: Text(
             client.name[0].toUpperCase(),
-            style: TextStyle(color: Theme.of(context).colorScheme.onPrimaryContainer),
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onPrimaryContainer,
+            ),
           ),
         ),
-        title: Text(client.name, style: const TextStyle(fontWeight: FontWeight.bold)),
+        title: Text(
+          client.name,
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
         subtitle: Text(client.email ?? l10n.email),
         trailing: const Icon(Icons.chevron_right),
-        onTap: () => context.pushNamed('client_details', pathParameters: {'id': client.id.toString()}),
+        onTap: () => context.pushNamed(
+          'client_details',
+          pathParameters: {'id': client.id.toString()},
+        ),
       ),
     );
   }
@@ -93,10 +121,8 @@ class ClientListScreen extends ConsumerWidget {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      builder: (context) => const Padding(
-        padding: EdgeInsets.all(16.0),
-        child: AddClientForm(),
-      ),
+      builder: (context) =>
+          const Padding(padding: EdgeInsets.all(16.0), child: AddClientForm()),
     );
   }
 }
@@ -128,36 +154,54 @@ class _AddClientFormState extends ConsumerState<AddClientForm> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return Padding(
-      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+      ),
       child: Form(
         key: _formKey,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(l10n.addClient, style: Theme.of(context).textTheme.headlineSmall),
+            Text(
+              l10n.addClient,
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
             const SizedBox(height: 16),
             TextFormField(
               controller: _nameController,
-              decoration: InputDecoration(labelText: l10n.name, prefixIcon: const Icon(Icons.person)),
-              validator: (v) => v == null || v.isEmpty ? 'Required' : null,
+              decoration: InputDecoration(
+                labelText: l10n.name,
+                prefixIcon: const Icon(Icons.person),
+              ),
+              validator: (v) =>
+                  v == null || v.isEmpty ? l10n.requiredField : null,
             ),
             const SizedBox(height: 12),
             TextFormField(
               controller: _emailController,
-              decoration: InputDecoration(labelText: l10n.email, prefixIcon: const Icon(Icons.email)),
+              decoration: InputDecoration(
+                labelText: l10n.email,
+                prefixIcon: const Icon(Icons.email),
+              ),
               keyboardType: TextInputType.emailAddress,
             ),
             const SizedBox(height: 12),
             TextFormField(
               controller: _phoneController,
-              decoration: InputDecoration(labelText: l10n.phone, prefixIcon: const Icon(Icons.phone)),
+              decoration: InputDecoration(
+                labelText: l10n.phone,
+                prefixIcon: const Icon(Icons.phone),
+              ),
               keyboardType: TextInputType.phone,
             ),
             const SizedBox(height: 12),
             TextFormField(
               controller: _addressController,
-              decoration: InputDecoration(labelText: l10n.address, prefixIcon: const Icon(Icons.location_on)),
+              decoration: InputDecoration(
+                labelText: l10n.address,
+                prefixIcon: const Icon(Icons.location_on),
+              ),
             ),
             const SizedBox(height: 24),
             ElevatedButton(

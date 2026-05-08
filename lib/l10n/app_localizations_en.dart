@@ -448,4 +448,283 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get service => 'Service';
+
+  @override
+  String get projects => 'Projects';
+
+  @override
+  String get project => 'Project';
+
+  @override
+  String get projectDetails => 'Project Details';
+
+  @override
+  String get addProject => 'Add Project';
+
+  @override
+  String get noProjects => 'No projects found';
+
+  @override
+  String get projectName => 'Project Name';
+
+  @override
+  String get optionalProject => 'Project (optional)';
+
+  @override
+  String get noProject => 'No project';
+
+  @override
+  String get expenses => 'Expenses';
+
+  @override
+  String get expense => 'Expense';
+
+  @override
+  String get addExpense => 'Add Expense';
+
+  @override
+  String get noExpenses => 'No expenses found';
+
+  @override
+  String get expenseType => 'Expense Type';
+
+  @override
+  String get expenseTypes => 'Expense Types';
+
+  @override
+  String get expenseTypesSubtitle =>
+      'Manage reusable project expense categories.';
+
+  @override
+  String get relatedInvoices => 'Related Invoices';
+
+  @override
+  String get notProvided => 'Not provided';
+
+  @override
+  String get requiredField => 'Required';
+
+  @override
+  String get updateClient => 'Update Client';
+
+  @override
+  String get emailAddress => 'Email Address';
+
+  @override
+  String get phoneNumber => 'Phone Number';
+
+  @override
+  String get companyLogo => 'Company Logo';
+
+  @override
+  String get companyLogoSubtitle => 'Appears on all generated PDF invoices';
+
+  @override
+  String get noLogo => 'No Logo';
+
+  @override
+  String get changeLogo => 'Change Logo';
+
+  @override
+  String get uploadLogo => 'Upload Logo';
+
+  @override
+  String get removeLogo => 'Remove Logo';
+
+  @override
+  String get logoHelp => 'PNG or JPG, used on PDF invoices.';
+
+  @override
+  String get invoiceNotFound => 'Invoice not found';
+
+  @override
+  String get invoiceNumberShort => 'Invoice #';
+
+  @override
+  String get addClientFirst => 'Add a client first';
+
+  @override
+  String get quotes => 'Quotes';
+
+  @override
+  String get quote => 'Quote';
+
+  @override
+  String get createQuote => 'New Quote';
+
+  @override
+  String get editQuote => 'Edit Quote';
+
+  @override
+  String get quoteDetails => 'Quote Details';
+
+  @override
+  String get quoteNumber => 'Quote #';
+
+  @override
+  String get validUntil => 'Valid Until';
+
+  @override
+  String get noQuotes => 'No quotes found';
+
+  @override
+  String get convertToInvoice => 'Convert to invoice';
+
+  @override
+  String get quoteConverted => 'Quote converted to invoice';
+
+  @override
+  String get approvalSignature => 'Client approval signature';
+
+  @override
+  String get goodForApproval => 'Good for approval';
+
+  @override
+  String get rejected => 'Rejected';
+
+  @override
+  String get quickTemplates => 'Quick templates';
+
+  @override
+  String get paintingRoom => 'Room painting';
+
+  @override
+  String get plumbingRepair => 'Plumbing repair';
+
+  @override
+  String get electricalJob => 'Electrical work';
+
+  @override
+  String get articleCategory => 'Category';
+
+  @override
+  String get laborCategory => 'Labor';
+
+  @override
+  String get materialsCategory => 'Materials';
+
+  @override
+  String get travelCategory => 'Travel';
+
+  @override
+  String get rentalCategory => 'Equipment rental';
+
+  @override
+  String get supplyCategory => 'Supply';
+
+  @override
+  String get margin => 'Margin (%)';
+
+  @override
+  String get defaultTax => 'Default tax (%)';
+
+  @override
+  String get surfacePreparation => 'Surface preparation';
+
+  @override
+  String get plasterAndSanding => 'Plastering and sanding';
+
+  @override
+  String get paintingLabor => 'Painting labor';
+
+  @override
+  String get leakDiagnosis => 'Leak diagnosis';
+
+  @override
+  String get plumbingInstallation => 'Installation and repair';
+
+  @override
+  String get wiringProtection => 'Wiring and protection';
+
+  @override
+  String get electricalLabor => 'Electrical labor';
+
+  @override
+  String get siteAddress => 'Job site address';
+
+  @override
+  String get projectStatus => 'Job status';
+
+  @override
+  String get planned => 'Planned';
+
+  @override
+  String get inProgress => 'In progress';
+
+  @override
+  String get completed => 'Completed';
+
+  @override
+  String get awaitingPayment => 'Awaiting payment';
+
+  @override
+  String get estimatedProfit => 'Estimated profit';
+
+  @override
+  String get unpaidInvoices => 'Unpaid invoices';
+
+  @override
+  String get partialPayment => 'Partial payment';
+
+  @override
+  String get remainingToPay => 'Remaining to pay';
+
+  @override
+  String get sendReminder => 'Send reminder';
+
+  @override
+  String get lastReminder => 'Last reminder';
+
+  @override
+  String get reminderLogged => 'Reminder date saved';
+
+  @override
+  String get contactClient => 'Contact client';
+
+  @override
+  String get globalSearch => 'Global search';
+
+  @override
+  String get searchEverything =>
+      'Search clients, invoices, projects, articles, payments...';
+
+  @override
+  String get globalSearchHint =>
+      'Search by client, invoice number, project, article, payment method or note.';
+
+  @override
+  String get noSearchResults => 'No matching results';
+
+  @override
+  String get addToProject => 'Add to project';
+
+  @override
+  String get supplier => 'Supplier';
+
+  @override
+  String get attachReceipt => 'Attach receipt photo';
+
+  @override
+  String get changeReceipt => 'Change receipt';
+
+  @override
+  String get quickClient => 'Quick client';
+
+  @override
+  String get quickArticle => 'Quick article';
+
+  @override
+  String get mobileQuickActions => 'Quick actions';
+
+  @override
+  String get draftAutoSaved => 'Draft autosaved';
+
+  @override
+  String get collectedThisMonth => 'Collected this month';
+
+  @override
+  String get monthlyExpenses => 'Expenses this month';
+
+  @override
+  String get ongoingProjects => 'Ongoing jobs';
 }

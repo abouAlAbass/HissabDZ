@@ -447,4 +447,283 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get service => 'خدمة';
+
+  @override
+  String get projects => 'المشاريع';
+
+  @override
+  String get project => 'المشروع';
+
+  @override
+  String get projectDetails => 'تفاصيل المشروع';
+
+  @override
+  String get addProject => 'إضافة مشروع';
+
+  @override
+  String get noProjects => 'لا توجد مشاريع';
+
+  @override
+  String get projectName => 'اسم المشروع';
+
+  @override
+  String get optionalProject => 'المشروع (اختياري)';
+
+  @override
+  String get noProject => 'بدون مشروع';
+
+  @override
+  String get expenses => 'المصاريف';
+
+  @override
+  String get expense => 'مصروف';
+
+  @override
+  String get addExpense => 'إضافة مصروف';
+
+  @override
+  String get noExpenses => 'لا توجد مصاريف';
+
+  @override
+  String get expenseType => 'نوع المصروف';
+
+  @override
+  String get expenseTypes => 'أنواع المصاريف';
+
+  @override
+  String get expenseTypesSubtitle =>
+      'إدارة الأنواع المستخدمة لتنظيم مصاريف المشاريع.';
+
+  @override
+  String get relatedInvoices => 'الفواتير المرتبطة';
+
+  @override
+  String get notProvided => 'غير محدد';
+
+  @override
+  String get requiredField => 'مطلوب';
+
+  @override
+  String get updateClient => 'تحديث العميل';
+
+  @override
+  String get emailAddress => 'البريد الإلكتروني';
+
+  @override
+  String get phoneNumber => 'رقم الهاتف';
+
+  @override
+  String get companyLogo => 'شعار الشركة';
+
+  @override
+  String get companyLogoSubtitle => 'يظهر في جميع فواتير PDF المنشأة';
+
+  @override
+  String get noLogo => 'لا يوجد شعار';
+
+  @override
+  String get changeLogo => 'تغيير الشعار';
+
+  @override
+  String get uploadLogo => 'رفع شعار';
+
+  @override
+  String get removeLogo => 'حذف الشعار';
+
+  @override
+  String get logoHelp => 'PNG أو JPG، سيظهر في فواتير PDF.';
+
+  @override
+  String get invoiceNotFound => 'الفاتورة غير موجودة';
+
+  @override
+  String get invoiceNumberShort => 'رقم الفاتورة';
+
+  @override
+  String get addClientFirst => 'أضف عميلاً أولاً';
+
+  @override
+  String get quotes => 'عروض الأسعار';
+
+  @override
+  String get quote => 'عرض سعر';
+
+  @override
+  String get createQuote => 'عرض سعر جديد';
+
+  @override
+  String get editQuote => 'تعديل عرض السعر';
+
+  @override
+  String get quoteDetails => 'تفاصيل عرض السعر';
+
+  @override
+  String get quoteNumber => 'رقم عرض السعر';
+
+  @override
+  String get validUntil => 'صالح إلى';
+
+  @override
+  String get noQuotes => 'لا توجد عروض أسعار';
+
+  @override
+  String get convertToInvoice => 'تحويل إلى فاتورة';
+
+  @override
+  String get quoteConverted => 'تم تحويل عرض السعر إلى فاتورة';
+
+  @override
+  String get approvalSignature => 'توقيع موافقة العميل';
+
+  @override
+  String get goodForApproval => 'صالح للموافقة';
+
+  @override
+  String get rejected => 'مرفوض';
+
+  @override
+  String get quickTemplates => 'نماذج سريعة';
+
+  @override
+  String get paintingRoom => 'دهان غرفة';
+
+  @override
+  String get plumbingRepair => 'إصلاح سباكة';
+
+  @override
+  String get electricalJob => 'أعمال كهربائية';
+
+  @override
+  String get articleCategory => 'الفئة';
+
+  @override
+  String get laborCategory => 'يد العمل';
+
+  @override
+  String get materialsCategory => 'المواد';
+
+  @override
+  String get travelCategory => 'التنقل';
+
+  @override
+  String get rentalCategory => 'كراء المعدات';
+
+  @override
+  String get supplyCategory => 'اللوازم';
+
+  @override
+  String get margin => 'الهامش (%)';
+
+  @override
+  String get defaultTax => 'الضريبة الافتراضية (%)';
+
+  @override
+  String get surfacePreparation => 'تحضير السطح';
+
+  @override
+  String get plasterAndSanding => 'المعجون والصنفرة';
+
+  @override
+  String get paintingLabor => 'يد عمل الدهان';
+
+  @override
+  String get leakDiagnosis => 'تشخيص التسرب';
+
+  @override
+  String get plumbingInstallation => 'التركيب والإصلاح';
+
+  @override
+  String get wiringProtection => 'التمديد والحماية';
+
+  @override
+  String get electricalLabor => 'يد عمل الكهرباء';
+
+  @override
+  String get siteAddress => 'عنوان الورشة';
+
+  @override
+  String get projectStatus => 'حالة الورشة';
+
+  @override
+  String get planned => 'مخطط';
+
+  @override
+  String get inProgress => 'قيد الإنجاز';
+
+  @override
+  String get completed => 'مكتمل';
+
+  @override
+  String get awaitingPayment => 'في انتظار الدفع';
+
+  @override
+  String get estimatedProfit => 'الربح التقديري';
+
+  @override
+  String get unpaidInvoices => 'الفواتير غير المدفوعة';
+
+  @override
+  String get partialPayment => 'دفع جزئي';
+
+  @override
+  String get remainingToPay => 'المتبقي للدفع';
+
+  @override
+  String get sendReminder => 'إرسال تذكير';
+
+  @override
+  String get lastReminder => 'آخر تذكير';
+
+  @override
+  String get reminderLogged => 'تم حفظ تاريخ التذكير';
+
+  @override
+  String get contactClient => 'التواصل مع العميل';
+
+  @override
+  String get globalSearch => 'بحث شامل';
+
+  @override
+  String get searchEverything =>
+      'ابحث عن العملاء، الفواتير، المشاريع، المواد، الدفعات...';
+
+  @override
+  String get globalSearchHint =>
+      'ابحث باسم العميل، رقم الفاتورة، المشروع، المادة، طريقة الدفع أو ملاحظة.';
+
+  @override
+  String get noSearchResults => 'لا توجد نتائج مطابقة';
+
+  @override
+  String get addToProject => 'إضافة إلى المشروع';
+
+  @override
+  String get supplier => 'المورد';
+
+  @override
+  String get attachReceipt => 'إرفاق صورة الوصل';
+
+  @override
+  String get changeReceipt => 'تغيير الوصل';
+
+  @override
+  String get quickClient => 'عميل سريع';
+
+  @override
+  String get quickArticle => 'مادة سريعة';
+
+  @override
+  String get mobileQuickActions => 'إجراءات سريعة';
+
+  @override
+  String get draftAutoSaved => 'تم حفظ المسودة تلقائياً';
+
+  @override
+  String get collectedThisMonth => 'المحصل هذا الشهر';
+
+  @override
+  String get monthlyExpenses => 'مصاريف هذا الشهر';
+
+  @override
+  String get ongoingProjects => 'الورشات الجارية';
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/client_providers.dart';
 import '../../domain/entities/client.dart';
+import '../../../../l10n/app_localizations.dart';
 
 class ClientDetailsScreen extends ConsumerWidget {
   final int clientId;
@@ -10,10 +11,11 @@ class ClientDetailsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final clientsAsync = ref.watch(clientsListProvider);
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Client Details'),
+        title: Text(l10n.clientDetails),
         actions: [
           IconButton(
             icon: const Icon(Icons.edit),
@@ -23,16 +25,23 @@ class ClientDetailsScreen extends ConsumerWidget {
       ),
       body: clientsAsync.when(
         data: (clients) {
-          final client = clients.firstWhere((c) => c.id == clientId, orElse: () => throw Exception('Client not found'));
-          return _buildBody(context, client);
+          final client = clients.firstWhere(
+            (c) => c.id == clientId,
+            orElse: () => throw Exception(l10n.noClients),
+          );
+          return _buildBody(context, client, l10n);
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, st) => Center(child: Text('Error: $e')),
+        error: (e, st) => Center(child: Text('${l10n.error}: $e')),
       ),
     );
   }
 
-  Widget _buildBody(BuildContext context, Client client) {
+  Widget _buildBody(
+    BuildContext context,
+    Client client,
+    AppLocalizations l10n,
+  ) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -42,16 +51,36 @@ class ClientDetailsScreen extends ConsumerWidget {
             child: CircleAvatar(
               radius: 50,
               backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-              child: Text(client.name[0].toUpperCase(), 
-                style: TextStyle(fontSize: 40, color: Theme.of(context).colorScheme.onPrimaryContainer)),
+              child: Text(
+                client.name[0].toUpperCase(),
+                style: TextStyle(
+                  fontSize: 40,
+                  color: Theme.of(context).colorScheme.onPrimaryContainer,
+                ),
+              ),
             ),
           ),
           const SizedBox(height: 24),
           _buildInfoCard(context, [
-            _buildInfoRow(context, Icons.person, 'Full Name', client.name),
-            _buildInfoRow(context, Icons.email, 'Email Address', client.email ?? 'Not provided'),
-            _buildInfoRow(context, Icons.phone, 'Phone Number', client.phone ?? 'Not provided'),
-            _buildInfoRow(context, Icons.location_on, 'Address', client.address ?? 'Not provided'),
+            _buildInfoRow(context, Icons.person, l10n.name, client.name),
+            _buildInfoRow(
+              context,
+              Icons.email,
+              l10n.emailAddress,
+              client.email ?? l10n.notProvided,
+            ),
+            _buildInfoRow(
+              context,
+              Icons.phone,
+              l10n.phoneNumber,
+              client.phone ?? l10n.notProvided,
+            ),
+            _buildInfoRow(
+              context,
+              Icons.location_on,
+              l10n.address,
+              client.address ?? l10n.notProvided,
+            ),
           ]),
         ],
       ),
@@ -67,7 +96,12 @@ class ClientDetailsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildInfoRow(BuildContext context, IconData icon, String label, String value) {
+  Widget _buildInfoRow(
+    BuildContext context,
+    IconData icon,
+    String label,
+    String value,
+  ) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
@@ -78,8 +112,17 @@ class ClientDetailsScreen extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
-                Text(value, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+                Text(
+                  label,
+                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+                ),
+                Text(
+                  value,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
               ],
             ),
           ),
@@ -91,7 +134,7 @@ class ClientDetailsScreen extends ConsumerWidget {
   void _showEditClientSheet(BuildContext context, WidgetRef ref, int id) {
     final clients = ref.read(clientsListProvider).value ?? [];
     final client = clients.firstWhere((c) => c.id == id);
-    
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -138,35 +181,54 @@ class _EditClientFormState extends ConsumerState<EditClientForm> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Padding(
-      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+      ),
       child: Form(
         key: _formKey,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text('Edit Client', style: Theme.of(context).textTheme.headlineSmall),
+            Text(
+              l10n.editClient,
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
             const SizedBox(height: 16),
             TextFormField(
               controller: _nameController,
-              decoration: const InputDecoration(labelText: 'Full Name', prefixIcon: Icon(Icons.person)),
-              validator: (v) => v == null || v.isEmpty ? 'Required' : null,
+              decoration: InputDecoration(
+                labelText: l10n.name,
+                prefixIcon: const Icon(Icons.person),
+              ),
+              validator: (v) =>
+                  v == null || v.isEmpty ? l10n.requiredField : null,
             ),
             const SizedBox(height: 12),
             TextFormField(
               controller: _emailController,
-              decoration: const InputDecoration(labelText: 'Email Address', prefixIcon: Icon(Icons.email)),
+              decoration: InputDecoration(
+                labelText: l10n.emailAddress,
+                prefixIcon: const Icon(Icons.email),
+              ),
             ),
             const SizedBox(height: 12),
             TextFormField(
               controller: _phoneController,
-              decoration: const InputDecoration(labelText: 'Phone Number', prefixIcon: Icon(Icons.phone)),
+              decoration: InputDecoration(
+                labelText: l10n.phoneNumber,
+                prefixIcon: const Icon(Icons.phone),
+              ),
             ),
             const SizedBox(height: 12),
             TextFormField(
               controller: _addressController,
-              decoration: const InputDecoration(labelText: 'Address', prefixIcon: Icon(Icons.location_on)),
+              decoration: InputDecoration(
+                labelText: l10n.address,
+                prefixIcon: const Icon(Icons.location_on),
+              ),
             ),
             const SizedBox(height: 24),
             ElevatedButton(
@@ -179,12 +241,14 @@ class _EditClientFormState extends ConsumerState<EditClientForm> {
                     address: _addressController.text,
                   );
                   final navigator = Navigator.of(context);
-                  await ref.read(clientRepositoryProvider).updateClient(updatedClient);
+                  await ref
+                      .read(clientRepositoryProvider)
+                      .updateClient(updatedClient);
                   if (!mounted) return;
                   navigator.pop();
                 }
               },
-              child: const Text('Update Client'),
+              child: Text(l10n.updateClient),
             ),
           ],
         ),

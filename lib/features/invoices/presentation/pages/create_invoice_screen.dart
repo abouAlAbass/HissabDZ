@@ -9,14 +9,17 @@ import 'package:hissab_dz/features/invoices/domain/entities/invoice.dart';
 import 'package:hissab_dz/features/invoices/domain/entities/invoice_item.dart';
 import 'package:hissab_dz/features/invoices/domain/entities/invoice_status.dart';
 import 'package:hissab_dz/features/clients/domain/entities/client.dart';
+import 'package:hissab_dz/features/projects/domain/entities/project.dart';
+import 'package:hissab_dz/features/projects/presentation/providers/project_providers.dart';
 import 'package:hissab_dz/l10n/app_localizations.dart';
 import 'package:hissab_dz/features/articles/domain/entities/article.dart';
 import 'package:hissab_dz/features/articles/presentation/providers/article_providers.dart';
 
 class CreateInvoiceScreen extends ConsumerStatefulWidget {
   final int? invoiceId;
+  final int? initialProjectId;
 
-  const CreateInvoiceScreen({super.key, this.invoiceId});
+  const CreateInvoiceScreen({super.key, this.invoiceId, this.initialProjectId});
 
   @override
   ConsumerState<CreateInvoiceScreen> createState() =>
@@ -29,6 +32,7 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
   final _notesController = TextEditingController();
 
   Client? _selectedClient;
+  int? _selectedProjectId;
   DateTime _issueDate = DateTime.now();
   DateTime? _dueDate;
   InvoiceStatus _status = InvoiceStatus.draft;
@@ -62,9 +66,29 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
     _invoiceNumberController.text =
         'INV-${DateTime.now().millisecondsSinceEpoch.toString().substring(7)}';
     _dueDate = DateTime.now().add(const Duration(days: 30));
+    if (widget.initialProjectId != null) {
+      _loadInitialProject(widget.initialProjectId!);
+    }
     if (_isEditMode) {
       _loadExistingInvoice();
     }
+  }
+
+  Future<void> _loadInitialProject(int projectId) async {
+    final project = await ref
+        .read(projectRepositoryProvider)
+        .getProjectById(projectId);
+    if (!mounted || project == null) return;
+    final client = project.clientId == null
+        ? null
+        : await ref
+              .read(clientRepositoryProvider)
+              .getClientById(project.clientId!);
+    if (!mounted) return;
+    setState(() {
+      _selectedProjectId = project.id;
+      if (client != null) _selectedClient = client;
+    });
   }
 
   Future<void> _loadExistingInvoice() async {
@@ -154,6 +178,7 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
 
     setState(() {
       _selectedClient = invoice.client;
+      _selectedProjectId = invoice.projectId;
       _invoiceNumberController.text = invoice.invoiceNumber;
       _issueDate = invoice.issueDate;
       _dueDate = invoice.dueDate;
@@ -277,6 +302,10 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
               _buildClientPicker(),
               const SizedBox(height: 20),
 
+              _buildSectionHeader(l10n.project),
+              _buildProjectPicker(),
+              const SizedBox(height: 20),
+
               _buildSectionHeader(l10n.invoiceDetails),
               Row(
                 children: [
@@ -346,7 +375,7 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
             child: ListTile(
               leading: const Icon(Icons.warning, color: Colors.orange),
               title: Text(l10n.noClients),
-              subtitle: const Text('Add a client first'),
+              subtitle: Text(l10n.addClientFirst),
             ),
           );
         }
@@ -364,8 +393,59 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
         );
       },
       loading: () => const LinearProgressIndicator(),
-      error: (e, st) => Text('Error: $e'),
+      error: (e, st) => Text('${l10n.error}: $e'),
     );
+  }
+
+  Widget _buildProjectPicker() {
+    final l10n = AppLocalizations.of(context)!;
+    final projectsAsync = ref.watch(projectsListProvider);
+    return projectsAsync.when(
+      data: (projects) {
+        return DropdownButtonFormField<int?>(
+          initialValue: _selectedProjectId,
+          decoration: InputDecoration(
+            labelText: l10n.optionalProject,
+            prefixIcon: const Icon(Icons.folder_open),
+          ),
+          items: [
+            DropdownMenuItem<int?>(value: null, child: Text(l10n.noProject)),
+            ...projects.map(
+              (project) => DropdownMenuItem<int?>(
+                value: project.id,
+                child: Text(project.name),
+              ),
+            ),
+          ],
+          onChanged: (value) => _selectProject(value, projects),
+        );
+      },
+      loading: () => const LinearProgressIndicator(),
+      error: (e, st) => Text('${l10n.error}: $e'),
+    );
+  }
+
+  Future<void> _selectProject(int? projectId, List<Project> projects) async {
+    Project? project;
+    if (projectId != null) {
+      for (final candidate in projects) {
+        if (candidate.id == projectId) {
+          project = candidate;
+          break;
+        }
+      }
+    }
+    Client? client;
+    if (project?.clientId != null) {
+      client = await ref
+          .read(clientRepositoryProvider)
+          .getClientById(project!.clientId!);
+    }
+    if (!mounted) return;
+    setState(() {
+      _selectedProjectId = projectId;
+      if (client != null) _selectedClient = client;
+    });
   }
 
   Widget _buildDueDatePicker() {
@@ -970,6 +1050,7 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
 
     final invoice = Invoice(
       clientId: _selectedClient!.id!,
+      projectId: _selectedProjectId,
       invoiceNumber: _invoiceNumberController.text,
       status: _status,
       issueDate: _issueDate,

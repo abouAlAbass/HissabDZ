@@ -975,6 +975,558 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Service'**
   String get service;
+
+  /// No description provided for @projects.
+  ///
+  /// In en, this message translates to:
+  /// **'Projects'**
+  String get projects;
+
+  /// No description provided for @project.
+  ///
+  /// In en, this message translates to:
+  /// **'Project'**
+  String get project;
+
+  /// No description provided for @projectDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Project Details'**
+  String get projectDetails;
+
+  /// No description provided for @addProject.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Project'**
+  String get addProject;
+
+  /// No description provided for @noProjects.
+  ///
+  /// In en, this message translates to:
+  /// **'No projects found'**
+  String get noProjects;
+
+  /// No description provided for @projectName.
+  ///
+  /// In en, this message translates to:
+  /// **'Project Name'**
+  String get projectName;
+
+  /// No description provided for @optionalProject.
+  ///
+  /// In en, this message translates to:
+  /// **'Project (optional)'**
+  String get optionalProject;
+
+  /// No description provided for @noProject.
+  ///
+  /// In en, this message translates to:
+  /// **'No project'**
+  String get noProject;
+
+  /// No description provided for @expenses.
+  ///
+  /// In en, this message translates to:
+  /// **'Expenses'**
+  String get expenses;
+
+  /// No description provided for @expense.
+  ///
+  /// In en, this message translates to:
+  /// **'Expense'**
+  String get expense;
+
+  /// No description provided for @addExpense.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Expense'**
+  String get addExpense;
+
+  /// No description provided for @noExpenses.
+  ///
+  /// In en, this message translates to:
+  /// **'No expenses found'**
+  String get noExpenses;
+
+  /// No description provided for @expenseType.
+  ///
+  /// In en, this message translates to:
+  /// **'Expense Type'**
+  String get expenseType;
+
+  /// No description provided for @expenseTypes.
+  ///
+  /// In en, this message translates to:
+  /// **'Expense Types'**
+  String get expenseTypes;
+
+  /// No description provided for @expenseTypesSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage reusable project expense categories.'**
+  String get expenseTypesSubtitle;
+
+  /// No description provided for @relatedInvoices.
+  ///
+  /// In en, this message translates to:
+  /// **'Related Invoices'**
+  String get relatedInvoices;
+
+  /// No description provided for @notProvided.
+  ///
+  /// In en, this message translates to:
+  /// **'Not provided'**
+  String get notProvided;
+
+  /// No description provided for @requiredField.
+  ///
+  /// In en, this message translates to:
+  /// **'Required'**
+  String get requiredField;
+
+  /// No description provided for @updateClient.
+  ///
+  /// In en, this message translates to:
+  /// **'Update Client'**
+  String get updateClient;
+
+  /// No description provided for @emailAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Email Address'**
+  String get emailAddress;
+
+  /// No description provided for @phoneNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone Number'**
+  String get phoneNumber;
+
+  /// No description provided for @companyLogo.
+  ///
+  /// In en, this message translates to:
+  /// **'Company Logo'**
+  String get companyLogo;
+
+  /// No description provided for @companyLogoSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Appears on all generated PDF invoices'**
+  String get companyLogoSubtitle;
+
+  /// No description provided for @noLogo.
+  ///
+  /// In en, this message translates to:
+  /// **'No Logo'**
+  String get noLogo;
+
+  /// No description provided for @changeLogo.
+  ///
+  /// In en, this message translates to:
+  /// **'Change Logo'**
+  String get changeLogo;
+
+  /// No description provided for @uploadLogo.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload Logo'**
+  String get uploadLogo;
+
+  /// No description provided for @removeLogo.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove Logo'**
+  String get removeLogo;
+
+  /// No description provided for @logoHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'PNG or JPG, used on PDF invoices.'**
+  String get logoHelp;
+
+  /// No description provided for @invoiceNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Invoice not found'**
+  String get invoiceNotFound;
+
+  /// No description provided for @invoiceNumberShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Invoice #'**
+  String get invoiceNumberShort;
+
+  /// No description provided for @addClientFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a client first'**
+  String get addClientFirst;
+
+  /// No description provided for @quotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Quotes'**
+  String get quotes;
+
+  /// No description provided for @quote.
+  ///
+  /// In en, this message translates to:
+  /// **'Quote'**
+  String get quote;
+
+  /// No description provided for @createQuote.
+  ///
+  /// In en, this message translates to:
+  /// **'New Quote'**
+  String get createQuote;
+
+  /// No description provided for @editQuote.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Quote'**
+  String get editQuote;
+
+  /// No description provided for @quoteDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Quote Details'**
+  String get quoteDetails;
+
+  /// No description provided for @quoteNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Quote #'**
+  String get quoteNumber;
+
+  /// No description provided for @validUntil.
+  ///
+  /// In en, this message translates to:
+  /// **'Valid Until'**
+  String get validUntil;
+
+  /// No description provided for @noQuotes.
+  ///
+  /// In en, this message translates to:
+  /// **'No quotes found'**
+  String get noQuotes;
+
+  /// No description provided for @convertToInvoice.
+  ///
+  /// In en, this message translates to:
+  /// **'Convert to invoice'**
+  String get convertToInvoice;
+
+  /// No description provided for @quoteConverted.
+  ///
+  /// In en, this message translates to:
+  /// **'Quote converted to invoice'**
+  String get quoteConverted;
+
+  /// No description provided for @approvalSignature.
+  ///
+  /// In en, this message translates to:
+  /// **'Client approval signature'**
+  String get approvalSignature;
+
+  /// No description provided for @goodForApproval.
+  ///
+  /// In en, this message translates to:
+  /// **'Good for approval'**
+  String get goodForApproval;
+
+  /// No description provided for @rejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected'**
+  String get rejected;
+
+  /// No description provided for @quickTemplates.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick templates'**
+  String get quickTemplates;
+
+  /// No description provided for @paintingRoom.
+  ///
+  /// In en, this message translates to:
+  /// **'Room painting'**
+  String get paintingRoom;
+
+  /// No description provided for @plumbingRepair.
+  ///
+  /// In en, this message translates to:
+  /// **'Plumbing repair'**
+  String get plumbingRepair;
+
+  /// No description provided for @electricalJob.
+  ///
+  /// In en, this message translates to:
+  /// **'Electrical work'**
+  String get electricalJob;
+
+  /// No description provided for @articleCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get articleCategory;
+
+  /// No description provided for @laborCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Labor'**
+  String get laborCategory;
+
+  /// No description provided for @materialsCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Materials'**
+  String get materialsCategory;
+
+  /// No description provided for @travelCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Travel'**
+  String get travelCategory;
+
+  /// No description provided for @rentalCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Equipment rental'**
+  String get rentalCategory;
+
+  /// No description provided for @supplyCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Supply'**
+  String get supplyCategory;
+
+  /// No description provided for @margin.
+  ///
+  /// In en, this message translates to:
+  /// **'Margin (%)'**
+  String get margin;
+
+  /// No description provided for @defaultTax.
+  ///
+  /// In en, this message translates to:
+  /// **'Default tax (%)'**
+  String get defaultTax;
+
+  /// No description provided for @surfacePreparation.
+  ///
+  /// In en, this message translates to:
+  /// **'Surface preparation'**
+  String get surfacePreparation;
+
+  /// No description provided for @plasterAndSanding.
+  ///
+  /// In en, this message translates to:
+  /// **'Plastering and sanding'**
+  String get plasterAndSanding;
+
+  /// No description provided for @paintingLabor.
+  ///
+  /// In en, this message translates to:
+  /// **'Painting labor'**
+  String get paintingLabor;
+
+  /// No description provided for @leakDiagnosis.
+  ///
+  /// In en, this message translates to:
+  /// **'Leak diagnosis'**
+  String get leakDiagnosis;
+
+  /// No description provided for @plumbingInstallation.
+  ///
+  /// In en, this message translates to:
+  /// **'Installation and repair'**
+  String get plumbingInstallation;
+
+  /// No description provided for @wiringProtection.
+  ///
+  /// In en, this message translates to:
+  /// **'Wiring and protection'**
+  String get wiringProtection;
+
+  /// No description provided for @electricalLabor.
+  ///
+  /// In en, this message translates to:
+  /// **'Electrical labor'**
+  String get electricalLabor;
+
+  /// No description provided for @siteAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Job site address'**
+  String get siteAddress;
+
+  /// No description provided for @projectStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Job status'**
+  String get projectStatus;
+
+  /// No description provided for @planned.
+  ///
+  /// In en, this message translates to:
+  /// **'Planned'**
+  String get planned;
+
+  /// No description provided for @inProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'In progress'**
+  String get inProgress;
+
+  /// No description provided for @completed.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get completed;
+
+  /// No description provided for @awaitingPayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Awaiting payment'**
+  String get awaitingPayment;
+
+  /// No description provided for @estimatedProfit.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimated profit'**
+  String get estimatedProfit;
+
+  /// No description provided for @unpaidInvoices.
+  ///
+  /// In en, this message translates to:
+  /// **'Unpaid invoices'**
+  String get unpaidInvoices;
+
+  /// No description provided for @partialPayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Partial payment'**
+  String get partialPayment;
+
+  /// No description provided for @remainingToPay.
+  ///
+  /// In en, this message translates to:
+  /// **'Remaining to pay'**
+  String get remainingToPay;
+
+  /// No description provided for @sendReminder.
+  ///
+  /// In en, this message translates to:
+  /// **'Send reminder'**
+  String get sendReminder;
+
+  /// No description provided for @lastReminder.
+  ///
+  /// In en, this message translates to:
+  /// **'Last reminder'**
+  String get lastReminder;
+
+  /// No description provided for @reminderLogged.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminder date saved'**
+  String get reminderLogged;
+
+  /// No description provided for @contactClient.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact client'**
+  String get contactClient;
+
+  /// No description provided for @globalSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Global search'**
+  String get globalSearch;
+
+  /// No description provided for @searchEverything.
+  ///
+  /// In en, this message translates to:
+  /// **'Search clients, invoices, projects, articles, payments...'**
+  String get searchEverything;
+
+  /// No description provided for @globalSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by client, invoice number, project, article, payment method or note.'**
+  String get globalSearchHint;
+
+  /// No description provided for @noSearchResults.
+  ///
+  /// In en, this message translates to:
+  /// **'No matching results'**
+  String get noSearchResults;
+
+  /// No description provided for @addToProject.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to project'**
+  String get addToProject;
+
+  /// No description provided for @supplier.
+  ///
+  /// In en, this message translates to:
+  /// **'Supplier'**
+  String get supplier;
+
+  /// No description provided for @attachReceipt.
+  ///
+  /// In en, this message translates to:
+  /// **'Attach receipt photo'**
+  String get attachReceipt;
+
+  /// No description provided for @changeReceipt.
+  ///
+  /// In en, this message translates to:
+  /// **'Change receipt'**
+  String get changeReceipt;
+
+  /// No description provided for @quickClient.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick client'**
+  String get quickClient;
+
+  /// No description provided for @quickArticle.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick article'**
+  String get quickArticle;
+
+  /// No description provided for @mobileQuickActions.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick actions'**
+  String get mobileQuickActions;
+
+  /// No description provided for @draftAutoSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft autosaved'**
+  String get draftAutoSaved;
+
+  /// No description provided for @collectedThisMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Collected this month'**
+  String get collectedThisMonth;
+
+  /// No description provided for @monthlyExpenses.
+  ///
+  /// In en, this message translates to:
+  /// **'Expenses this month'**
+  String get monthlyExpenses;
+
+  /// No description provided for @ongoingProjects.
+  ///
+  /// In en, this message translates to:
+  /// **'Ongoing jobs'**
+  String get ongoingProjects;
 }
 
 class _AppLocalizationsDelegate

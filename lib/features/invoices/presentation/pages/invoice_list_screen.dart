@@ -43,7 +43,9 @@ class _InvoiceListScreenState extends ConsumerState<InvoiceListScreen>
     final invoicesAsync = ref.watch(filteredInvoicesProvider);
 
     return Scaffold(
-      drawer: const AppDrawer(),
+      drawer: MediaQuery.sizeOf(context).width >= 1100
+          ? null
+          : const AppDrawer(),
       appBar: AppBar(
         title: Text(l10n.invoices),
         bottom: PreferredSize(
@@ -95,8 +97,17 @@ class _InvoiceListScreenState extends ConsumerState<InvoiceListScreen>
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, st) => Center(child: Text('Error: $e')),
+        error: (e, st) => Center(child: Text('${l10n.error}: $e')),
       ),
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 72),
+        child: FloatingActionButton(
+          onPressed: () => context.pushNamed('create_invoice'),
+          tooltip: l10n.createInvoice,
+          child: const Icon(Icons.add),
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 

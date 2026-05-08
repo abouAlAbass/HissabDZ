@@ -23,10 +23,12 @@ Invoice _$InvoiceFromJson(Map<String, dynamic> json) {
 mixin _$Invoice {
   int? get id => throw _privateConstructorUsedError;
   int get clientId => throw _privateConstructorUsedError;
+  int? get projectId => throw _privateConstructorUsedError;
   String get invoiceNumber => throw _privateConstructorUsedError;
   InvoiceStatus get status => throw _privateConstructorUsedError;
   DateTime get issueDate => throw _privateConstructorUsedError;
   DateTime? get dueDate => throw _privateConstructorUsedError;
+  DateTime? get lastReminderAt => throw _privateConstructorUsedError;
   String? get notes => throw _privateConstructorUsedError;
   double get subtotal => throw _privateConstructorUsedError;
   double get taxRate => throw _privateConstructorUsedError;
@@ -36,6 +38,7 @@ mixin _$Invoice {
   DateTime? get updatedAt => throw _privateConstructorUsedError;
   List<InvoiceItem> get items => throw _privateConstructorUsedError;
   Client? get client => throw _privateConstructorUsedError;
+  String? get projectName => throw _privateConstructorUsedError;
 
   /// Serializes this Invoice to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -54,10 +57,12 @@ abstract class $InvoiceCopyWith<$Res> {
   $Res call({
     int? id,
     int clientId,
+    int? projectId,
     String invoiceNumber,
     InvoiceStatus status,
     DateTime issueDate,
     DateTime? dueDate,
+    DateTime? lastReminderAt,
     String? notes,
     double subtotal,
     double taxRate,
@@ -67,6 +72,7 @@ abstract class $InvoiceCopyWith<$Res> {
     DateTime? updatedAt,
     List<InvoiceItem> items,
     Client? client,
+    String? projectName,
   });
 
   $ClientCopyWith<$Res>? get client;
@@ -89,10 +95,12 @@ class _$InvoiceCopyWithImpl<$Res, $Val extends Invoice>
   $Res call({
     Object? id = freezed,
     Object? clientId = null,
+    Object? projectId = freezed,
     Object? invoiceNumber = null,
     Object? status = null,
     Object? issueDate = null,
     Object? dueDate = freezed,
+    Object? lastReminderAt = freezed,
     Object? notes = freezed,
     Object? subtotal = null,
     Object? taxRate = null,
@@ -102,6 +110,7 @@ class _$InvoiceCopyWithImpl<$Res, $Val extends Invoice>
     Object? updatedAt = freezed,
     Object? items = null,
     Object? client = freezed,
+    Object? projectName = freezed,
   }) {
     return _then(
       _value.copyWith(
@@ -113,6 +122,10 @@ class _$InvoiceCopyWithImpl<$Res, $Val extends Invoice>
                 ? _value.clientId
                 : clientId // ignore: cast_nullable_to_non_nullable
                       as int,
+            projectId: freezed == projectId
+                ? _value.projectId
+                : projectId // ignore: cast_nullable_to_non_nullable
+                      as int?,
             invoiceNumber: null == invoiceNumber
                 ? _value.invoiceNumber
                 : invoiceNumber // ignore: cast_nullable_to_non_nullable
@@ -128,6 +141,10 @@ class _$InvoiceCopyWithImpl<$Res, $Val extends Invoice>
             dueDate: freezed == dueDate
                 ? _value.dueDate
                 : dueDate // ignore: cast_nullable_to_non_nullable
+                      as DateTime?,
+            lastReminderAt: freezed == lastReminderAt
+                ? _value.lastReminderAt
+                : lastReminderAt // ignore: cast_nullable_to_non_nullable
                       as DateTime?,
             notes: freezed == notes
                 ? _value.notes
@@ -165,6 +182,10 @@ class _$InvoiceCopyWithImpl<$Res, $Val extends Invoice>
                 ? _value.client
                 : client // ignore: cast_nullable_to_non_nullable
                       as Client?,
+            projectName: freezed == projectName
+                ? _value.projectName
+                : projectName // ignore: cast_nullable_to_non_nullable
+                      as String?,
           )
           as $Val,
     );
@@ -196,10 +217,12 @@ abstract class _$$InvoiceImplCopyWith<$Res> implements $InvoiceCopyWith<$Res> {
   $Res call({
     int? id,
     int clientId,
+    int? projectId,
     String invoiceNumber,
     InvoiceStatus status,
     DateTime issueDate,
     DateTime? dueDate,
+    DateTime? lastReminderAt,
     String? notes,
     double subtotal,
     double taxRate,
@@ -209,6 +232,7 @@ abstract class _$$InvoiceImplCopyWith<$Res> implements $InvoiceCopyWith<$Res> {
     DateTime? updatedAt,
     List<InvoiceItem> items,
     Client? client,
+    String? projectName,
   });
 
   @override
@@ -231,10 +255,12 @@ class __$$InvoiceImplCopyWithImpl<$Res>
   $Res call({
     Object? id = freezed,
     Object? clientId = null,
+    Object? projectId = freezed,
     Object? invoiceNumber = null,
     Object? status = null,
     Object? issueDate = null,
     Object? dueDate = freezed,
+    Object? lastReminderAt = freezed,
     Object? notes = freezed,
     Object? subtotal = null,
     Object? taxRate = null,
@@ -244,6 +270,7 @@ class __$$InvoiceImplCopyWithImpl<$Res>
     Object? updatedAt = freezed,
     Object? items = null,
     Object? client = freezed,
+    Object? projectName = freezed,
   }) {
     return _then(
       _$InvoiceImpl(
@@ -255,6 +282,10 @@ class __$$InvoiceImplCopyWithImpl<$Res>
             ? _value.clientId
             : clientId // ignore: cast_nullable_to_non_nullable
                   as int,
+        projectId: freezed == projectId
+            ? _value.projectId
+            : projectId // ignore: cast_nullable_to_non_nullable
+                  as int?,
         invoiceNumber: null == invoiceNumber
             ? _value.invoiceNumber
             : invoiceNumber // ignore: cast_nullable_to_non_nullable
@@ -270,6 +301,10 @@ class __$$InvoiceImplCopyWithImpl<$Res>
         dueDate: freezed == dueDate
             ? _value.dueDate
             : dueDate // ignore: cast_nullable_to_non_nullable
+                  as DateTime?,
+        lastReminderAt: freezed == lastReminderAt
+            ? _value.lastReminderAt
+            : lastReminderAt // ignore: cast_nullable_to_non_nullable
                   as DateTime?,
         notes: freezed == notes
             ? _value.notes
@@ -307,6 +342,10 @@ class __$$InvoiceImplCopyWithImpl<$Res>
             ? _value.client
             : client // ignore: cast_nullable_to_non_nullable
                   as Client?,
+        projectName: freezed == projectName
+            ? _value.projectName
+            : projectName // ignore: cast_nullable_to_non_nullable
+                  as String?,
       ),
     );
   }
@@ -318,10 +357,12 @@ class _$InvoiceImpl implements _Invoice {
   const _$InvoiceImpl({
     this.id,
     required this.clientId,
+    this.projectId,
     required this.invoiceNumber,
     this.status = InvoiceStatus.draft,
     required this.issueDate,
     this.dueDate,
+    this.lastReminderAt,
     this.notes,
     this.subtotal = 0.0,
     this.taxRate = 0.0,
@@ -331,6 +372,7 @@ class _$InvoiceImpl implements _Invoice {
     this.updatedAt,
     final List<InvoiceItem> items = const [],
     this.client,
+    this.projectName,
   }) : _items = items;
 
   factory _$InvoiceImpl.fromJson(Map<String, dynamic> json) =>
@@ -341,6 +383,8 @@ class _$InvoiceImpl implements _Invoice {
   @override
   final int clientId;
   @override
+  final int? projectId;
+  @override
   final String invoiceNumber;
   @override
   @JsonKey()
@@ -349,6 +393,8 @@ class _$InvoiceImpl implements _Invoice {
   final DateTime issueDate;
   @override
   final DateTime? dueDate;
+  @override
+  final DateTime? lastReminderAt;
   @override
   final String? notes;
   @override
@@ -378,10 +424,12 @@ class _$InvoiceImpl implements _Invoice {
 
   @override
   final Client? client;
+  @override
+  final String? projectName;
 
   @override
   String toString() {
-    return 'Invoice(id: $id, clientId: $clientId, invoiceNumber: $invoiceNumber, status: $status, issueDate: $issueDate, dueDate: $dueDate, notes: $notes, subtotal: $subtotal, taxRate: $taxRate, discountAmount: $discountAmount, total: $total, createdAt: $createdAt, updatedAt: $updatedAt, items: $items, client: $client)';
+    return 'Invoice(id: $id, clientId: $clientId, projectId: $projectId, invoiceNumber: $invoiceNumber, status: $status, issueDate: $issueDate, dueDate: $dueDate, lastReminderAt: $lastReminderAt, notes: $notes, subtotal: $subtotal, taxRate: $taxRate, discountAmount: $discountAmount, total: $total, createdAt: $createdAt, updatedAt: $updatedAt, items: $items, client: $client, projectName: $projectName)';
   }
 
   @override
@@ -392,12 +440,16 @@ class _$InvoiceImpl implements _Invoice {
             (identical(other.id, id) || other.id == id) &&
             (identical(other.clientId, clientId) ||
                 other.clientId == clientId) &&
+            (identical(other.projectId, projectId) ||
+                other.projectId == projectId) &&
             (identical(other.invoiceNumber, invoiceNumber) ||
                 other.invoiceNumber == invoiceNumber) &&
             (identical(other.status, status) || other.status == status) &&
             (identical(other.issueDate, issueDate) ||
                 other.issueDate == issueDate) &&
             (identical(other.dueDate, dueDate) || other.dueDate == dueDate) &&
+            (identical(other.lastReminderAt, lastReminderAt) ||
+                other.lastReminderAt == lastReminderAt) &&
             (identical(other.notes, notes) || other.notes == notes) &&
             (identical(other.subtotal, subtotal) ||
                 other.subtotal == subtotal) &&
@@ -410,7 +462,9 @@ class _$InvoiceImpl implements _Invoice {
             (identical(other.updatedAt, updatedAt) ||
                 other.updatedAt == updatedAt) &&
             const DeepCollectionEquality().equals(other._items, _items) &&
-            (identical(other.client, client) || other.client == client));
+            (identical(other.client, client) || other.client == client) &&
+            (identical(other.projectName, projectName) ||
+                other.projectName == projectName));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -419,10 +473,12 @@ class _$InvoiceImpl implements _Invoice {
     runtimeType,
     id,
     clientId,
+    projectId,
     invoiceNumber,
     status,
     issueDate,
     dueDate,
+    lastReminderAt,
     notes,
     subtotal,
     taxRate,
@@ -432,6 +488,7 @@ class _$InvoiceImpl implements _Invoice {
     updatedAt,
     const DeepCollectionEquality().hash(_items),
     client,
+    projectName,
   );
 
   /// Create a copy of Invoice
@@ -452,10 +509,12 @@ abstract class _Invoice implements Invoice {
   const factory _Invoice({
     final int? id,
     required final int clientId,
+    final int? projectId,
     required final String invoiceNumber,
     final InvoiceStatus status,
     required final DateTime issueDate,
     final DateTime? dueDate,
+    final DateTime? lastReminderAt,
     final String? notes,
     final double subtotal,
     final double taxRate,
@@ -465,6 +524,7 @@ abstract class _Invoice implements Invoice {
     final DateTime? updatedAt,
     final List<InvoiceItem> items,
     final Client? client,
+    final String? projectName,
   }) = _$InvoiceImpl;
 
   factory _Invoice.fromJson(Map<String, dynamic> json) = _$InvoiceImpl.fromJson;
@@ -474,6 +534,8 @@ abstract class _Invoice implements Invoice {
   @override
   int get clientId;
   @override
+  int? get projectId;
+  @override
   String get invoiceNumber;
   @override
   InvoiceStatus get status;
@@ -481,6 +543,8 @@ abstract class _Invoice implements Invoice {
   DateTime get issueDate;
   @override
   DateTime? get dueDate;
+  @override
+  DateTime? get lastReminderAt;
   @override
   String? get notes;
   @override
@@ -499,6 +563,8 @@ abstract class _Invoice implements Invoice {
   List<InvoiceItem> get items;
   @override
   Client? get client;
+  @override
+  String? get projectName;
 
   /// Create a copy of Invoice
   /// with the given fields replaced by the non-null parameter values.

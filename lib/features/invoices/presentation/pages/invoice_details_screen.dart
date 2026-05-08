@@ -59,7 +59,7 @@ class InvoiceDetailsScreen extends ConsumerWidget {
         data: (invoices) {
           final index = invoices.indexWhere((i) => i.id == invoiceId);
           if (index == -1) {
-            return const Center(child: Text('Invoice not found'));
+            return Center(child: Text(l10n.invoiceNotFound));
           }
           final invoice = invoices[index];
           return Hero(
@@ -76,7 +76,7 @@ class InvoiceDetailsScreen extends ConsumerWidget {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, st) => Center(child: Text('Error: $e')),
+        error: (e, st) => Center(child: Text('${l10n.error}: $e')),
       ),
     );
   }
@@ -471,6 +471,14 @@ class _InvoiceDetailsBodyState extends ConsumerState<_InvoiceDetailsBody> {
                                 color: invoice.status == InvoiceStatus.overdue
                                     ? Colors.red
                                     : Colors.grey,
+                                fontSize: 12,
+                              ),
+                            ),
+                          if (invoice.projectName != null)
+                            Text(
+                              '${l10n.project}: ${invoice.projectName}',
+                              style: const TextStyle(
+                                color: Colors.grey,
                                 fontSize: 12,
                               ),
                             ),

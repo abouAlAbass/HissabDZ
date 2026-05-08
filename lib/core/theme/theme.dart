@@ -5,16 +5,16 @@ class AppTheme {
   // New Design Tokens
   static const primaryIndigo = Color(0xFF4F46E5);
   static const primaryViolet = Color(0xFF7C3AED);
-  static const background = Color(0xFFF5F7FF);
+  static const background = Color(0xFFF7F8FB);
   static const cardBg = Color(0xFFFFFFFF);
-  
+
   static const statusPaid = Color(0xFF059669);
   static const statusIssued = Color(0xFF4F46E5);
   static const statusOverdue = Color(0xFFDC2626);
   static const statusAccepted = Color(0xFF10B981);
   static const statusConverted = Color(0xFF6366F1);
   static const statusCancelled = Color(0xFF94A3B8);
-  
+
   static const textPrimary = Color(0xFF1E293B);
   static const textSecondary = Color(0xFF94A3B8);
 
@@ -30,9 +30,16 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       scaffoldBackgroundColor: background,
+      visualDensity: VisualDensity.standard,
       textTheme: GoogleFonts.nunitoTextTheme().copyWith(
-        displayLarge: GoogleFonts.nunito(color: textPrimary, fontWeight: FontWeight.w800),
-        titleLarge: GoogleFonts.nunito(color: textPrimary, fontWeight: FontWeight.w700),
+        displayLarge: GoogleFonts.nunito(
+          color: textPrimary,
+          fontWeight: FontWeight.w800,
+        ),
+        titleLarge: GoogleFonts.nunito(
+          color: textPrimary,
+          fontWeight: FontWeight.w700,
+        ),
         bodyLarge: GoogleFonts.nunito(color: textPrimary),
         bodyMedium: GoogleFonts.nunito(color: textSecondary),
       ),
@@ -47,8 +54,11 @@ class AppTheme {
         color: cardBg,
         elevation: 0, // Flat design with subtle border or shadow
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: BorderSide(color: Colors.black.withValues(alpha: 0.05), width: 1),
+          borderRadius: BorderRadius.circular(10),
+          side: BorderSide(
+            color: Colors.black.withValues(alpha: 0.06),
+            width: 1,
+          ),
         ),
       ),
       appBarTheme: AppBarTheme(
@@ -65,7 +75,10 @@ class AppTheme {
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: Colors.white,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 12,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(color: Colors.black.withValues(alpha: 0.1)),
@@ -80,10 +93,24 @@ class AppTheme {
         ),
         hintStyle: TextStyle(color: textSecondary.withValues(alpha: 0.5)),
       ),
+      floatingActionButtonTheme: const FloatingActionButtonThemeData(
+        backgroundColor: primaryIndigo,
+        foregroundColor: Colors.white,
+      ),
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        ),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        ),
+      ),
     );
   }
 
-  // Dark theme follows same logic but with darker background if needed, 
+  // Dark theme follows same logic but with darker background if needed,
   // but for this specific design request we focus on the light/premium version.
-  static ThemeData get darkTheme => lightTheme; 
+  static ThemeData get darkTheme => lightTheme;
 }

@@ -11,10 +11,12 @@ class Invoice with _$Invoice {
   const factory Invoice({
     int? id,
     required int clientId,
+    int? projectId,
     required String invoiceNumber,
     @Default(InvoiceStatus.draft) InvoiceStatus status,
     required DateTime issueDate,
     DateTime? dueDate,
+    DateTime? lastReminderAt,
     String? notes,
     @Default(0.0) double subtotal,
     @Default(0.0) double taxRate,
@@ -24,7 +26,9 @@ class Invoice with _$Invoice {
     DateTime? updatedAt,
     @Default([]) List<InvoiceItem> items,
     Client? client,
+    String? projectName,
   }) = _Invoice;
 
-  factory Invoice.fromJson(Map<String, dynamic> json) => _$InvoiceFromJson(json);
+  factory Invoice.fromJson(Map<String, dynamic> json) =>
+      _$InvoiceFromJson(json);
 }

@@ -10,6 +10,7 @@ _$InvoiceImpl _$$InvoiceImplFromJson(Map<String, dynamic> json) =>
     _$InvoiceImpl(
       id: (json['id'] as num?)?.toInt(),
       clientId: (json['clientId'] as num).toInt(),
+      projectId: (json['projectId'] as num?)?.toInt(),
       invoiceNumber: json['invoiceNumber'] as String,
       status:
           $enumDecodeNullable(_$InvoiceStatusEnumMap, json['status']) ??
@@ -18,6 +19,9 @@ _$InvoiceImpl _$$InvoiceImplFromJson(Map<String, dynamic> json) =>
       dueDate: json['dueDate'] == null
           ? null
           : DateTime.parse(json['dueDate'] as String),
+      lastReminderAt: json['lastReminderAt'] == null
+          ? null
+          : DateTime.parse(json['lastReminderAt'] as String),
       notes: json['notes'] as String?,
       subtotal: (json['subtotal'] as num?)?.toDouble() ?? 0.0,
       taxRate: (json['taxRate'] as num?)?.toDouble() ?? 0.0,
@@ -37,16 +41,19 @@ _$InvoiceImpl _$$InvoiceImplFromJson(Map<String, dynamic> json) =>
       client: json['client'] == null
           ? null
           : Client.fromJson(json['client'] as Map<String, dynamic>),
+      projectName: json['projectName'] as String?,
     );
 
 Map<String, dynamic> _$$InvoiceImplToJson(_$InvoiceImpl instance) =>
     <String, dynamic>{
       'id': instance.id,
       'clientId': instance.clientId,
+      'projectId': instance.projectId,
       'invoiceNumber': instance.invoiceNumber,
       'status': _$InvoiceStatusEnumMap[instance.status]!,
       'issueDate': instance.issueDate.toIso8601String(),
       'dueDate': instance.dueDate?.toIso8601String(),
+      'lastReminderAt': instance.lastReminderAt?.toIso8601String(),
       'notes': instance.notes,
       'subtotal': instance.subtotal,
       'taxRate': instance.taxRate,
@@ -56,11 +63,16 @@ Map<String, dynamic> _$$InvoiceImplToJson(_$InvoiceImpl instance) =>
       'updatedAt': instance.updatedAt?.toIso8601String(),
       'items': instance.items,
       'client': instance.client,
+      'projectName': instance.projectName,
     };
 
 const _$InvoiceStatusEnumMap = {
   InvoiceStatus.draft: 'draft',
   InvoiceStatus.sent: 'sent',
+  InvoiceStatus.accepted: 'accepted',
+  InvoiceStatus.converted: 'converted',
   InvoiceStatus.paid: 'paid',
+  InvoiceStatus.unpaid: 'unpaid',
+  InvoiceStatus.cancelled: 'cancelled',
   InvoiceStatus.overdue: 'overdue',
 };
