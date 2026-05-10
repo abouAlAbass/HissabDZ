@@ -12,38 +12,38 @@ class StatusBadge extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     Color color;
     String label;
-    
+
     switch (status) {
       case InvoiceStatus.draft:
-        color = AppTheme.textSecondary;
+        color = AppColors.neutral;
         label = l10n.draft;
         break;
       case InvoiceStatus.sent:
-        color = AppTheme.statusIssued;
+        color = AppColors.invoice;
         label = l10n.sent;
         break;
       case InvoiceStatus.accepted:
-        color = AppTheme.statusAccepted;
+        color = AppColors.success;
         label = l10n.accepted;
         break;
       case InvoiceStatus.converted:
-        color = AppTheme.statusConverted;
+        color = AppColors.quote;
         label = l10n.converted;
         break;
       case InvoiceStatus.paid:
-        color = AppTheme.statusPaid;
+        color = AppColors.success;
         label = l10n.paid;
         break;
       case InvoiceStatus.unpaid:
-        color = AppTheme.statusOverdue;
+        color = AppColors.danger;
         label = l10n.unpaid;
         break;
       case InvoiceStatus.cancelled:
-        color = AppTheme.statusCancelled;
+        color = AppColors.neutral;
         label = l10n.cancelled;
         break;
       case InvoiceStatus.overdue:
-        color = AppTheme.statusOverdue;
+        color = AppColors.danger;
         label = l10n.overdue;
         break;
     }
@@ -54,10 +54,7 @@ class StatusBadge extends StatelessWidget {
         Container(
           width: 6,
           height: 6,
-          decoration: BoxDecoration(
-            color: color,
-            shape: BoxShape.circle,
-          ),
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
         ),
         const SizedBox(width: 4),
         Text(

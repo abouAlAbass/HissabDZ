@@ -7,18 +7,20 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:open_filex/open_filex.dart';
-import '../providers/invoice_providers.dart';
-import '../../domain/entities/invoice.dart';
-import '../../domain/entities/invoice_status.dart';
-import 'package:hissab_dz/core/theme/theme.dart';
-import '../../../../core/widgets/status_badge.dart';
-import '../../services/pdf_invoice_service.dart';
-import '../../../settings/presentation/providers/settings_providers.dart';
-import '../../../settings/domain/entities/business_profile.dart';
-import 'package:hissab_dz/l10n/app_localizations.dart';
-import 'package:hissab_dz/features/payments/domain/entities/payment.dart';
 import 'package:hissab_dz/features/payments/presentation/providers/payment_providers.dart';
-import 'package:hissab_dz/features/payments/data/repositories/payment_repository.dart';
+import 'package:hissab_dz/features/payments/presentation/widgets/payment_record_dialog.dart';
+import 'package:hissab_dz/features/refunds/presentation/providers/refund_providers.dart';
+import 'package:hissab_dz/features/refunds/data/repositories/refund_repository_impl.dart';
+import 'package:hissab_dz/features/invoices/presentation/providers/invoice_providers.dart';
+import 'package:hissab_dz/features/invoices/domain/entities/invoice.dart';
+import 'package:hissab_dz/features/invoices/domain/entities/invoice_status.dart';
+import 'package:hissab_dz/core/theme/theme.dart';
+import 'package:hissab_dz/core/widgets/status_badge.dart';
+import 'package:hissab_dz/features/invoices/services/pdf_invoice_service.dart';
+import 'package:hissab_dz/features/settings/presentation/providers/settings_providers.dart';
+import 'package:hissab_dz/features/settings/domain/entities/business_profile.dart';
+import 'package:hissab_dz/l10n/app_localizations.dart';
+import 'package:hissab_dz/features/refunds/domain/entities/refund.dart';
 
 class InvoiceDetailsScreen extends ConsumerWidget {
   final int invoiceId;
@@ -52,6 +54,14 @@ class InvoiceDetailsScreen extends ConsumerWidget {
               'edit_invoice',
               pathParameters: {'id': invoiceId.toString()},
             ),
+          ),
+          IconButton(
+            tooltip: l10n.delete,
+            icon: Icon(
+              Icons.delete_outline,
+              color: Theme.of(context).colorScheme.error,
+            ),
+            onPressed: () => _confirmDeleteInvoice(context, ref, l10n),
           ),
         ],
       ),
@@ -185,6 +195,59 @@ class InvoiceDetailsScreen extends ConsumerWidget {
           SnackBar(
             content: Text('${l10n.errorGeneratingPdf}: $e'),
             backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _confirmDeleteInvoice(
+    BuildContext context,
+    WidgetRef ref,
+    AppLocalizations l10n,
+  ) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.delete),
+        content: Text(l10n.deleteInvoiceConfirm),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(
+              foregroundColor: Theme.of(context).colorScheme.error,
+            ),
+            child: Text(l10n.delete),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      try {
+        await ref.read(invoiceRepositoryProvider).deleteInvoice(invoiceId);
+        if (!context.mounted) return;
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.invoiceDeleted)),
+        );
+        Navigator.pop(context);
+      } catch (e) {
+        if (!context.mounted) return;
+
+        String message = l10n.error;
+        if (e.toString().contains('HAS_PAYMENTS')) {
+          message = l10n.deleteInvoiceErrorHasPayments;
+        }
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(message),
+            backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
       }
@@ -333,101 +396,9 @@ class _InvoiceDetailsBodyState extends ConsumerState<_InvoiceDetailsBody> {
 
   // ─── Record Payment ───────────────────────────────────────────────────────
   void _showPaymentDialog() {
-    final l10n = AppLocalizations.of(context)!;
-    final amountController = TextEditingController(
-      text: widget.invoice.total.toStringAsFixed(2),
-    );
-    final notesController = TextEditingController();
-
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.recordPayment),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              '${l10n.outstanding}: ${NumberFormat.currency(symbol: l10n.currencySymbol).format(widget.invoice.total)}',
-              style: const TextStyle(color: Colors.grey, fontSize: 13),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: amountController,
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
-              ),
-              decoration: InputDecoration(
-                labelText: l10n.paymentAmount,
-                prefixText: '${l10n.currencySymbol} ',
-                border: const OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: notesController,
-              decoration: InputDecoration(
-                labelText: l10n.notesOptional,
-                hintText: l10n.paymentNotesHint,
-                border: const OutlineInputBorder(),
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text(l10n.cancel),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              final amount = double.tryParse(amountController.text) ?? 0;
-              if (amount <= 0) return;
-
-              Navigator.pop(ctx);
-
-              // 1. Save the payment record
-              final payment = Payment(
-                invoiceId: widget.invoice.id!,
-                clientId: widget.invoice.clientId,
-                amount: amount,
-                date: DateTime.now(),
-                notes: notesController.text.trim().isEmpty
-                    ? null
-                    : notesController.text.trim(),
-              );
-              await ref.read(paymentRepositoryProvider).addPayment(payment);
-
-              // 2. Calculate new total paid to decide status
-              final existingPayments = await ref.read(
-                invoicePaymentsProvider(widget.invoice.id!).future,
-              );
-              final totalPaid =
-                  existingPayments.fold(0.0, (sum, p) => sum + p.amount) +
-                  amount;
-
-              // 3. Mark as paid when a full (or over) payment is recorded
-              final newStatus = totalPaid >= widget.invoice.total
-                  ? InvoiceStatus.paid
-                  : InvoiceStatus.sent;
-
-              await _updateStatus(newStatus);
-
-              if (mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      '${l10n.paymentRecorded}: ${NumberFormat.currency(symbol: l10n.currencySymbol).format(amount)}'
-                      '${newStatus == InvoiceStatus.paid ? ' - ${l10n.invoiceMarkedPaid}' : ''}',
-                    ),
-                    backgroundColor: Colors.green,
-                  ),
-                );
-              }
-            },
-            child: Text(l10n.record),
-          ),
-        ],
-      ),
+      builder: (_) => PaymentRecordDialog(invoice: widget.invoice),
     );
   }
 
@@ -544,6 +515,25 @@ class _InvoiceDetailsBodyState extends ConsumerState<_InvoiceDetailsBody> {
               ),
             ],
           ),
+          const SizedBox(height: 12),
+          // Create Refund Button
+          if (invoice.status != InvoiceStatus.cancelled && invoice.status != InvoiceStatus.draft)
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: () => context.pushNamed(
+                  'create_refund',
+                  pathParameters: {'id': invoice.id!.toString()},
+                ),
+                icon: const Icon(Icons.assignment_return_outlined),
+                label: Text(l10n.createRefund),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  foregroundColor: Colors.orange,
+                  side: const BorderSide(color: Colors.orange),
+                ),
+              ),
+            ),
 
           const SizedBox(height: 20),
 
@@ -572,6 +562,8 @@ class _InvoiceDetailsBodyState extends ConsumerState<_InvoiceDetailsBody> {
             ),
           ),
 
+          const SizedBox(height: 20),
+          _buildRefundsSection(invoice, l10n),
           const SizedBox(height: 20),
 
           // Items
@@ -684,71 +676,77 @@ class _InvoiceDetailsBodyState extends ConsumerState<_InvoiceDetailsBody> {
 
           // Totals / Balance
           _sectionTitle(l10n.summary),
-          ref
-              .watch(invoicePaymentsProvider(invoice.id!))
-              .when(
-                data: (payments) {
-                  final paidAmount = payments.fold(
-                    0.0,
-                    (sum, p) => sum + p.amount,
-                  );
-                  final remainingAmount = invoice.total - paidAmount;
+          ref.watch(invoicePaymentsProvider(invoice.id!)).when(
+            data: (payments) {
+              final paidAmount = payments.fold(0.0, (sum, p) => sum + p.amount);
+              final remainingAmount = invoice.total - paidAmount;
+              
+              final netAmountAsync = ref.watch(FutureProvider((ref) => 
+                ref.watch(refundRepositoryProvider).calculateInvoiceNetAmount(invoice.id!)));
 
-                  return Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        children: [
-                          _totalRow(
-                            l10n.subtotal,
-                            currencyFormat.format(invoice.subtotal),
-                          ),
-                          const SizedBox(height: 6),
-                          _totalRow(
-                            '${l10n.totalTax} (${invoice.taxRate}%)',
-                            currencyFormat.format(
-                              invoice.subtotal * invoice.taxRate / 100,
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-                          _totalRow(
-                            l10n.discount,
-                            '- ${currencyFormat.format(invoice.discountAmount)}',
-                          ),
-                          const Divider(height: 20),
-                          _totalRow(
-                            l10n.total,
-                            currencyFormat.format(invoice.total),
-                            isBold: true,
-                            fontSize: 16,
-                          ),
-                          const SizedBox(height: 6),
-                          _totalRow(
-                            l10n.paidAmount,
-                            currencyFormat.format(paidAmount),
-                            color: Colors.green,
-                            fontSize: 16,
-                          ),
-                          const Divider(height: 20),
-                          _totalRow(
-                            l10n.remaining,
-                            currencyFormat.format(
-                              remainingAmount < 0 ? 0 : remainingAmount,
-                            ),
-                            isBold: true,
-                            fontSize: 18,
-                            color: remainingAmount > 0
-                                ? Colors.red
-                                : Colors.green,
-                          ),
-                        ],
+              return Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    children: [
+                      _totalRow(l10n.subtotal, currencyFormat.format(invoice.subtotal)),
+                      const SizedBox(height: 6),
+                      _totalRow(
+                        '${l10n.totalTax} (${invoice.taxRate}%)',
+                        currencyFormat.format(invoice.subtotal * invoice.taxRate / 100),
                       ),
-                    ),
-                  );
-                },
-                loading: () => const LinearProgressIndicator(),
-                error: (_, __) => const SizedBox(),
-              ),
+                      const SizedBox(height: 6),
+                      _totalRow(l10n.discount, '- ${currencyFormat.format(invoice.discountAmount)}'),
+                      const Divider(height: 20),
+                      _totalRow(
+                        l10n.total,
+                        currencyFormat.format(invoice.total),
+                        isBold: true,
+                        fontSize: 16,
+                      ),
+                      netAmountAsync.maybeWhen(
+                        data: (netAmount) => netAmount < invoice.total ? Column(
+                          children: [
+                            const SizedBox(height: 6),
+                            _totalRow(
+                              l10n.refundAmount,
+                              '- ${currencyFormat.format(invoice.total - netAmount)}',
+                              color: Colors.red,
+                            ),
+                            _totalRow(
+                              l10n.netAmount,
+                              currencyFormat.format(netAmount),
+                              isBold: true,
+                              fontSize: 16,
+                              color: Colors.teal,
+                            ),
+                          ],
+                        ) : const SizedBox.shrink(),
+                        orElse: () => const SizedBox.shrink(),
+                      ),
+                      const SizedBox(height: 6),
+                      _totalRow(
+                        l10n.paidAmount,
+                        currencyFormat.format(paidAmount),
+                        color: Colors.green,
+                        fontSize: 16,
+                      ),
+                      const Divider(height: 20),
+                      _totalRow(
+                        l10n.remaining,
+                        currencyFormat.format(remainingAmount < 0 ? 0 : remainingAmount),
+                        isBold: true,
+                        fontSize: 18,
+                        color: remainingAmount > 0 ? Colors.red : Colors.green,
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+            loading: () => const LinearProgressIndicator(),
+            error: (_, __) => const SizedBox(),
+          ),
 
           const SizedBox(height: 20),
 
@@ -805,6 +803,9 @@ class _InvoiceDetailsBodyState extends ConsumerState<_InvoiceDetailsBody> {
                 error: (_, __) => const SizedBox(),
               ),
 
+          const SizedBox(height: 20),
+          _buildRefundsSection(invoice, l10n),
+
           // Notes
           if (invoice.notes != null && invoice.notes!.isNotEmpty) ...[
             const SizedBox(height: 20),
@@ -857,6 +858,45 @@ class _InvoiceDetailsBodyState extends ConsumerState<_InvoiceDetailsBody> {
         Text(label, style: style),
         Text(value, style: style),
       ],
+    );
+  }
+
+  Widget _buildRefundsSection(Invoice invoice, AppLocalizations l10n) {
+    final refundsAsync = ref.watch(invoiceRefundsProvider(invoice.id!));
+
+    return refundsAsync.when(
+      data: (refunds) {
+        if (refunds.isEmpty) return const SizedBox.shrink();
+        
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              l10n.refunds,
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const SizedBox(height: 8),
+            ...refunds.map((Refund refund) => Card(
+              margin: const EdgeInsets.only(bottom: 8),
+              child: ListTile(
+                onTap: () => context.pushNamed(
+                  'refund_details',
+                  pathParameters: {'id': refund.id!.toString()},
+                ),
+                leading: const Icon(Icons.assignment_return_outlined, color: Colors.orange),
+                title: Text(refund.refundNumber),
+                subtitle: Text(DateFormat.yMMMd(l10n.localeName).format(refund.date)),
+                trailing: Text(
+                  '- ${NumberFormat.currency(symbol: l10n.currencySymbol).format(refund.totalAmount)}',
+                  style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+                ),
+              ),
+            )),
+          ],
+        );
+      },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (e, st) => Text(l10n.error),
     );
   }
 }

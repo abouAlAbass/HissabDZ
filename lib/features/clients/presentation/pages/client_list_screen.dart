@@ -3,7 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/client_providers.dart';
 import '../../domain/entities/client.dart';
+import '../../../../core/theme/theme.dart';
+import '../../../../core/widgets/app_empty_state.dart';
 import '../../../../core/widgets/app_drawer.dart';
+import '../../../../core/widgets/contextual_fab.dart';
+import '../../../../core/widgets/entity_card.dart';
+import '../../../../core/widgets/responsive_content.dart';
 import '../../../../l10n/app_localizations.dart';
 
 class ClientListScreen extends ConsumerWidget {
@@ -45,44 +50,38 @@ class ClientListScreen extends ConsumerWidget {
       body: clientsAsync.when(
         data: (clients) => clients.isEmpty
             ? _buildEmptyState(context, l10n)
-            : ListView.builder(
-                padding: const EdgeInsets.fromLTRB(8, 8, 8, 112),
-                itemCount: clients.length,
-                itemBuilder: (context, index) =>
-                    _buildClientCard(context, clients[index], l10n),
+            : ResponsiveContent(
+                child: ListView.builder(
+                  padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.xs,
+                    AppSpacing.xs,
+                    AppSpacing.xs,
+                    AppSpacing.bottomNavClearance,
+                  ),
+                  itemCount: clients.length,
+                  itemBuilder: (context, index) =>
+                      _buildClientCard(context, clients[index], l10n),
+                ),
               ),
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, st) => Center(child: Text('${l10n.error}: $e')),
       ),
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 72),
-        child: FloatingActionButton(
-          onPressed: () => _showAddClientSheet(context),
-          tooltip: l10n.addClient,
-          child: const Icon(Icons.add),
-        ),
+      floatingActionButton: ContextualFab(
+        onPressed: () => _showAddClientSheet(context),
+        tooltip: l10n.addClient,
+        icon: Icons.add,
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 
   Widget _buildEmptyState(BuildContext context, AppLocalizations l10n) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.people_outline, size: 80, color: Colors.grey),
-          const SizedBox(height: 16),
-          Text(
-            l10n.noClients,
-            style: const TextStyle(fontSize: 18, color: Colors.grey),
-          ),
-          const SizedBox(height: 24),
-          ElevatedButton(
-            onPressed: () => _showAddClientSheet(context),
-            child: Text(l10n.addFirstClient),
-          ),
-        ],
+    return AppEmptyState(
+      icon: Icons.people_outline,
+      title: l10n.noClients,
+      action: ElevatedButton(
+        onPressed: () => _showAddClientSheet(context),
+        child: Text(l10n.addFirstClient),
       ),
     );
   }
@@ -92,27 +91,21 @@ class ClientListScreen extends ConsumerWidget {
     Client client,
     AppLocalizations l10n,
   ) {
-    return Card(
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-          child: Text(
-            client.name[0].toUpperCase(),
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.onPrimaryContainer,
-            ),
-          ),
-        ),
-        title: Text(
-          client.name,
-          style: const TextStyle(fontWeight: FontWeight.bold),
-        ),
-        subtitle: Text(client.email ?? l10n.email),
-        trailing: const Icon(Icons.chevron_right),
-        onTap: () => context.pushNamed(
-          'client_details',
-          pathParameters: {'id': client.id.toString()},
-        ),
+    final contactInfo = [
+      if (client.phone != null && client.phone!.isNotEmpty) client.phone!,
+      if (client.email != null && client.email!.isNotEmpty) client.email!,
+    ];
+
+    return EntityCard(
+      icon: Icons.person_outline,
+      color: AppColors.info,
+      title: client.name,
+      subtitle: contactInfo.isEmpty
+          ? l10n.notProvided
+          : contactInfo.join(' - '),
+      onTap: () => context.pushNamed(
+        'client_details',
+        pathParameters: {'id': client.id.toString()},
       ),
     );
   }

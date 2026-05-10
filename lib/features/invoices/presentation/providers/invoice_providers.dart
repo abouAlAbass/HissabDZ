@@ -43,3 +43,8 @@ Future<List<Invoice>> filteredInvoices(FilteredInvoicesRef ref) {
   
   return repository.getInvoices(status: status, query: query);
 }
+@riverpod
+Future<Invoice?> invoiceById(InvoiceByIdRef ref, int id) {
+  final repository = ref.watch(invoiceRepositoryProvider);
+  return repository.getInvoiceById(id);
+}

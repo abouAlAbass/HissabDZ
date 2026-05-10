@@ -22,9 +22,12 @@ class _AddEditArticleScreenState extends ConsumerState<AddEditArticleScreen> {
   late TextEditingController _priceController;
   late TextEditingController _taxRateController;
   late TextEditingController _marginRateController;
+  late TextEditingController _defaultQuantityController;
+  late TextEditingController _quickTemplateOrderController;
   String _selectedUnit = 'pieces';
   String _selectedType = 'physical';
   String _selectedCategory = 'materials';
+  String _selectedQuickTemplate = 'none';
 
   @override
   void initState() {
@@ -34,6 +37,8 @@ class _AddEditArticleScreenState extends ConsumerState<AddEditArticleScreen> {
     _priceController = TextEditingController();
     _taxRateController = TextEditingController(text: '0');
     _marginRateController = TextEditingController(text: '0');
+    _defaultQuantityController = TextEditingController(text: '1');
+    _quickTemplateOrderController = TextEditingController(text: '0');
 
     if (widget.articleId != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -44,10 +49,14 @@ class _AddEditArticleScreenState extends ConsumerState<AddEditArticleScreen> {
         _priceController.text = article.price.toString();
         _taxRateController.text = article.taxRate.toString();
         _marginRateController.text = article.marginRate.toString();
+        _defaultQuantityController.text = article.defaultQuantity.toString();
+        _quickTemplateOrderController.text = article.quickTemplateOrder
+            .toString();
         setState(() {
           _selectedUnit = article.unit;
           _selectedType = article.type;
           _selectedCategory = article.category;
+          _selectedQuickTemplate = article.quickTemplate ?? 'none';
         });
       });
     }
@@ -60,6 +69,8 @@ class _AddEditArticleScreenState extends ConsumerState<AddEditArticleScreen> {
     _priceController.dispose();
     _taxRateController.dispose();
     _marginRateController.dispose();
+    _defaultQuantityController.dispose();
+    _quickTemplateOrderController.dispose();
     super.dispose();
   }
 
@@ -76,6 +87,11 @@ class _AddEditArticleScreenState extends ConsumerState<AddEditArticleScreen> {
       category: _selectedCategory,
       taxRate: double.tryParse(_taxRateController.text) ?? 0.0,
       marginRate: double.tryParse(_marginRateController.text) ?? 0.0,
+      quickTemplate: _selectedQuickTemplate == 'none'
+          ? null
+          : _selectedQuickTemplate,
+      defaultQuantity: double.tryParse(_defaultQuantityController.text) ?? 1.0,
+      quickTemplateOrder: int.tryParse(_quickTemplateOrderController.text) ?? 0,
     );
 
     if (widget.articleId == null) {
@@ -131,6 +147,13 @@ class _AddEditArticleScreenState extends ConsumerState<AddEditArticleScreen> {
       'rental': l10n.rentalCategory,
       'service': l10n.service,
       'supply': l10n.supplyCategory,
+    };
+    final quickTemplates = {
+      'none': l10n.noQuickTemplate,
+      'painting': l10n.paintingRoom,
+      'plumbing': l10n.plumbingRepair,
+      'electrical': l10n.electricalJob,
+      'masonry': l10n.masonryWork,
     };
 
     return Scaffold(
@@ -224,6 +247,49 @@ class _AddEditArticleScreenState extends ConsumerState<AddEditArticleScreen> {
                   )
                   .toList(),
               onChanged: (v) => setState(() => _selectedUnit = v!),
+            ),
+            const SizedBox(height: 16),
+            DropdownButtonFormField<String>(
+              initialValue: _selectedQuickTemplate,
+              decoration: InputDecoration(
+                labelText: l10n.quickTemplateTrade,
+                border: const OutlineInputBorder(),
+              ),
+              items: quickTemplates.entries
+                  .map(
+                    (e) => DropdownMenuItem(value: e.key, child: Text(e.value)),
+                  )
+                  .toList(),
+              onChanged: (v) =>
+                  setState(() => _selectedQuickTemplate = v ?? 'none'),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: TextFormField(
+                    controller: _defaultQuantityController,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    decoration: InputDecoration(
+                      labelText: l10n.defaultQuantity,
+                      border: const OutlineInputBorder(),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: TextFormField(
+                    controller: _quickTemplateOrderController,
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecoration(
+                      labelText: l10n.quickTemplateOrder,
+                      border: const OutlineInputBorder(),
+                    ),
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 16),
             Row(

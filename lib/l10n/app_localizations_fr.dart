@@ -597,6 +597,33 @@ class AppLocalizationsFr extends AppLocalizations {
   String get electricalJob => 'Travaux électriques';
 
   @override
+  String get masonryWork => 'Travaux maçonnerie';
+
+  @override
+  String get quickTemplateTrade => 'Modèle rapide devis';
+
+  @override
+  String get noQuickTemplate => 'Aucun modèle rapide';
+
+  @override
+  String get defaultQuantity => 'Quantité par défaut';
+
+  @override
+  String get quickTemplateOrder => 'Ordre d\'affichage';
+
+  @override
+  String get configureQuickArticles => 'Configurer les articles rapides';
+
+  @override
+  String get chooseFromArticles => 'Choisir article';
+
+  @override
+  String get addQuickTemplateArticles => 'Ajouter modèle rapide';
+
+  @override
+  String get noQuickTemplateArticles => 'Aucun article rapide configuré';
+
+  @override
   String get articleCategory => 'Catégorie';
 
   @override
@@ -640,6 +667,15 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get electricalLabor => 'Main d’œuvre électricité';
+
+  @override
+  String get masonryPreparation => 'Préparation chantier';
+
+  @override
+  String get blockWork => 'Maçonnerie blocs';
+
+  @override
+  String get masonryLabor => 'Main d\'œuvre maçonnerie';
 
   @override
   String get siteAddress => 'Adresse du chantier';
@@ -729,4 +765,92 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get ongoingProjects => 'Chantiers en cours';
+
+  @override
+  String get deleteClientErrorHasInvoices =>
+      'Impossible de supprimer : ce client a des factures.';
+
+  @override
+  String get deleteClientErrorHasPayments =>
+      'Impossible de supprimer : ce client a des paiements.';
+
+  @override
+  String get deleteClientConfirm =>
+      'Supprimer ce client ? Ses devis seront également supprimés.';
+
+  @override
+  String get clientDeleted => 'Client supprimé avec succès.';
+
+  @override
+  String get deleteInvoiceConfirm =>
+      'Supprimer cette facture ? Cette action est irréversible.';
+
+  @override
+  String get deleteInvoiceErrorHasPayments =>
+      'Impossible de supprimer : cette facture a déjà des paiements enregistrés.';
+
+  @override
+  String get invoiceDeleted => 'Facture supprimée avec succès.';
+
+  @override
+  String get deleteQuoteConfirm => 'Supprimer ce devis ?';
+
+  @override
+  String get quoteDeleted => 'Devis supprimé avec succès.';
+
+  @override
+  String get createRefund => 'Créer un avoir';
+
+  @override
+  String get refund => 'Avoir';
+
+  @override
+  String get refunds => 'Avoirs';
+
+  @override
+  String get refundDetails => 'Détails de l\'avoir';
+
+  @override
+  String get refundNumber => 'Avoir n°';
+
+  @override
+  String get refundDate => 'Date de l\'avoir';
+
+  @override
+  String get refundReason => 'Raison de l\'avoir';
+
+  @override
+  String get refundAmount => 'Montant remboursé';
+
+  @override
+  String get netAmount => 'Montant net';
+
+  @override
+  String get refundedQuantity => 'Qté remboursée';
+
+  @override
+  String get availableToRefund => 'Disponible à rembourser';
+
+  @override
+  String get refundSuccess => 'Avoir créé avec succès';
+
+  @override
+  String get refundErrorExceedsQuantity =>
+      'La quantité dépasse la quantité facturée restante.';
+
+  @override
+  String get refundErrorCancelledInvoice =>
+      'Impossible de créer un avoir sur une facture annulée.';
+
+  @override
+  String get profitability => 'Rentabilité';
+
+  @override
+  String get projectProfitability => 'Rentabilité du projet';
+
+  @override
+  String get noRefundsYet => 'Aucun avoir trouvé';
+
+  @override
+  String get validated => 'Validé';
 }

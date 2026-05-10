@@ -21,6 +21,14 @@ class ClientDetailsScreen extends ConsumerWidget {
             icon: const Icon(Icons.edit),
             onPressed: () => _showEditClientSheet(context, ref, clientId),
           ),
+          const SizedBox(width: 8),
+          IconButton(
+            icon: Icon(
+              Icons.delete_outline,
+              color: Theme.of(context).colorScheme.error,
+            ),
+            onPressed: () => _confirmDeleteClient(context, ref, l10n),
+          ),
         ],
       ),
       body: clientsAsync.when(
@@ -143,6 +151,62 @@ class ClientDetailsScreen extends ConsumerWidget {
         child: EditClientForm(client: client),
       ),
     );
+  }
+
+  Future<void> _confirmDeleteClient(
+    BuildContext context,
+    WidgetRef ref,
+    AppLocalizations l10n,
+  ) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.delete),
+        content: Text(l10n.deleteClientConfirm),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(
+              foregroundColor: Theme.of(context).colorScheme.error,
+            ),
+            child: Text(l10n.delete),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      try {
+        await ref.read(clientRepositoryProvider).deleteClient(clientId);
+        if (!context.mounted) return;
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.clientDeleted)),
+        );
+        Navigator.pop(context);
+      } catch (e) {
+        if (!context.mounted) return;
+
+        String message = l10n.error;
+        final errorStr = e.toString();
+        if (errorStr.contains('HAS_INVOICES')) {
+          message = l10n.deleteClientErrorHasInvoices;
+        } else if (errorStr.contains('HAS_PAYMENTS')) {
+          message = l10n.deleteClientErrorHasPayments;
+        }
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(message),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
+    }
   }
 }
 

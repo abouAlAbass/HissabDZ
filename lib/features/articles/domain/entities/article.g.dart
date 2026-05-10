@@ -17,6 +17,9 @@ _$ArticleImpl _$$ArticleImplFromJson(Map<String, dynamic> json) =>
       category: json['category'] as String? ?? 'materials',
       taxRate: (json['taxRate'] as num?)?.toDouble() ?? 0.0,
       marginRate: (json['marginRate'] as num?)?.toDouble() ?? 0.0,
+      quickTemplate: json['quickTemplate'] as String?,
+      defaultQuantity: (json['defaultQuantity'] as num?)?.toDouble() ?? 1.0,
+      quickTemplateOrder: (json['quickTemplateOrder'] as num?)?.toInt() ?? 0,
       createdAt: json['createdAt'] == null
           ? null
           : DateTime.parse(json['createdAt'] as String),
@@ -33,5 +36,8 @@ Map<String, dynamic> _$$ArticleImplToJson(_$ArticleImpl instance) =>
       'category': instance.category,
       'taxRate': instance.taxRate,
       'marginRate': instance.marginRate,
+      'quickTemplate': instance.quickTemplate,
+      'defaultQuantity': instance.defaultQuantity,
+      'quickTemplateOrder': instance.quickTemplateOrder,
       'createdAt': instance.createdAt?.toIso8601String(),
     };

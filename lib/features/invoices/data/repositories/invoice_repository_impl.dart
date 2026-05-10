@@ -25,7 +25,7 @@ class InvoiceRepositoryImpl implements InvoiceRepository {
         _database.projects,
         _database.projects.id.equalsExp(_database.invoices.projectId),
       ),
-    ]);
+    ])..orderBy([OrderingTerm.desc(_database.invoices.id)]);
 
     if (status != null) {
       statement.where(_database.invoices.status.equals(status.index));
@@ -61,7 +61,7 @@ class InvoiceRepositoryImpl implements InvoiceRepository {
         _database.projects,
         _database.projects.id.equalsExp(_database.invoices.projectId),
       ),
-    ]);
+    ])..orderBy([OrderingTerm.desc(_database.invoices.id)]);
 
     if (status != null) {
       query.where(_database.invoices.status.equals(status.index));
@@ -200,10 +200,16 @@ class InvoiceRepositoryImpl implements InvoiceRepository {
   }
 
   @override
-  Future<void> deleteInvoice(int id) {
-    return (_database.delete(
-      _database.invoices,
-    )..where((t) => t.id.equals(id))).go();
+  Future<void> deleteInvoice(int id) async {
+    final payments = await (_database.select(_database.payments)
+          ..where((t) => t.invoiceId.equals(id)))
+        .get();
+
+    if (payments.isNotEmpty) {
+      throw Exception('HAS_PAYMENTS');
+    }
+
+    await (_database.delete(_database.invoices)..where((t) => t.id.equals(id))).go();
   }
 
   @override

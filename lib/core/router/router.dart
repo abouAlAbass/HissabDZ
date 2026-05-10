@@ -21,6 +21,9 @@ import '../../features/projects/presentation/pages/project_details_screen.dart';
 import '../../features/projects/presentation/pages/expense_list_screen.dart';
 import '../../features/projects/presentation/pages/project_list_screen.dart';
 import '../../features/search/presentation/pages/global_search_screen.dart';
+import '../../features/refunds/presentation/pages/create_refund_screen.dart';
+import '../../features/refunds/presentation/pages/refund_details_screen.dart';
+import '../../features/refunds/presentation/pages/refund_list_screen.dart';
 import '../widgets/app_drawer.dart';
 
 final rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
@@ -78,6 +81,11 @@ class AppRouter {
             path: '/articles',
             name: 'articles',
             builder: (context, state) => const ArticleListScreen(),
+          ),
+          GoRoute(
+            path: '/refunds',
+            name: 'refunds',
+            builder: (context, state) => const RefundListScreen(),
           ),
         ],
       ),
@@ -174,6 +182,26 @@ class AppRouter {
           final idString = state.pathParameters['id'];
           final id = int.tryParse(idString ?? '') ?? 0;
           return InvoiceDetailsScreen(invoiceId: id);
+        },
+      ),
+      GoRoute(
+        path: '/invoices/:id/refund',
+        name: 'create_refund',
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) {
+          final idString = state.pathParameters['id'];
+          final id = int.tryParse(idString ?? '') ?? 0;
+          return CreateRefundScreen(invoiceId: id);
+        },
+      ),
+      GoRoute(
+        path: '/refunds/:id',
+        name: 'refund_details',
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) {
+          final idString = state.pathParameters['id'];
+          final id = int.tryParse(idString ?? '') ?? 0;
+          return RefundDetailsScreen(refundId: id);
         },
       ),
       GoRoute(
@@ -320,6 +348,7 @@ class ScaffoldWithBottomNavBar extends StatelessWidget {
       _ShellDestination(l10n.quotes, Icons.request_quote_rounded),
       _ShellDestination(l10n.invoices, Icons.description_rounded),
       _ShellDestination(l10n.payments, Icons.payments_rounded),
+      _ShellDestination(l10n.refunds, Icons.assignment_return_rounded),
       _ShellDestination(l10n.articles, Icons.inventory_2_rounded),
     ];
   }
@@ -345,6 +374,9 @@ class ScaffoldWithBottomNavBar extends StatelessWidget {
         context.goNamed('payments');
         break;
       case 6:
+        context.goNamed('refunds');
+        break;
+      case 7:
         context.goNamed('articles');
         break;
     }
@@ -369,7 +401,8 @@ class ScaffoldWithBottomNavBar extends StatelessWidget {
     if (location.startsWith('/quotes')) return 3;
     if (location.startsWith('/invoices')) return 4;
     if (location.startsWith('/payments')) return 5;
-    if (location.startsWith('/articles')) return 6;
+    if (location.startsWith('/refunds')) return 6;
+    if (location.startsWith('/articles')) return 7;
     return 0;
   }
 }
@@ -401,6 +434,7 @@ class _DesktopSidebar extends ConsumerWidget {
       _ShellDestination(l10n.quotes, Icons.request_quote_rounded),
       _ShellDestination(l10n.invoices, Icons.description_rounded),
       _ShellDestination(l10n.payments, Icons.payments_rounded),
+      _ShellDestination(l10n.refunds, Icons.assignment_return_rounded),
       _ShellDestination(l10n.articles, Icons.inventory_2_rounded),
     ];
 

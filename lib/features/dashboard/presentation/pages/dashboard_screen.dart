@@ -2,13 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import '../providers/dashboard_providers.dart';
-import '../../../invoices/domain/entities/invoice.dart';
-import '../../../clients/presentation/pages/client_list_screen.dart';
-import '../../../projects/presentation/widgets/expense_form_sheet.dart';
-import '../../../../core/widgets/status_badge.dart';
+
+import '../../../../core/theme/theme.dart';
 import '../../../../core/widgets/app_drawer.dart';
+import '../../../../core/widgets/app_empty_state.dart';
+import '../../../../core/widgets/entity_card.dart';
+import '../../../../core/widgets/metric_card.dart';
+import '../../../../core/widgets/quick_action_card.dart';
+import '../../../../core/widgets/status_badge.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../clients/presentation/pages/client_list_screen.dart';
+import '../../../invoices/domain/entities/invoice.dart';
+import '../../../projects/presentation/widgets/expense_form_sheet.dart';
+import '../providers/dashboard_providers.dart';
 
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
@@ -29,7 +35,7 @@ class DashboardScreen extends ConsumerWidget {
           ),
         ],
       ),
-      drawer: MediaQuery.sizeOf(context).width >= 1100
+      drawer: MediaQuery.sizeOf(context).width >= AppBreakpoints.desktop
           ? null
           : const AppDrawer(),
       body: statsAsync.when(
@@ -38,37 +44,45 @@ class DashboardScreen extends ConsumerWidget {
           child: LayoutBuilder(
             builder: (context, constraints) {
               final width = constraints.maxWidth;
-              final horizontalPadding = width >= 1100 ? 28.0 : 16.0;
+              final horizontalPadding = width >= AppBreakpoints.desktop
+                  ? AppSpacing.desktopPage
+                  : AppSpacing.page;
               return SingleChildScrollView(
                 padding: EdgeInsets.fromLTRB(
                   horizontalPadding,
-                  16,
+                  AppSpacing.md,
                   horizontalPadding,
-                  width < 720 ? 112 : 28,
+                  width < AppBreakpoints.tablet
+                      ? AppSpacing.bottomNavClearance
+                      : AppSpacing.desktopPage,
                 ),
                 child: Center(
                   child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 1280),
+                    constraints: const BoxConstraints(
+                      maxWidth: AppBreakpoints.maxContentWidth,
+                    ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        _buildDashboardHero(context, l10n, stats),
+                        const SizedBox(height: AppSpacing.lg),
                         _buildQuickActions(context, l10n),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: AppSpacing.lg),
                         _buildSummaryGrid(context, l10n, stats),
-                        const SizedBox(height: 24),
+                        const SizedBox(height: AppSpacing.lg),
                         if ((stats['overdueInvoices'] as List).isNotEmpty) ...[
                           _buildOverdueAlert(
                             context,
                             l10n,
                             stats['overdueInvoices'] as List<Invoice>,
                           ),
-                          const SizedBox(height: 24),
+                          const SizedBox(height: AppSpacing.lg),
                         ],
                         Text(
                           l10n.recentInvoices,
                           style: Theme.of(context).textTheme.titleLarge,
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: AppSpacing.xs),
                         _buildRecentInvoices(
                           context,
                           l10n,
@@ -88,37 +102,171 @@ class DashboardScreen extends ConsumerWidget {
     );
   }
 
+  Widget _buildDashboardHero(
+    BuildContext context,
+    AppLocalizations l10n,
+    Map<String, dynamic> stats,
+  ) {
+    final currencyFormat = NumberFormat.currency(symbol: l10n.currencySymbol);
+
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        gradient: AppTheme.primaryGradient,
+        borderRadius: BorderRadius.circular(AppRadii.lg),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withValues(alpha: 0.18),
+            blurRadius: 28,
+            offset: const Offset(0, 16),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final compact = constraints.maxWidth < AppBreakpoints.tablet;
+            final mainPanel = Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.appTitle,
+                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                    color: Colors.white.withValues(alpha: 0.82),
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.xs),
+                Text(
+                  l10n.dashboard,
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    color: Colors.white,
+                    fontSize: compact ? 26 : 30,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                Text(
+                  currencyFormat.format(stats['collectedThisMonth']),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    color: Colors.white,
+                    fontSize: compact ? 28 : 36,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                Text(
+                  l10n.collectedThisMonth,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Colors.white.withValues(alpha: 0.80),
+                  ),
+                ),
+              ],
+            );
+            final sidePanel = Container(
+              padding: const EdgeInsets.all(AppSpacing.md),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(AppRadii.lg),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Icon(
+                    Icons.construction_outlined,
+                    color: Colors.white,
+                    size: 30,
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+                  Text(
+                    '${stats['ongoingProjects']}',
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                  Text(
+                    l10n.ongoingProjects,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Colors.white.withValues(alpha: 0.82),
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  Text(
+                    currencyFormat.format(stats['outstandingAmount']),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(
+                      context,
+                    ).textTheme.titleMedium?.copyWith(color: Colors.white),
+                  ),
+                  Text(
+                    l10n.outstanding,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Colors.white.withValues(alpha: 0.78),
+                    ),
+                  ),
+                ],
+              ),
+            );
+
+            if (compact) {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  mainPanel,
+                  const SizedBox(height: AppSpacing.md),
+                  sidePanel,
+                ],
+              );
+            }
+
+            return Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(flex: 3, child: mainPanel),
+                const SizedBox(width: AppSpacing.lg),
+                Expanded(flex: 2, child: sidePanel),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+  }
+
   Widget _buildQuickActions(BuildContext context, AppLocalizations l10n) {
     final actions = [
       (
         label: l10n.createQuote,
         icon: Icons.request_quote_outlined,
-        color: Colors.indigo,
+        color: AppColors.quote,
         onTap: () => context.pushNamed('create_quote'),
       ),
       (
         label: l10n.addExpense,
         icon: Icons.receipt_long_outlined,
-        color: Colors.red,
+        color: AppColors.expense,
         onTap: () => _showExpenseSheet(context),
       ),
       (
         label: l10n.quickClient,
         icon: Icons.person_add_alt_1_outlined,
-        color: Colors.blue,
+        color: AppColors.info,
         onTap: () => _showClientSheet(context),
       ),
       (
         label: l10n.quickArticle,
         icon: Icons.add_box_outlined,
-        color: Colors.green,
+        color: AppColors.success,
         onTap: () => context.pushNamed('add_article'),
       ),
     ];
 
     final width = MediaQuery.sizeOf(context).width;
-    final crossAxisCount = width >= 1100 ? 4 : 2;
-    final childAspectRatio = width >= 1100 ? 3.2 : 2.45;
+    final crossAxisCount = width >= AppBreakpoints.desktop ? 4 : 2;
+    final childAspectRatio = width >= AppBreakpoints.desktop ? 3.2 : 2.45;
 
     return GridView.builder(
       shrinkWrap: true,
@@ -126,29 +274,17 @@ class DashboardScreen extends ConsumerWidget {
       itemCount: actions.length,
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: crossAxisCount,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
+        crossAxisSpacing: AppSpacing.sm,
+        mainAxisSpacing: AppSpacing.sm,
         childAspectRatio: childAspectRatio,
       ),
       itemBuilder: (context, index) {
         final action = actions[index];
-        return FilledButton.icon(
-          onPressed: action.onTap,
-          icon: Icon(action.icon, size: 24),
-          label: Text(
-            action.label,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            textAlign: TextAlign.center,
-          ),
-          style: FilledButton.styleFrom(
-            backgroundColor: action.color,
-            foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-          ),
+        return QuickActionCard(
+          label: action.label,
+          icon: action.icon,
+          color: action.color,
+          onTap: action.onTap,
         );
       },
     );
@@ -178,95 +314,57 @@ class DashboardScreen extends ConsumerWidget {
     Map<String, dynamic> stats,
   ) {
     final currencyFormat = NumberFormat.currency(symbol: l10n.currencySymbol);
-
     final width = MediaQuery.sizeOf(context).width;
-    final crossAxisCount = width >= 1100
-        ? 3
-        : width >= 720
-        ? 3
-        : 2;
-    final childAspectRatio = width >= 720 ? 2.0 : 1.45;
+    final crossAxisCount = width >= AppBreakpoints.tablet ? 3 : 2;
+    final childAspectRatio = width >= AppBreakpoints.tablet ? 2.0 : 1.45;
 
     return GridView.count(
       crossAxisCount: crossAxisCount,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      crossAxisSpacing: 12,
-      mainAxisSpacing: 12,
+      crossAxisSpacing: AppSpacing.sm,
+      mainAxisSpacing: AppSpacing.sm,
       childAspectRatio: childAspectRatio,
       children: [
-        _buildStatCard(
-          context,
-          l10n.collectedThisMonth,
-          currencyFormat.format(stats['collectedThisMonth']),
-          Icons.account_balance_wallet_outlined,
-          Colors.green,
+        MetricCard(
+          label: l10n.collectedThisMonth,
+          value: currencyFormat.format(stats['collectedThisMonth']),
+          icon: Icons.account_balance_wallet_outlined,
+          color: AppColors.income,
+          emphasized: true,
         ),
-        _buildStatCard(
-          context,
-          l10n.outstanding,
-          currencyFormat.format(stats['outstandingAmount']),
-          Icons.pending_actions,
-          Colors.orange,
+        MetricCard(
+          label: l10n.outstanding,
+          value: currencyFormat.format(stats['outstandingAmount']),
+          icon: Icons.pending_actions,
+          color: AppColors.warning,
         ),
-        _buildStatCard(
-          context,
-          l10n.monthlyExpenses,
-          currencyFormat.format(stats['expensesThisMonth']),
-          Icons.receipt_long_outlined,
-          Colors.red,
+        MetricCard(
+          label: l10n.monthlyExpenses,
+          value: currencyFormat.format(stats['expensesThisMonth']),
+          icon: Icons.receipt_long_outlined,
+          color: AppColors.expense,
         ),
-        _buildStatCard(
-          context,
-          l10n.estimatedProfit,
-          currencyFormat.format(stats['estimatedProfit']),
-          Icons.trending_up,
-          Colors.purple,
+        MetricCard(
+          label: l10n.estimatedProfit,
+          value: currencyFormat.format(stats['estimatedProfit']),
+          icon: Icons.trending_up,
+          color: AppColors.profit,
+          emphasized: true,
         ),
-        _buildStatCard(
-          context,
-          l10n.ongoingProjects,
-          '${stats['ongoingProjects']}',
-          Icons.construction_outlined,
-          Colors.blue,
+        MetricCard(
+          label: l10n.ongoingProjects,
+          value: '${stats['ongoingProjects']}',
+          icon: Icons.construction_outlined,
+          color: AppColors.project,
         ),
-        _buildStatCard(
-          context,
-          l10n.overdueInvoices,
-          '${stats['overdueInvoiceCount']}',
-          Icons.warning_amber_rounded,
-          Colors.deepOrange,
+        MetricCard(
+          label: l10n.overdueInvoices,
+          value: '${stats['overdueInvoiceCount']}',
+          icon: Icons.warning_amber_rounded,
+          color: AppColors.overdue,
         ),
       ],
-    );
-  }
-
-  Widget _buildStatCard(
-    BuildContext context,
-    String title,
-    String value,
-    IconData icon,
-    Color color,
-  ) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, color: color, size: 24),
-            const Spacer(),
-            Text(
-              value,
-              style: Theme.of(
-                context,
-              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            Text(title, style: Theme.of(context).textTheme.bodySmall),
-          ],
-        ),
-      ),
     );
   }
 
@@ -276,24 +374,22 @@ class DashboardScreen extends ConsumerWidget {
     List<Invoice> overdue,
   ) {
     return Card(
-      color: Theme.of(context).colorScheme.errorContainer,
+      color: AppColors.dangerSoft,
       child: ListTile(
-        leading: Icon(
-          Icons.warning,
-          color: Theme.of(context).colorScheme.error,
+        leading: const Icon(
+          Icons.warning_amber_rounded,
+          color: AppColors.danger,
         ),
         title: Text(
           l10n.overdueAlert(overdue.length),
-          style: TextStyle(
-            color: Theme.of(context).colorScheme.onErrorContainer,
+          style: const TextStyle(
+            color: AppColors.danger,
             fontWeight: FontWeight.bold,
           ),
         ),
         subtitle: Text(
           l10n.immediateAction,
-          style: TextStyle(
-            color: Theme.of(context).colorScheme.onErrorContainer,
-          ),
+          style: const TextStyle(color: AppColors.textPrimary),
         ),
         trailing: const Icon(Icons.chevron_right),
         onTap: () => context.pushNamed('invoices'),
@@ -307,37 +403,27 @@ class DashboardScreen extends ConsumerWidget {
     List<Invoice> invoices,
   ) {
     if (invoices.isEmpty) {
-      return Card(child: ListTile(title: Text(l10n.noRecentInvoices)));
+      return AppEmptyState(
+        icon: Icons.description_outlined,
+        title: l10n.noRecentInvoices,
+      );
     }
 
     return Column(
       children: invoices
           .map(
-            (invoice) => Card(
-              margin: const EdgeInsets.only(bottom: 8),
-              child: ListTile(
-                title: Text(
-                  invoice.invoiceNumber,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-                subtitle: Text(invoice.client?.name ?? '—'),
-                trailing: Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      NumberFormat.currency(
-                        symbol: l10n.currencySymbol,
-                      ).format(invoice.total),
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    StatusBadge(status: invoice.status),
-                  ],
-                ),
-                onTap: () => context.pushNamed(
-                  'invoice_details',
-                  pathParameters: {'id': invoice.id.toString()},
-                ),
+            (invoice) => EntityCard(
+              icon: Icons.description_outlined,
+              color: AppColors.invoice,
+              title: invoice.invoiceNumber,
+              subtitle: invoice.client?.name ?? '',
+              amount: NumberFormat.currency(
+                symbol: l10n.currencySymbol,
+              ).format(invoice.total),
+              badge: StatusBadge(status: invoice.status),
+              onTap: () => context.pushNamed(
+                'invoice_details',
+                pathParameters: {'id': invoice.id.toString()},
               ),
             ),
           )

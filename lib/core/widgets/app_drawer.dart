@@ -105,6 +105,14 @@ class AppDrawer extends ConsumerWidget {
               },
             ),
             ListTile(
+              leading: const Icon(Icons.assignment_return),
+              title: Text(l10n.refunds),
+              onTap: () {
+                Navigator.pop(context);
+                context.go('/refunds');
+              },
+            ),
+            ListTile(
               leading: const Icon(Icons.receipt_long),
               title: Text(l10n.expenses),
               onTap: () {

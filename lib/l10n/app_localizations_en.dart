@@ -595,6 +595,33 @@ class AppLocalizationsEn extends AppLocalizations {
   String get electricalJob => 'Electrical work';
 
   @override
+  String get masonryWork => 'Masonry work';
+
+  @override
+  String get quickTemplateTrade => 'Quick quote template';
+
+  @override
+  String get noQuickTemplate => 'No quick template';
+
+  @override
+  String get defaultQuantity => 'Default quantity';
+
+  @override
+  String get quickTemplateOrder => 'Display order';
+
+  @override
+  String get configureQuickArticles => 'Configure quick articles';
+
+  @override
+  String get chooseFromArticles => 'Choose article';
+
+  @override
+  String get addQuickTemplateArticles => 'Add quick template';
+
+  @override
+  String get noQuickTemplateArticles => 'No quick template articles configured';
+
+  @override
   String get articleCategory => 'Category';
 
   @override
@@ -638,6 +665,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get electricalLabor => 'Electrical labor';
+
+  @override
+  String get masonryPreparation => 'Site preparation';
+
+  @override
+  String get blockWork => 'Block work';
+
+  @override
+  String get masonryLabor => 'Masonry labor';
 
   @override
   String get siteAddress => 'Job site address';
@@ -727,4 +763,92 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ongoingProjects => 'Ongoing jobs';
+
+  @override
+  String get deleteClientErrorHasInvoices =>
+      'Cannot delete: this client has invoices.';
+
+  @override
+  String get deleteClientErrorHasPayments =>
+      'Cannot delete: this client has payments.';
+
+  @override
+  String get deleteClientConfirm =>
+      'Delete this client? Associated quotes will also be deleted.';
+
+  @override
+  String get clientDeleted => 'Client deleted successfully.';
+
+  @override
+  String get deleteInvoiceConfirm =>
+      'Delete this invoice? This action cannot be undone.';
+
+  @override
+  String get deleteInvoiceErrorHasPayments =>
+      'Cannot delete: this invoice already has payments recorded.';
+
+  @override
+  String get invoiceDeleted => 'Invoice deleted successfully.';
+
+  @override
+  String get deleteQuoteConfirm => 'Delete this quote?';
+
+  @override
+  String get quoteDeleted => 'Quote deleted successfully.';
+
+  @override
+  String get createRefund => 'Create Refund';
+
+  @override
+  String get refund => 'Refund / Credit Note';
+
+  @override
+  String get refunds => 'Refunds';
+
+  @override
+  String get refundDetails => 'Refund Details';
+
+  @override
+  String get refundNumber => 'Refund #';
+
+  @override
+  String get refundDate => 'Refund Date';
+
+  @override
+  String get refundReason => 'Reason';
+
+  @override
+  String get refundAmount => 'Refunded Amount';
+
+  @override
+  String get netAmount => 'Net Amount';
+
+  @override
+  String get refundedQuantity => 'Refunded Qty';
+
+  @override
+  String get availableToRefund => 'Available to refund';
+
+  @override
+  String get refundSuccess => 'Refund created successfully';
+
+  @override
+  String get refundErrorExceedsQuantity =>
+      'Quantity exceeds remaining invoiced quantity.';
+
+  @override
+  String get refundErrorCancelledInvoice =>
+      'Cannot create refund on a cancelled invoice.';
+
+  @override
+  String get profitability => 'Profitability';
+
+  @override
+  String get projectProfitability => 'Project Profitability';
+
+  @override
+  String get noRefundsYet => 'No credit notes yet';
+
+  @override
+  String get validated => 'Validated';
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hissab_dz/core/theme/theme.dart';
 import 'package:hissab_dz/features/quotes/domain/entities/quote_status.dart';
 import 'package:hissab_dz/l10n/app_localizations.dart';
 
@@ -20,15 +21,15 @@ String quoteStatusText(AppLocalizations l10n, QuoteStatus status) {
 Color quoteStatusColor(QuoteStatus status) {
   switch (status) {
     case QuoteStatus.draft:
-      return Colors.grey;
+      return AppColors.neutral;
     case QuoteStatus.sent:
-      return Colors.blue;
+      return AppColors.info;
     case QuoteStatus.accepted:
-      return Colors.green;
+      return AppColors.success;
     case QuoteStatus.rejected:
-      return Colors.red;
+      return AppColors.danger;
     case QuoteStatus.converted:
-      return Colors.purple;
+      return AppColors.quote;
   }
 }
 

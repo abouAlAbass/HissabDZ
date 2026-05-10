@@ -1264,6 +1264,60 @@ abstract class AppLocalizations {
   /// **'Electrical work'**
   String get electricalJob;
 
+  /// No description provided for @masonryWork.
+  ///
+  /// In en, this message translates to:
+  /// **'Masonry work'**
+  String get masonryWork;
+
+  /// No description provided for @quickTemplateTrade.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick quote template'**
+  String get quickTemplateTrade;
+
+  /// No description provided for @noQuickTemplate.
+  ///
+  /// In en, this message translates to:
+  /// **'No quick template'**
+  String get noQuickTemplate;
+
+  /// No description provided for @defaultQuantity.
+  ///
+  /// In en, this message translates to:
+  /// **'Default quantity'**
+  String get defaultQuantity;
+
+  /// No description provided for @quickTemplateOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Display order'**
+  String get quickTemplateOrder;
+
+  /// No description provided for @configureQuickArticles.
+  ///
+  /// In en, this message translates to:
+  /// **'Configure quick articles'**
+  String get configureQuickArticles;
+
+  /// No description provided for @chooseFromArticles.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose article'**
+  String get chooseFromArticles;
+
+  /// No description provided for @addQuickTemplateArticles.
+  ///
+  /// In en, this message translates to:
+  /// **'Add quick template'**
+  String get addQuickTemplateArticles;
+
+  /// No description provided for @noQuickTemplateArticles.
+  ///
+  /// In en, this message translates to:
+  /// **'No quick template articles configured'**
+  String get noQuickTemplateArticles;
+
   /// No description provided for @articleCategory.
   ///
   /// In en, this message translates to:
@@ -1353,6 +1407,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Electrical labor'**
   String get electricalLabor;
+
+  /// No description provided for @masonryPreparation.
+  ///
+  /// In en, this message translates to:
+  /// **'Site preparation'**
+  String get masonryPreparation;
+
+  /// No description provided for @blockWork.
+  ///
+  /// In en, this message translates to:
+  /// **'Block work'**
+  String get blockWork;
+
+  /// No description provided for @masonryLabor.
+  ///
+  /// In en, this message translates to:
+  /// **'Masonry labor'**
+  String get masonryLabor;
 
   /// No description provided for @siteAddress.
   ///
@@ -1527,6 +1599,168 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Ongoing jobs'**
   String get ongoingProjects;
+
+  /// No description provided for @deleteClientErrorHasInvoices.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot delete: this client has invoices.'**
+  String get deleteClientErrorHasInvoices;
+
+  /// No description provided for @deleteClientErrorHasPayments.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot delete: this client has payments.'**
+  String get deleteClientErrorHasPayments;
+
+  /// No description provided for @deleteClientConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this client? Associated quotes will also be deleted.'**
+  String get deleteClientConfirm;
+
+  /// No description provided for @clientDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Client deleted successfully.'**
+  String get clientDeleted;
+
+  /// No description provided for @deleteInvoiceConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this invoice? This action cannot be undone.'**
+  String get deleteInvoiceConfirm;
+
+  /// No description provided for @deleteInvoiceErrorHasPayments.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot delete: this invoice already has payments recorded.'**
+  String get deleteInvoiceErrorHasPayments;
+
+  /// No description provided for @invoiceDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Invoice deleted successfully.'**
+  String get invoiceDeleted;
+
+  /// No description provided for @deleteQuoteConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this quote?'**
+  String get deleteQuoteConfirm;
+
+  /// No description provided for @quoteDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Quote deleted successfully.'**
+  String get quoteDeleted;
+
+  /// No description provided for @createRefund.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Refund'**
+  String get createRefund;
+
+  /// No description provided for @refund.
+  ///
+  /// In en, this message translates to:
+  /// **'Refund / Credit Note'**
+  String get refund;
+
+  /// No description provided for @refunds.
+  ///
+  /// In en, this message translates to:
+  /// **'Refunds'**
+  String get refunds;
+
+  /// No description provided for @refundDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Refund Details'**
+  String get refundDetails;
+
+  /// No description provided for @refundNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Refund #'**
+  String get refundNumber;
+
+  /// No description provided for @refundDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Refund Date'**
+  String get refundDate;
+
+  /// No description provided for @refundReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason'**
+  String get refundReason;
+
+  /// No description provided for @refundAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Refunded Amount'**
+  String get refundAmount;
+
+  /// No description provided for @netAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Net Amount'**
+  String get netAmount;
+
+  /// No description provided for @refundedQuantity.
+  ///
+  /// In en, this message translates to:
+  /// **'Refunded Qty'**
+  String get refundedQuantity;
+
+  /// No description provided for @availableToRefund.
+  ///
+  /// In en, this message translates to:
+  /// **'Available to refund'**
+  String get availableToRefund;
+
+  /// No description provided for @refundSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Refund created successfully'**
+  String get refundSuccess;
+
+  /// No description provided for @refundErrorExceedsQuantity.
+  ///
+  /// In en, this message translates to:
+  /// **'Quantity exceeds remaining invoiced quantity.'**
+  String get refundErrorExceedsQuantity;
+
+  /// No description provided for @refundErrorCancelledInvoice.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot create refund on a cancelled invoice.'**
+  String get refundErrorCancelledInvoice;
+
+  /// No description provided for @profitability.
+  ///
+  /// In en, this message translates to:
+  /// **'Profitability'**
+  String get profitability;
+
+  /// No description provided for @projectProfitability.
+  ///
+  /// In en, this message translates to:
+  /// **'Project Profitability'**
+  String get projectProfitability;
+
+  /// No description provided for @noRefundsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No credit notes yet'**
+  String get noRefundsYet;
+
+  /// No description provided for @validated.
+  ///
+  /// In en, this message translates to:
+  /// **'Validated'**
+  String get validated;
 }
 
 class _AppLocalizationsDelegate

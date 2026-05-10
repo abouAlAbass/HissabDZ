@@ -174,7 +174,35 @@ class Articles extends Table {
       text().withDefault(const Constant('materials'))(); // labor, materials...
   RealColumn get taxRate => real().withDefault(const Constant(0.0))();
   RealColumn get marginRate => real().withDefault(const Constant(0.0))();
+  TextColumn get quickTemplate => text().nullable()();
+  RealColumn get defaultQuantity => real().withDefault(const Constant(1.0))();
+  IntColumn get quickTemplateOrder =>
+      integer().withDefault(const Constant(0))();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+}
+@DataClassName('RefundData')
+class Refunds extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get invoiceId =>
+      integer().references(Invoices, #id, onDelete: KeyAction.cascade)();
+  TextColumn get refundNumber => text().withLength(min: 1, max: 20)();
+  DateTimeColumn get date => dateTime().withDefault(currentDateAndTime)();
+  TextColumn get reason => text().nullable()();
+  RealColumn get totalAmount => real().withDefault(const Constant(0.0))();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  BoolColumn get isValidated => boolean().withDefault(const Constant(false))();
+}
+
+@DataClassName('RefundItemData')
+class RefundItems extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get refundId =>
+      integer().references(Refunds, #id, onDelete: KeyAction.cascade)();
+  IntColumn get invoiceItemId =>
+      integer().references(InvoiceItems, #id, onDelete: KeyAction.cascade)();
+  RealColumn get quantity => real()();
+  RealColumn get unitPrice => real()();
+  RealColumn get amount => real()();
 }
 
 @DriftDatabase(
@@ -190,13 +218,15 @@ class Articles extends Table {
     Articles,
     ExpenseTypes,
     ProjectExpenses,
+    Refunds,
+    RefundItems,
   ],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 11;
+  int get schemaVersion => 13;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -297,6 +327,27 @@ class AppDatabase extends _$AppDatabase {
         } else {
           await _createTableIfMissing(m, projectExpenses);
         }
+      }
+      if (from < 12) {
+        await _addColumnIfMissing(
+          m,
+          articles.actualTableName,
+          articles.quickTemplate,
+        );
+        await _addColumnIfMissing(
+          m,
+          articles.actualTableName,
+          articles.defaultQuantity,
+        );
+        await _addColumnIfMissing(
+          m,
+          articles.actualTableName,
+          articles.quickTemplateOrder,
+        );
+      }
+      if (from < 13) {
+        await _createTableIfMissing(m, refunds);
+        await _createTableIfMissing(m, refundItems);
       }
     },
     beforeOpen: (details) async {

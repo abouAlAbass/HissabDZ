@@ -2,7 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:hissab_dz/core/theme/theme.dart';
+import 'package:hissab_dz/core/widgets/app_empty_state.dart';
 import 'package:hissab_dz/core/widgets/app_drawer.dart';
+import 'package:hissab_dz/core/widgets/contextual_fab.dart';
+import 'package:hissab_dz/core/widgets/entity_card.dart';
+import 'package:hissab_dz/core/widgets/responsive_content.dart';
 import 'package:hissab_dz/features/clients/domain/entities/client.dart';
 import 'package:hissab_dz/features/clients/presentation/providers/client_providers.dart';
 import 'package:hissab_dz/features/projects/domain/entities/project.dart';
@@ -30,44 +35,39 @@ class ProjectListScreen extends ConsumerWidget {
             return _buildEmptyState(context, l10n);
           }
 
-          return ListView.builder(
-            padding: const EdgeInsets.fromLTRB(8, 8, 8, 112),
-            itemCount: projects.length,
-            itemBuilder: (context, index) {
-              final project = projects[index];
-              return Card(
-                child: ListTile(
-                  leading: CircleAvatar(
-                    backgroundColor: Theme.of(
-                      context,
-                    ).colorScheme.primaryContainer,
-                    child: Icon(
-                      Icons.folder_open,
-                      color: Theme.of(context).colorScheme.onPrimaryContainer,
-                    ),
-                  ),
-                  title: Text(
-                    project.name,
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  subtitle: Text(
-                    '${project.clientName ?? l10n.unknownClient} - ${_statusLabel(l10n, project.status)}',
-                  ),
+          return ResponsiveContent(
+            child: ListView.builder(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.xs,
+                AppSpacing.xs,
+                AppSpacing.xs,
+                AppSpacing.bottomNavClearance,
+              ),
+              itemCount: projects.length,
+              itemBuilder: (context, index) {
+                final project = projects[index];
+                return EntityCard(
+                  icon: Icons.folder_open_outlined,
+                  color: AppColors.project,
+                  title: project.name,
+                  subtitle:
+                      '${project.clientName ?? l10n.unknownClient} - ${_statusLabel(l10n, project.status)}',
                   trailing: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Text(
                         currencyFormat.format(project.invoiceTotal),
-                        style: const TextStyle(fontWeight: FontWeight.bold),
+                        style: Theme.of(context).textTheme.titleSmall,
                       ),
                       Text(
                         currencyFormat.format(project.balance),
                         style: TextStyle(
                           color: project.balance >= 0
-                              ? Colors.green
-                              : Colors.red,
+                              ? AppColors.profit
+                              : AppColors.expense,
                           fontSize: 12,
+                          fontWeight: FontWeight.w800,
                         ),
                       ),
                     ],
@@ -76,21 +76,18 @@ class ProjectListScreen extends ConsumerWidget {
                     'project_details',
                     pathParameters: {'id': project.id.toString()},
                   ),
-                ),
-              );
-            },
+                );
+              },
+            ),
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, st) => Center(child: Text('${l10n.error}: $e')),
       ),
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 72),
-        child: FloatingActionButton(
-          onPressed: () => _showProjectSheet(context, l10n),
-          tooltip: l10n.addProject,
-          child: const Icon(Icons.add),
-        ),
+      floatingActionButton: ContextualFab(
+        onPressed: () => _showProjectSheet(context, l10n),
+        tooltip: l10n.addProject,
+        icon: Icons.add,
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
@@ -110,20 +107,13 @@ class ProjectListScreen extends ConsumerWidget {
   }
 
   Widget _buildEmptyState(BuildContext context, AppLocalizations l10n) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.folder_open_outlined, size: 72, color: Colors.grey),
-          const SizedBox(height: 16),
-          Text(l10n.noProjects, style: const TextStyle(color: Colors.grey)),
-          const SizedBox(height: 24),
-          ElevatedButton.icon(
-            onPressed: () => _showProjectSheet(context, l10n),
-            icon: const Icon(Icons.add),
-            label: Text(l10n.addProject),
-          ),
-        ],
+    return AppEmptyState(
+      icon: Icons.folder_open_outlined,
+      title: l10n.noProjects,
+      action: ElevatedButton.icon(
+        onPressed: () => _showProjectSheet(context, l10n),
+        icon: const Icon(Icons.add),
+        label: Text(l10n.addProject),
       ),
     );
   }

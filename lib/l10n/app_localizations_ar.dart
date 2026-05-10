@@ -594,6 +594,33 @@ class AppLocalizationsAr extends AppLocalizations {
   String get electricalJob => 'أعمال كهربائية';
 
   @override
+  String get masonryWork => 'أعمال البناء';
+
+  @override
+  String get quickTemplateTrade => 'نموذج عرض سريع';
+
+  @override
+  String get noQuickTemplate => 'بدون نموذج سريع';
+
+  @override
+  String get defaultQuantity => 'الكمية الافتراضية';
+
+  @override
+  String get quickTemplateOrder => 'ترتيب العرض';
+
+  @override
+  String get configureQuickArticles => 'إعداد المقالات السريعة';
+
+  @override
+  String get chooseFromArticles => 'اختيار مقال';
+
+  @override
+  String get addQuickTemplateArticles => 'إضافة نموذج سريع';
+
+  @override
+  String get noQuickTemplateArticles => 'لا توجد مقالات سريعة معدة';
+
+  @override
   String get articleCategory => 'الفئة';
 
   @override
@@ -637,6 +664,15 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get electricalLabor => 'يد عمل الكهرباء';
+
+  @override
+  String get masonryPreparation => 'تحضير الورشة';
+
+  @override
+  String get blockWork => 'أعمال الطوب';
+
+  @override
+  String get masonryLabor => 'يد عمل البناء';
 
   @override
   String get siteAddress => 'عنوان الورشة';
@@ -726,4 +762,92 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get ongoingProjects => 'الورشات الجارية';
+
+  @override
+  String get deleteClientErrorHasInvoices =>
+      'لا يمكن الحذف: هذا العميل لديه فواتير.';
+
+  @override
+  String get deleteClientErrorHasPayments =>
+      'لا يمكن الحذف: هذا العميل لديه مدفوعات.';
+
+  @override
+  String get deleteClientConfirm =>
+      'هل تريد حذف هذا العميل؟ سيتم حذف العروض المرتبطة به أيضًا.';
+
+  @override
+  String get clientDeleted => 'تم حذف العميل بنجاح.';
+
+  @override
+  String get deleteInvoiceConfirm =>
+      'هل تريد حذف هذه الفاتورة؟ لا يمكن التراجع عن هذا الإجراء.';
+
+  @override
+  String get deleteInvoiceErrorHasPayments =>
+      'لا يمكن الحذف: هذه الفاتورة تحتوي بالفعل على دفعات مسجلة.';
+
+  @override
+  String get invoiceDeleted => 'تم حذف الفاتورة بنجاح.';
+
+  @override
+  String get deleteQuoteConfirm => 'هل تريد حذف عرض السعر هذا؟';
+
+  @override
+  String get quoteDeleted => 'تم حذف عرض السعر بنجاح.';
+
+  @override
+  String get createRefund => 'إنشاء إشعار دائن (avoir)';
+
+  @override
+  String get refund => 'إشعار دائن';
+
+  @override
+  String get refunds => 'الإشعارات الدائنة';
+
+  @override
+  String get refundDetails => 'تفاصيل الإشعار الدائن';
+
+  @override
+  String get refundNumber => 'رقم الإشعار';
+
+  @override
+  String get refundDate => 'تاريخ الإشعار';
+
+  @override
+  String get refundReason => 'السبب';
+
+  @override
+  String get refundAmount => 'المبلغ المرتجع';
+
+  @override
+  String get netAmount => 'المبلغ الصافي';
+
+  @override
+  String get refundedQuantity => 'الكمية المرتجعة';
+
+  @override
+  String get availableToRefund => 'المتاح للإرجاع';
+
+  @override
+  String get refundSuccess => 'تم إنشاء الإشعار الدائن بنجاح';
+
+  @override
+  String get refundErrorExceedsQuantity =>
+      'الكمية تتجاوز الكمية المتبقية المفوترة.';
+
+  @override
+  String get refundErrorCancelledInvoice =>
+      'لا يمكن إنشاء إشعار دائن لفاتورة ملغاة.';
+
+  @override
+  String get profitability => 'الربحية';
+
+  @override
+  String get projectProfitability => 'ربحية المشروع';
+
+  @override
+  String get noRefundsYet => 'لا توجد إشعارات دائنة بعد';
+
+  @override
+  String get validated => 'مصدق';
 }

@@ -15,6 +15,7 @@ class ExpenseFormSheet extends ConsumerStatefulWidget {
 }
 
 class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
+  final _formKey = GlobalKey<FormState>();
   final _labelController = TextEditingController();
   final _amountController = TextEditingController();
   final _supplierController = TextEditingController();
@@ -54,132 +55,148 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
           16,
           MediaQuery.of(context).viewInsets.bottom + 16,
         ),
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                l10n.addExpense,
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              const SizedBox(height: 16),
-              projectsAsync.when(
-                data: (projects) => DropdownButtonFormField<int?>(
-                  initialValue: _projectId,
-                  decoration: InputDecoration(
-                    labelText: l10n.optionalProject,
-                    prefixIcon: const Icon(Icons.folder_open_outlined),
-                  ),
-                  items: [
-                    DropdownMenuItem<int?>(
-                      value: null,
-                      child: Text(l10n.noProject),
+        child: Form(
+          key: _formKey,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  l10n.addExpense,
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                const SizedBox(height: 16),
+                projectsAsync.when(
+                  data: (projects) => DropdownButtonFormField<int?>(
+                    initialValue: _projectId,
+                    decoration: InputDecoration(
+                      labelText: l10n.optionalProject,
+                      prefixIcon: const Icon(Icons.folder_open_outlined),
                     ),
-                    ...projects.map(
-                      (project) => DropdownMenuItem<int?>(
-                        value: project.id,
-                        child: Text(project.name),
+                    items: [
+                      DropdownMenuItem<int?>(
+                        value: null,
+                        child: Text(l10n.noProject),
                       ),
-                    ),
-                  ],
-                  onChanged: (value) => setState(() => _projectId = value),
-                ),
-                loading: () => const LinearProgressIndicator(),
-                error: (e, st) => Text('${l10n.error}: $e'),
-              ),
-              const SizedBox(height: 12),
-              typesAsync.when(
-                data: (types) => DropdownButtonFormField<int>(
-                  initialValue: _expenseTypeId,
-                  decoration: InputDecoration(
-                    labelText: l10n.expenseType,
-                    prefixIcon: const Icon(Icons.category_outlined),
-                  ),
-                  items: types
-                      .map(
-                        (type) => DropdownMenuItem(
-                          value: type.id,
-                          child: Text(type.name),
+                      ...projects.map(
+                        (project) => DropdownMenuItem<int?>(
+                          value: project.id,
+                          child: Text(project.name),
                         ),
-                      )
-                      .toList(),
-                  onChanged: (value) => setState(() => _expenseTypeId = value),
+                      ),
+                    ],
+                    onChanged: (value) => setState(() => _projectId = value),
+                  ),
+                  loading: () => const LinearProgressIndicator(),
+                  error: (e, st) => Text('${l10n.error}: $e'),
                 ),
-                loading: () => const LinearProgressIndicator(),
-                error: (e, st) => Text('${l10n.error}: $e'),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: _labelController,
-                decoration: InputDecoration(
-                  labelText: l10n.name,
-                  prefixIcon: const Icon(Icons.receipt_long_outlined),
+                const SizedBox(height: 12),
+                typesAsync.when(
+                  data: (types) => DropdownButtonFormField<int>(
+                    initialValue: _expenseTypeId,
+                    decoration: InputDecoration(
+                      labelText: l10n.expenseType,
+                      prefixIcon: const Icon(Icons.category_outlined),
+                    ),
+                    items: types
+                        .map(
+                          (type) => DropdownMenuItem(
+                            value: type.id,
+                            child: Text(type.name),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (value) =>
+                        setState(() => _expenseTypeId = value),
+                  ),
+                  loading: () => const LinearProgressIndicator(),
+                  error: (e, st) => Text('${l10n.error}: $e'),
                 ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: _amountController,
-                decoration: InputDecoration(
-                  labelText: l10n.amount,
-                  prefixIcon: const Icon(Icons.payments_outlined),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: _labelController,
+                  decoration: InputDecoration(
+                    labelText: l10n.name,
+                    prefixIcon: const Icon(Icons.receipt_long_outlined),
+                  ),
+                  textInputAction: TextInputAction.next,
+                  validator: (value) => value == null || value.trim().isEmpty
+                      ? l10n.requiredField
+                      : null,
                 ),
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: _amountController,
+                  decoration: InputDecoration(
+                    labelText: l10n.amount,
+                    prefixIcon: const Icon(Icons.payments_outlined),
+                  ),
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                  textInputAction: TextInputAction.next,
+                  validator: (value) {
+                    final amount = double.tryParse(value ?? '') ?? 0;
+                    return amount <= 0 ? l10n.requiredField : null;
+                  },
                 ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: _supplierController,
-                decoration: InputDecoration(
-                  labelText: l10n.supplier,
-                  prefixIcon: const Icon(Icons.store_outlined),
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: _paymentMethodController,
-                decoration: InputDecoration(
-                  labelText: l10n.paymentMethod,
-                  prefixIcon: const Icon(Icons.credit_card_outlined),
-                ),
-              ),
-              const SizedBox(height: 12),
-              OutlinedButton.icon(
-                onPressed: _pickReceipt,
-                icon: const Icon(Icons.document_scanner_outlined),
-                label: Text(
-                  _receiptPath == null
-                      ? l10n.attachReceipt
-                      : l10n.changeReceipt,
-                ),
-              ),
-              if (_receiptPath != null)
-                Padding(
-                  padding: const EdgeInsets.only(top: 6),
-                  child: Text(
-                    _receiptPath!,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.bodySmall,
+                const SizedBox(height: 12),
+                TextField(
+                  controller: _supplierController,
+                  decoration: InputDecoration(
+                    labelText: l10n.supplier,
+                    prefixIcon: const Icon(Icons.store_outlined),
                   ),
                 ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: _notesController,
-                decoration: InputDecoration(
-                  labelText: l10n.notes,
-                  prefixIcon: const Icon(Icons.notes_outlined),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: _paymentMethodController,
+                  decoration: InputDecoration(
+                    labelText: l10n.paymentMethod,
+                    prefixIcon: const Icon(Icons.credit_card_outlined),
+                  ),
                 ),
-                maxLines: 2,
-              ),
-              const SizedBox(height: 20),
-              FilledButton.icon(
-                onPressed: _save,
-                icon: const Icon(Icons.save_outlined),
-                label: Text(l10n.save),
-              ),
-            ],
+                const SizedBox(height: 12),
+                OutlinedButton.icon(
+                  onPressed: _pickReceipt,
+                  icon: const Icon(Icons.document_scanner_outlined),
+                  label: Text(
+                    _receiptPath == null
+                        ? l10n.attachReceipt
+                        : l10n.changeReceipt,
+                  ),
+                ),
+                if (_receiptPath != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 6),
+                    child: Text(
+                      _receiptPath!,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: _notesController,
+                  decoration: InputDecoration(
+                    labelText: l10n.notes,
+                    prefixIcon: const Icon(Icons.notes_outlined),
+                  ),
+                  maxLines: 2,
+                ),
+                const SizedBox(height: 20),
+                FilledButton.icon(
+                  onPressed: _save,
+                  icon: const Icon(Icons.save_outlined),
+                  label: Text(l10n.save),
+                  style: FilledButton.styleFrom(
+                    minimumSize: const Size.fromHeight(52),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -197,10 +214,10 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
   }
 
   Future<void> _save() async {
+    if (!_formKey.currentState!.validate()) return;
+
     final label = _labelController.text.trim();
     final amount = double.tryParse(_amountController.text) ?? 0;
-    if (label.isEmpty || amount <= 0) return;
-
     final navigator = Navigator.of(context);
     await ref
         .read(projectRepositoryProvider)

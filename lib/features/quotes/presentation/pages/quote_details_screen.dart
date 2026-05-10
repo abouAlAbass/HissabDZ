@@ -32,6 +32,14 @@ class QuoteDetailsScreen extends ConsumerWidget {
               pathParameters: {'id': quoteId.toString()},
             ),
           ),
+          IconButton(
+            tooltip: l10n.delete,
+            icon: Icon(
+              Icons.delete_outline,
+              color: Theme.of(context).colorScheme.error,
+            ),
+            onPressed: () => _confirmDeleteQuote(context, ref, l10n),
+          ),
         ],
       ),
       body: quoteAsync.when(
@@ -246,5 +254,53 @@ class QuoteDetailsScreen extends ConsumerWidget {
       'invoice_details',
       pathParameters: {'id': invoiceId.toString()},
     );
+  }
+
+  Future<void> _confirmDeleteQuote(
+    BuildContext context,
+    WidgetRef ref,
+    AppLocalizations l10n,
+  ) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.delete),
+        content: Text(l10n.deleteQuoteConfirm),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(
+              foregroundColor: Theme.of(context).colorScheme.error,
+            ),
+            child: Text(l10n.delete),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      try {
+        await ref.read(quoteRepositoryProvider).deleteQuote(quoteId);
+        if (!context.mounted) return;
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.quoteDeleted)),
+        );
+        Navigator.pop(context);
+      } catch (e) {
+        if (!context.mounted) return;
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${l10n.error}: $e'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
+    }
   }
 }

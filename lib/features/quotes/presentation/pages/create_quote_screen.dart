@@ -3,6 +3,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
+import 'package:hissab_dz/core/widgets/sticky_action_footer.dart';
+import 'package:hissab_dz/features/articles/domain/entities/article.dart';
+import 'package:hissab_dz/features/articles/presentation/providers/article_providers.dart';
 import 'package:hissab_dz/features/clients/domain/entities/client.dart';
 import 'package:hissab_dz/features/clients/presentation/providers/client_providers.dart';
 import 'package:hissab_dz/features/projects/presentation/providers/project_providers.dart';
@@ -134,12 +138,25 @@ class _CreateQuoteScreenState extends ConsumerState<CreateQuoteScreen> {
     final l10n = AppLocalizations.of(context)!;
     final clientsAsync = ref.watch(clientsListProvider);
     final projectsAsync = ref.watch(projectsListProvider);
+    final articlesAsync = ref.watch(articlesListProvider);
     final isEditing = widget.quoteId != null;
 
     return Scaffold(
       appBar: AppBar(
         title: Text(isEditing ? l10n.editQuote : l10n.createQuote),
       ),
+      bottomNavigationBar: _isLoading
+          ? null
+          : StickyActionFooter(
+              label: l10n.total,
+              value: NumberFormat.currency(
+                symbol: l10n.currencySymbol,
+              ).format(_total),
+              actionLabel: l10n.save,
+              actionIcon: Icons.save_outlined,
+              onPressed: _save,
+              loading: _isSaving,
+            ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : Form(
@@ -226,7 +243,7 @@ class _CreateQuoteScreenState extends ConsumerState<CreateQuoteScreen> {
                   const SizedBox(height: 16),
                   _buildStatusSelector(l10n),
                   const SizedBox(height: 16),
-                  _buildTemplates(l10n),
+                  _buildTemplates(l10n, articlesAsync),
                   const SizedBox(height: 16),
                   Text(
                     l10n.items,
@@ -307,6 +324,7 @@ class _CreateQuoteScreenState extends ConsumerState<CreateQuoteScreen> {
                         : const Icon(Icons.save_outlined),
                     label: Text(l10n.save),
                   ),
+                  const SizedBox(height: 96),
                 ],
               ),
             ),
@@ -336,48 +354,106 @@ class _CreateQuoteScreenState extends ConsumerState<CreateQuoteScreen> {
     );
   }
 
-  Widget _buildTemplates(AppLocalizations l10n) {
-    final templates = {
-      l10n.paintingRoom: [
+  Widget _buildTemplates(
+    AppLocalizations l10n,
+    AsyncValue<List<Article>> articlesAsync,
+  ) {
+    final fallbackTemplates = {
+      'painting': [
         (l10n.description, l10n.surfacePreparation, 1.0, 3500.0),
         (l10n.description, l10n.plasterAndSanding, 1.0, 4500.0),
         (l10n.description, l10n.paintingLabor, 1.0, 9000.0),
       ],
-      l10n.plumbingRepair: [
+      'plumbing': [
         (l10n.description, l10n.travelCategory, 1.0, 1500.0),
         (l10n.description, l10n.leakDiagnosis, 1.0, 2500.0),
         (l10n.description, l10n.plumbingInstallation, 1.0, 6000.0),
       ],
-      l10n.electricalJob: [
+      'electrical': [
         (l10n.description, l10n.travelCategory, 1.0, 1500.0),
         (l10n.description, l10n.wiringProtection, 1.0, 6500.0),
         (l10n.description, l10n.electricalLabor, 1.0, 7000.0),
       ],
+      'masonry': [
+        (l10n.description, l10n.masonryPreparation, 1.0, 3000.0),
+        (l10n.description, l10n.blockWork, 1.0, 12000.0),
+        (l10n.description, l10n.masonryLabor, 1.0, 8000.0),
+      ],
     };
+    final templateLabels = {
+      'painting': l10n.paintingRoom,
+      'plumbing': l10n.plumbingRepair,
+      'electrical': l10n.electricalJob,
+      'masonry': l10n.masonryWork,
+    };
+    final templateIcons = {
+      'painting': Icons.format_paint_outlined,
+      'plumbing': Icons.plumbing_outlined,
+      'electrical': Icons.electrical_services_outlined,
+      'masonry': Icons.construction_outlined,
+    };
+    final articles = articlesAsync.value ?? const <Article>[];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          l10n.quickTemplates,
-          style: const TextStyle(fontWeight: FontWeight.w700),
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                l10n.quickTemplates,
+                style: const TextStyle(fontWeight: FontWeight.w700),
+              ),
+            ),
+            TextButton.icon(
+              onPressed: () => context.pushNamed('articles'),
+              icon: const Icon(Icons.tune_outlined, size: 18),
+              label: Text(l10n.configureQuickArticles),
+            ),
+          ],
         ),
         const SizedBox(height: 8),
         Wrap(
           spacing: 8,
           runSpacing: 8,
-          children: templates.entries
-              .map(
-                (entry) => ActionChip(
-                  label: Text(entry.key),
-                  avatar: const Icon(Icons.auto_awesome, size: 18),
-                  onPressed: () => _applyTemplate(entry.value),
-                ),
-              )
-              .toList(),
+          children: templateLabels.entries.map((entry) {
+            final configuredRows = _configuredTemplateRows(entry.key, articles);
+            final rows = configuredRows.isNotEmpty
+                ? configuredRows
+                : fallbackTemplates[entry.key]!;
+            return ActionChip(
+              label: Text(entry.value),
+              avatar: Icon(templateIcons[entry.key], size: 18),
+              onPressed: () => _applyTemplate(rows),
+            );
+          }).toList(),
         ),
       ],
     );
+  }
+
+  List<(String, String, double, double)> _configuredTemplateRows(
+    String template,
+    List<Article> articles,
+  ) {
+    final matching =
+        articles.where((article) => article.quickTemplate == template).toList()
+          ..sort((a, b) {
+            final order = a.quickTemplateOrder.compareTo(b.quickTemplateOrder);
+            return order != 0 ? order : a.name.compareTo(b.name);
+          });
+
+    return matching.map((article) {
+      final description = article.code == null || article.code!.isEmpty
+          ? article.name
+          : '${article.code} - ${article.name}';
+      return (
+        article.category,
+        description,
+        article.defaultQuantity,
+        article.price,
+      );
+    }).toList();
   }
 
   Widget _buildLine(AppLocalizations l10n, int index) {

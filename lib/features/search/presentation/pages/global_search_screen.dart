@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:hissab_dz/core/theme/theme.dart';
 import 'package:hissab_dz/core/widgets/app_drawer.dart';
 import 'package:hissab_dz/features/search/domain/entities/global_search_result.dart';
 import 'package:hissab_dz/features/search/presentation/providers/global_search_providers.dart';
@@ -213,7 +214,11 @@ class _SearchEmptyHint extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.manage_search, size: 72, color: Colors.grey),
+            Icon(
+              Icons.manage_search,
+              size: 72,
+              color: AppColors.textMuted.withValues(alpha: 0.55),
+            ),
             const SizedBox(height: 16),
             Text(
               l10n.globalSearchHint,

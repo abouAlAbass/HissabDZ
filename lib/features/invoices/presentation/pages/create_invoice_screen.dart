@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:hissab_dz/core/theme/theme.dart';
+import 'package:hissab_dz/core/widgets/sticky_action_footer.dart';
 import 'package:hissab_dz/features/invoices/presentation/providers/invoice_providers.dart';
 import 'package:hissab_dz/features/clients/presentation/providers/client_providers.dart';
 import 'package:hissab_dz/features/invoices/domain/entities/invoice.dart';
@@ -224,6 +225,76 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
     });
   }
 
+  void _appendItemFromArticle(Article article) {
+    final quantity = article.defaultQuantity <= 0
+        ? 1.0
+        : article.defaultQuantity;
+    _items.add({
+      'code': article.code ?? '',
+      'description': article.name,
+      'quantity': quantity,
+      'unitPrice': article.price,
+    });
+    _codeControllers.add(TextEditingController(text: article.code ?? ''));
+    _descControllers.add(TextEditingController(text: article.name));
+    _qtyControllers.add(TextEditingController(text: quantity.toString()));
+    _priceControllers.add(
+      TextEditingController(text: article.price.toStringAsFixed(2)),
+    );
+  }
+
+  bool _isItemEmpty(int index) {
+    return _codeControllers[index].text.trim().isEmpty &&
+        _descControllers[index].text.trim().isEmpty &&
+        (double.tryParse(_priceControllers[index].text) ?? 0) == 0;
+  }
+
+  void _applyArticleToItem(int index, Article article) {
+    final quantity = article.defaultQuantity <= 0
+        ? 1.0
+        : article.defaultQuantity;
+    _items[index]['code'] = article.code ?? '';
+    _items[index]['description'] = article.name;
+    _items[index]['quantity'] = quantity;
+    _items[index]['unitPrice'] = article.price;
+
+    _codeControllers[index].text = article.code ?? '';
+    _descControllers[index].text = article.name;
+    _qtyControllers[index].text = quantity.toString();
+    _priceControllers[index].text = article.price.toStringAsFixed(2);
+  }
+
+  void _addQuickTemplateArticles(
+    String template,
+    List<Article> articles,
+    AppLocalizations l10n,
+  ) {
+    final matching =
+        articles.where((article) => article.quickTemplate == template).toList()
+          ..sort((a, b) {
+            final order = a.quickTemplateOrder.compareTo(b.quickTemplateOrder);
+            return order != 0 ? order : a.name.compareTo(b.name);
+          });
+
+    if (matching.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.noQuickTemplateArticles)));
+      return;
+    }
+
+    setState(() {
+      var start = 0;
+      if (_items.length == 1 && _isItemEmpty(0)) {
+        _applyArticleToItem(0, matching.first);
+        start = 1;
+      }
+      for (final article in matching.skip(start)) {
+        _appendItemFromArticle(article);
+      }
+    });
+  }
+
   void _removeItem(int index) {
     if (_items.length > 1) {
       setState(() {
@@ -257,7 +328,7 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    ref.watch(articlesListProvider);
+    final articlesAsync = ref.watch(articlesListProvider);
 
     if (_isLoadingExistingInvoice) {
       return Scaffold(
@@ -290,6 +361,16 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
               ),
             ),
         ],
+      ),
+      bottomNavigationBar: StickyActionFooter(
+        label: l10n.total,
+        value: NumberFormat.currency(
+          symbol: l10n.currencySymbol,
+        ).format(_total),
+        actionLabel: l10n.save,
+        actionIcon: Icons.save_outlined,
+        onPressed: _saveInvoice,
+        loading: _isSaving,
       ),
       body: Form(
         key: _formKey,
@@ -326,7 +407,7 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
               ),
               const SizedBox(height: 20),
 
-              _buildItemsSection(l10n),
+              _buildItemsSection(l10n, articlesAsync),
               const SizedBox(height: 20),
 
               _buildSectionHeader(l10n.summary),
@@ -342,7 +423,7 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
                 ),
                 maxLines: 3,
               ),
-              const SizedBox(height: 80),
+              const SizedBox(height: 112),
             ],
           ),
         ),
@@ -472,14 +553,106 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
     );
   }
 
-  Widget _buildItemsSection(AppLocalizations l10n) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        if (constraints.maxWidth < 650) {
-          return _buildMobileItemsList(l10n);
-        }
-        return _buildDesktopItemsTable(l10n);
+  Widget _buildItemsSection(
+    AppLocalizations l10n,
+    AsyncValue<List<Article>> articlesAsync,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _buildQuickTemplateActions(l10n, articlesAsync),
+        const SizedBox(height: 12),
+        LayoutBuilder(
+          builder: (context, constraints) {
+            if (constraints.maxWidth < 650) {
+              return _buildMobileItemsList(l10n);
+            }
+            return _buildDesktopItemsTable(l10n);
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildQuickTemplateActions(
+    AppLocalizations l10n,
+    AsyncValue<List<Article>> articlesAsync,
+  ) {
+    final templateLabels = {
+      'painting': l10n.paintingRoom,
+      'plumbing': l10n.plumbingRepair,
+      'electrical': l10n.electricalJob,
+      'masonry': l10n.masonryWork,
+    };
+    final templateIcons = {
+      'painting': Icons.format_paint_outlined,
+      'plumbing': Icons.plumbing_outlined,
+      'electrical': Icons.electrical_services_outlined,
+      'masonry': Icons.construction_outlined,
+    };
+
+    return articlesAsync.when(
+      data: (articles) {
+        final configured = articles
+            .where((article) => article.quickTemplate != null)
+            .toList();
+        return Card(
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        l10n.quickTemplates,
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                    ),
+                    TextButton.icon(
+                      onPressed: () => context.pushNamed('articles'),
+                      icon: const Icon(Icons.tune_outlined, size: 18),
+                      label: Text(l10n.configureQuickArticles),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                if (configured.isEmpty)
+                  Text(
+                    l10n.noQuickTemplateArticles,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  )
+                else
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: templateLabels.entries.map((entry) {
+                      final count = configured
+                          .where(
+                            (article) => article.quickTemplate == entry.key,
+                          )
+                          .length;
+                      return ActionChip(
+                        avatar: Icon(templateIcons[entry.key], size: 18),
+                        label: Text('${entry.value} ($count)'),
+                        onPressed: count == 0
+                            ? null
+                            : () => _addQuickTemplateArticles(
+                                entry.key,
+                                articles,
+                                l10n,
+                              ),
+                      );
+                    }).toList(),
+                  ),
+              ],
+            ),
+          ),
+        );
       },
+      loading: () => const LinearProgressIndicator(),
+      error: (e, st) => Text('${l10n.error}: $e'),
     );
   }
 
@@ -511,7 +684,7 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
             const SizedBox(height: 8),
             Table(
               columnWidths: const {
-                0: FixedColumnWidth(40),
+                0: FixedColumnWidth(150),
                 1: FixedColumnWidth(90),
                 2: FlexColumnWidth(2),
                 3: FixedColumnWidth(60),
@@ -578,13 +751,26 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
           children: [
             Row(
               children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () => _showArticlePicker(i),
+                    icon: const Icon(Icons.inventory_2_outlined),
+                    label: Text(l10n.chooseFromArticles),
+                  ),
+                ),
+                const SizedBox(width: 8),
                 IconButton(
                   icon: const Icon(
-                    Icons.inventory_2_rounded,
-                    color: AppTheme.primaryIndigo,
+                    Icons.delete_outline_rounded,
+                    color: AppTheme.statusOverdue,
                   ),
-                  onPressed: () => _showArticlePicker(i),
+                  onPressed: _items.length > 1 ? () => _removeItem(i) : null,
                 ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
                 Expanded(
                   child: TextFormField(
                     controller: _codeControllers[i],
@@ -595,14 +781,6 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
                     style: const TextStyle(fontSize: 14),
                     onChanged: (v) => setState(() => _items[i]['code'] = v),
                   ),
-                ),
-                const SizedBox(width: 8),
-                IconButton(
-                  icon: const Icon(
-                    Icons.delete_outline_rounded,
-                    color: AppTheme.statusOverdue,
-                  ),
-                  onPressed: _items.length > 1 ? () => _removeItem(i) : null,
                 ),
               ],
             ),
@@ -715,15 +893,18 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
       children: [
         Padding(
           padding: const EdgeInsets.all(4),
-          child: IconButton(
-            icon: const Icon(
-              Icons.inventory_2_rounded,
-              size: 20,
-              color: AppTheme.primaryIndigo,
-            ),
+          child: OutlinedButton.icon(
             onPressed: () => _showArticlePicker(i),
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(),
+            icon: const Icon(Icons.inventory_2_outlined, size: 16),
+            label: Text(
+              l10n.chooseFromArticles,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            style: OutlinedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              minimumSize: const Size(0, 40),
+            ),
           ),
         ),
         Padding(
@@ -1004,13 +1185,7 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
 
     if (article != null) {
       setState(() {
-        _items[itemIndex]['code'] = article.code ?? '';
-        _items[itemIndex]['description'] = article.name;
-        _items[itemIndex]['unitPrice'] = article.price;
-
-        _codeControllers[itemIndex].text = article.code ?? '';
-        _descControllers[itemIndex].text = article.name;
-        _priceControllers[itemIndex].text = article.price.toStringAsFixed(2);
+        _applyArticleToItem(itemIndex, article);
       });
     }
   }
@@ -1071,6 +1246,10 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
       } else {
         await ref.read(invoiceRepositoryProvider).createInvoice(invoice);
       }
+      
+      // Invalidate providers to refresh UI
+      ref.invalidate(invoicesListProvider);
+      ref.invalidate(filteredInvoicesProvider);
       if (mounted) {
         context.pop();
         ScaffoldMessenger.of(context).showSnackBar(

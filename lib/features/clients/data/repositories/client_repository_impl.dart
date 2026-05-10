@@ -54,8 +54,25 @@ class ClientRepositoryImpl implements ClientRepository {
   }
 
   @override
-  Future<void> deleteClient(int id) {
-    return (_db.delete(_db.clients)..where((t) => t.id.equals(id))).go();
+  Future<void> deleteClient(int id) async {
+    // Check if client has invoices
+    final invoicesCount = await (_db.select(_db.invoices)..where((t) => t.clientId.equals(id))).get();
+    if (invoicesCount.isNotEmpty) {
+      throw Exception('HAS_INVOICES');
+    }
+
+    // Check if client has payments
+    final paymentsCount = await (_db.select(_db.payments)..where((t) => t.clientId.equals(id))).get();
+    if (paymentsCount.isNotEmpty) {
+      throw Exception('HAS_PAYMENTS');
+    }
+
+    // Delete quotes associated with this client
+    // Note: quote_items will be deleted by cascade in database
+    await (_db.delete(_db.quotes)..where((t) => t.clientId.equals(id))).go();
+
+    // Finally delete the client
+    await (_db.delete(_db.clients)..where((t) => t.id.equals(id))).go();
   }
 
   @override

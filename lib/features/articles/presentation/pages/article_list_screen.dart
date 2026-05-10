@@ -2,6 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:hissab_dz/core/theme/theme.dart';
+import 'package:hissab_dz/core/widgets/app_empty_state.dart';
+import 'package:hissab_dz/core/widgets/contextual_fab.dart';
+import 'package:hissab_dz/core/widgets/entity_card.dart';
+import 'package:hissab_dz/core/widgets/responsive_content.dart';
 import 'package:hissab_dz/l10n/app_localizations.dart';
 import 'package:hissab_dz/core/widgets/app_drawer.dart';
 import 'package:hissab_dz/features/articles/presentation/providers/article_providers.dart';
@@ -43,85 +48,48 @@ class ArticleListScreen extends ConsumerWidget {
       body: articlesAsync.when(
         data: (articles) {
           if (articles.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(
-                    Icons.inventory_2_outlined,
-                    size: 64,
-                    color: Colors.grey,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    l10n.noArticles,
-                    style: const TextStyle(color: Colors.grey),
-                  ),
-                ],
-              ),
+            return AppEmptyState(
+              icon: Icons.inventory_2_outlined,
+              title: l10n.noArticles,
             );
           }
 
-          return ListView.builder(
-            padding: const EdgeInsets.fromLTRB(8, 8, 8, 112),
-            itemCount: articles.length,
-            itemBuilder: (context, index) {
-              final article = articles[index];
-              final isService = article.type == 'service';
-              final categoryLabel = _categoryLabel(l10n, article.category);
-              return Card(
-                child: ListTile(
-                  leading: CircleAvatar(
-                    backgroundColor: isService
-                        ? Colors.orange.withValues(alpha: 0.1)
-                        : Colors.blue.withValues(alpha: 0.1),
-                    child: Icon(
-                      isService ? Icons.build_circle : Icons.inventory_2,
-                      color: isService ? Colors.orange : Colors.blue,
-                    ),
-                  ),
-                  title: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          article.name,
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                      Text(
-                        currencyFormat.format(article.price),
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.green,
-                        ),
-                      ),
-                    ],
-                  ),
-                  subtitle: Text(
-                    '${article.code != null ? "${article.code} - " : ""}${article.unit} - $categoryLabel - ${isService ? l10n.service : l10n.physical}',
-                    style: const TextStyle(fontSize: 12),
-                  ),
-                  trailing: const Icon(Icons.chevron_right),
+          return ResponsiveContent(
+            child: ListView.builder(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.xs,
+                AppSpacing.xs,
+                AppSpacing.xs,
+                AppSpacing.bottomNavClearance,
+              ),
+              itemCount: articles.length,
+              itemBuilder: (context, index) {
+                final article = articles[index];
+                final isService = article.type == 'service';
+                final categoryLabel = _categoryLabel(l10n, article.category);
+                return EntityCard(
+                  icon: isService ? Icons.build_circle : Icons.inventory_2,
+                  color: isService ? AppColors.warning : AppColors.info,
+                  title: article.name,
+                  subtitle:
+                      '${article.code != null ? "${article.code} - " : ""}${article.unit} - $categoryLabel - ${isService ? l10n.service : l10n.physical}',
+                  amount: currencyFormat.format(article.price),
                   onTap: () => context.pushNamed(
                     'edit_article',
                     pathParameters: {'id': article.id.toString()},
                   ),
-                ),
-              );
-            },
+                );
+              },
+            ),
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, st) => Center(child: Text('${l10n.error}: $e')),
       ),
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 72),
-        child: FloatingActionButton(
-          onPressed: () => context.pushNamed('add_article'),
-          tooltip: l10n.addArticle,
-          child: const Icon(Icons.add),
-        ),
+      floatingActionButton: ContextualFab(
+        onPressed: () => context.pushNamed('add_article'),
+        tooltip: l10n.addArticle,
+        icon: Icons.add,
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );

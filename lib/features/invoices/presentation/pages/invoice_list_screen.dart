@@ -3,7 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:hissab_dz/core/theme/theme.dart';
+import 'package:hissab_dz/core/widgets/app_empty_state.dart';
 import 'package:hissab_dz/core/widgets/app_drawer.dart';
+import 'package:hissab_dz/core/widgets/contextual_fab.dart';
+import 'package:hissab_dz/core/widgets/entity_card.dart';
 import 'package:hissab_dz/core/widgets/status_badge.dart';
 import 'package:hissab_dz/features/invoices/domain/entities/invoice.dart';
 import 'package:hissab_dz/features/invoices/presentation/providers/invoice_providers.dart';
@@ -99,13 +102,10 @@ class _InvoiceListScreenState extends ConsumerState<InvoiceListScreen>
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, st) => Center(child: Text('${l10n.error}: $e')),
       ),
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 72),
-        child: FloatingActionButton(
-          onPressed: () => context.pushNamed('create_invoice'),
-          tooltip: l10n.createInvoice,
-          child: const Icon(Icons.add),
-        ),
+      floatingActionButton: ContextualFab(
+        onPressed: () => context.pushNamed('create_invoice'),
+        tooltip: l10n.createInvoice,
+        icon: Icons.add,
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
@@ -283,100 +283,29 @@ class _InvoiceListScreenState extends ConsumerState<InvoiceListScreen>
     Invoice invoice,
     AppLocalizations l10n,
   ) {
-    final initials = invoice.client?.name.substring(0, 1).toUpperCase() ?? "?";
-    final avatarColor = _getAvatarColor(initials);
-
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      child: Card(
-        child: ListTile(
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 8,
-          ),
-          leading: CircleAvatar(
-            backgroundColor: avatarColor.bg,
-            child: Text(
-              initials,
-              style: TextStyle(
-                color: avatarColor.text,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-          title: Text(
-            invoice.client?.name ?? l10n.unknownClient,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
-          subtitle: Padding(
-            padding: const EdgeInsets.only(top: 4),
-            child: Row(
-              children: [
-                Text(
-                  invoice.invoiceNumber,
-                  style: const TextStyle(fontSize: 12),
-                ),
-                const SizedBox(width: 8),
-                StatusBadge(status: invoice.status),
-              ],
-            ),
-          ),
-          trailing: Text(
-            NumberFormat.currency(
-              symbol: l10n.currencySymbol,
-            ).format(invoice.total),
-            style: const TextStyle(
-              color: AppTheme.textPrimary,
-              fontSize: 14,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-          onTap: () => context.pushNamed(
-            'invoice_details',
-            pathParameters: {'id': invoice.id.toString()},
-          ),
+      child: EntityCard(
+        icon: Icons.description_outlined,
+        color: AppColors.invoice,
+        title: invoice.client?.name ?? l10n.unknownClient,
+        subtitle: invoice.invoiceNumber,
+        amount: NumberFormat.currency(
+          symbol: l10n.currencySymbol,
+        ).format(invoice.total),
+        badge: StatusBadge(status: invoice.status),
+        onTap: () => context.pushNamed(
+          'invoice_details',
+          pathParameters: {'id': invoice.id.toString()},
         ),
       ),
     );
   }
 
-  AvatarColor _getAvatarColor(String initials) {
-    const colors = [
-      AvatarColor(Color(0xFFEDE9FE), Color(0xFF6D28D9)),
-      AvatarColor(Color(0xFFDBEAFE), Color(0xFF1D4ED8)),
-      AvatarColor(Color(0xFFFCE7F3), Color(0xFF9D174D)),
-      AvatarColor(Color(0xFFFEF3C7), Color(0xFFB45309)),
-      AvatarColor(Color(0xFFCCFBF1), Color(0xFF0F766E)),
-      AvatarColor(Color(0xFFD1FAE5), Color(0xFF059669)),
-    ];
-    return colors[initials.codeUnitAt(0) % colors.length];
-  }
-
   Widget _buildEmptyState(AppLocalizations l10n) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.description_outlined,
-            size: 72,
-            color: AppTheme.textSecondary.withValues(alpha: 0.45),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            l10n.noInvoices,
-            style: const TextStyle(fontSize: 16, color: AppTheme.textSecondary),
-          ),
-        ],
-      ),
+    return AppEmptyState(
+      icon: Icons.description_outlined,
+      title: l10n.noInvoices,
     );
   }
-}
-
-class AvatarColor {
-  final Color bg;
-  final Color text;
-  const AvatarColor(this.bg, this.text);
 }

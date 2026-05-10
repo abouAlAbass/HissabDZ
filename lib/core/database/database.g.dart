@@ -4598,6 +4598,40 @@ class $ArticlesTable extends Articles
     requiredDuringInsert: false,
     defaultValue: const Constant(0.0),
   );
+  static const VerificationMeta _quickTemplateMeta = const VerificationMeta(
+    'quickTemplate',
+  );
+  @override
+  late final GeneratedColumn<String> quickTemplate = GeneratedColumn<String>(
+    'quick_template',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _defaultQuantityMeta = const VerificationMeta(
+    'defaultQuantity',
+  );
+  @override
+  late final GeneratedColumn<double> defaultQuantity = GeneratedColumn<double>(
+    'default_quantity',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1.0),
+  );
+  static const VerificationMeta _quickTemplateOrderMeta =
+      const VerificationMeta('quickTemplateOrder');
+  @override
+  late final GeneratedColumn<int> quickTemplateOrder = GeneratedColumn<int>(
+    'quick_template_order',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -4621,6 +4655,9 @@ class $ArticlesTable extends Articles
     category,
     taxRate,
     marginRate,
+    quickTemplate,
+    defaultQuantity,
+    quickTemplateOrder,
     createdAt,
   ];
   @override
@@ -4690,6 +4727,33 @@ class $ArticlesTable extends Articles
         marginRate.isAcceptableOrUnknown(data['margin_rate']!, _marginRateMeta),
       );
     }
+    if (data.containsKey('quick_template')) {
+      context.handle(
+        _quickTemplateMeta,
+        quickTemplate.isAcceptableOrUnknown(
+          data['quick_template']!,
+          _quickTemplateMeta,
+        ),
+      );
+    }
+    if (data.containsKey('default_quantity')) {
+      context.handle(
+        _defaultQuantityMeta,
+        defaultQuantity.isAcceptableOrUnknown(
+          data['default_quantity']!,
+          _defaultQuantityMeta,
+        ),
+      );
+    }
+    if (data.containsKey('quick_template_order')) {
+      context.handle(
+        _quickTemplateOrderMeta,
+        quickTemplateOrder.isAcceptableOrUnknown(
+          data['quick_template_order']!,
+          _quickTemplateOrderMeta,
+        ),
+      );
+    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
@@ -4741,6 +4805,18 @@ class $ArticlesTable extends Articles
         DriftSqlType.double,
         data['${effectivePrefix}margin_rate'],
       )!,
+      quickTemplate: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}quick_template'],
+      ),
+      defaultQuantity: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}default_quantity'],
+      )!,
+      quickTemplateOrder: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}quick_template_order'],
+      )!,
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
@@ -4764,6 +4840,9 @@ class ArticleData extends DataClass implements Insertable<ArticleData> {
   final String category;
   final double taxRate;
   final double marginRate;
+  final String? quickTemplate;
+  final double defaultQuantity;
+  final int quickTemplateOrder;
   final DateTime createdAt;
   const ArticleData({
     required this.id,
@@ -4775,6 +4854,9 @@ class ArticleData extends DataClass implements Insertable<ArticleData> {
     required this.category,
     required this.taxRate,
     required this.marginRate,
+    this.quickTemplate,
+    required this.defaultQuantity,
+    required this.quickTemplateOrder,
     required this.createdAt,
   });
   @override
@@ -4791,6 +4873,11 @@ class ArticleData extends DataClass implements Insertable<ArticleData> {
     map['category'] = Variable<String>(category);
     map['tax_rate'] = Variable<double>(taxRate);
     map['margin_rate'] = Variable<double>(marginRate);
+    if (!nullToAbsent || quickTemplate != null) {
+      map['quick_template'] = Variable<String>(quickTemplate);
+    }
+    map['default_quantity'] = Variable<double>(defaultQuantity);
+    map['quick_template_order'] = Variable<int>(quickTemplateOrder);
     map['created_at'] = Variable<DateTime>(createdAt);
     return map;
   }
@@ -4806,6 +4893,11 @@ class ArticleData extends DataClass implements Insertable<ArticleData> {
       category: Value(category),
       taxRate: Value(taxRate),
       marginRate: Value(marginRate),
+      quickTemplate: quickTemplate == null && nullToAbsent
+          ? const Value.absent()
+          : Value(quickTemplate),
+      defaultQuantity: Value(defaultQuantity),
+      quickTemplateOrder: Value(quickTemplateOrder),
       createdAt: Value(createdAt),
     );
   }
@@ -4825,6 +4917,9 @@ class ArticleData extends DataClass implements Insertable<ArticleData> {
       category: serializer.fromJson<String>(json['category']),
       taxRate: serializer.fromJson<double>(json['taxRate']),
       marginRate: serializer.fromJson<double>(json['marginRate']),
+      quickTemplate: serializer.fromJson<String?>(json['quickTemplate']),
+      defaultQuantity: serializer.fromJson<double>(json['defaultQuantity']),
+      quickTemplateOrder: serializer.fromJson<int>(json['quickTemplateOrder']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
     );
   }
@@ -4841,6 +4936,9 @@ class ArticleData extends DataClass implements Insertable<ArticleData> {
       'category': serializer.toJson<String>(category),
       'taxRate': serializer.toJson<double>(taxRate),
       'marginRate': serializer.toJson<double>(marginRate),
+      'quickTemplate': serializer.toJson<String?>(quickTemplate),
+      'defaultQuantity': serializer.toJson<double>(defaultQuantity),
+      'quickTemplateOrder': serializer.toJson<int>(quickTemplateOrder),
       'createdAt': serializer.toJson<DateTime>(createdAt),
     };
   }
@@ -4855,6 +4953,9 @@ class ArticleData extends DataClass implements Insertable<ArticleData> {
     String? category,
     double? taxRate,
     double? marginRate,
+    Value<String?> quickTemplate = const Value.absent(),
+    double? defaultQuantity,
+    int? quickTemplateOrder,
     DateTime? createdAt,
   }) => ArticleData(
     id: id ?? this.id,
@@ -4866,6 +4967,11 @@ class ArticleData extends DataClass implements Insertable<ArticleData> {
     category: category ?? this.category,
     taxRate: taxRate ?? this.taxRate,
     marginRate: marginRate ?? this.marginRate,
+    quickTemplate: quickTemplate.present
+        ? quickTemplate.value
+        : this.quickTemplate,
+    defaultQuantity: defaultQuantity ?? this.defaultQuantity,
+    quickTemplateOrder: quickTemplateOrder ?? this.quickTemplateOrder,
     createdAt: createdAt ?? this.createdAt,
   );
   ArticleData copyWithCompanion(ArticlesCompanion data) {
@@ -4881,6 +4987,15 @@ class ArticleData extends DataClass implements Insertable<ArticleData> {
       marginRate: data.marginRate.present
           ? data.marginRate.value
           : this.marginRate,
+      quickTemplate: data.quickTemplate.present
+          ? data.quickTemplate.value
+          : this.quickTemplate,
+      defaultQuantity: data.defaultQuantity.present
+          ? data.defaultQuantity.value
+          : this.defaultQuantity,
+      quickTemplateOrder: data.quickTemplateOrder.present
+          ? data.quickTemplateOrder.value
+          : this.quickTemplateOrder,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
     );
   }
@@ -4897,6 +5012,9 @@ class ArticleData extends DataClass implements Insertable<ArticleData> {
           ..write('category: $category, ')
           ..write('taxRate: $taxRate, ')
           ..write('marginRate: $marginRate, ')
+          ..write('quickTemplate: $quickTemplate, ')
+          ..write('defaultQuantity: $defaultQuantity, ')
+          ..write('quickTemplateOrder: $quickTemplateOrder, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
@@ -4913,6 +5031,9 @@ class ArticleData extends DataClass implements Insertable<ArticleData> {
     category,
     taxRate,
     marginRate,
+    quickTemplate,
+    defaultQuantity,
+    quickTemplateOrder,
     createdAt,
   );
   @override
@@ -4928,6 +5049,9 @@ class ArticleData extends DataClass implements Insertable<ArticleData> {
           other.category == this.category &&
           other.taxRate == this.taxRate &&
           other.marginRate == this.marginRate &&
+          other.quickTemplate == this.quickTemplate &&
+          other.defaultQuantity == this.defaultQuantity &&
+          other.quickTemplateOrder == this.quickTemplateOrder &&
           other.createdAt == this.createdAt);
 }
 
@@ -4941,6 +5065,9 @@ class ArticlesCompanion extends UpdateCompanion<ArticleData> {
   final Value<String> category;
   final Value<double> taxRate;
   final Value<double> marginRate;
+  final Value<String?> quickTemplate;
+  final Value<double> defaultQuantity;
+  final Value<int> quickTemplateOrder;
   final Value<DateTime> createdAt;
   const ArticlesCompanion({
     this.id = const Value.absent(),
@@ -4952,6 +5079,9 @@ class ArticlesCompanion extends UpdateCompanion<ArticleData> {
     this.category = const Value.absent(),
     this.taxRate = const Value.absent(),
     this.marginRate = const Value.absent(),
+    this.quickTemplate = const Value.absent(),
+    this.defaultQuantity = const Value.absent(),
+    this.quickTemplateOrder = const Value.absent(),
     this.createdAt = const Value.absent(),
   });
   ArticlesCompanion.insert({
@@ -4964,6 +5094,9 @@ class ArticlesCompanion extends UpdateCompanion<ArticleData> {
     this.category = const Value.absent(),
     this.taxRate = const Value.absent(),
     this.marginRate = const Value.absent(),
+    this.quickTemplate = const Value.absent(),
+    this.defaultQuantity = const Value.absent(),
+    this.quickTemplateOrder = const Value.absent(),
     this.createdAt = const Value.absent(),
   }) : name = Value(name),
        unit = Value(unit);
@@ -4977,6 +5110,9 @@ class ArticlesCompanion extends UpdateCompanion<ArticleData> {
     Expression<String>? category,
     Expression<double>? taxRate,
     Expression<double>? marginRate,
+    Expression<String>? quickTemplate,
+    Expression<double>? defaultQuantity,
+    Expression<int>? quickTemplateOrder,
     Expression<DateTime>? createdAt,
   }) {
     return RawValuesInsertable({
@@ -4989,6 +5125,10 @@ class ArticlesCompanion extends UpdateCompanion<ArticleData> {
       if (category != null) 'category': category,
       if (taxRate != null) 'tax_rate': taxRate,
       if (marginRate != null) 'margin_rate': marginRate,
+      if (quickTemplate != null) 'quick_template': quickTemplate,
+      if (defaultQuantity != null) 'default_quantity': defaultQuantity,
+      if (quickTemplateOrder != null)
+        'quick_template_order': quickTemplateOrder,
       if (createdAt != null) 'created_at': createdAt,
     });
   }
@@ -5003,6 +5143,9 @@ class ArticlesCompanion extends UpdateCompanion<ArticleData> {
     Value<String>? category,
     Value<double>? taxRate,
     Value<double>? marginRate,
+    Value<String?>? quickTemplate,
+    Value<double>? defaultQuantity,
+    Value<int>? quickTemplateOrder,
     Value<DateTime>? createdAt,
   }) {
     return ArticlesCompanion(
@@ -5015,6 +5158,9 @@ class ArticlesCompanion extends UpdateCompanion<ArticleData> {
       category: category ?? this.category,
       taxRate: taxRate ?? this.taxRate,
       marginRate: marginRate ?? this.marginRate,
+      quickTemplate: quickTemplate ?? this.quickTemplate,
+      defaultQuantity: defaultQuantity ?? this.defaultQuantity,
+      quickTemplateOrder: quickTemplateOrder ?? this.quickTemplateOrder,
       createdAt: createdAt ?? this.createdAt,
     );
   }
@@ -5049,6 +5195,15 @@ class ArticlesCompanion extends UpdateCompanion<ArticleData> {
     if (marginRate.present) {
       map['margin_rate'] = Variable<double>(marginRate.value);
     }
+    if (quickTemplate.present) {
+      map['quick_template'] = Variable<String>(quickTemplate.value);
+    }
+    if (defaultQuantity.present) {
+      map['default_quantity'] = Variable<double>(defaultQuantity.value);
+    }
+    if (quickTemplateOrder.present) {
+      map['quick_template_order'] = Variable<int>(quickTemplateOrder.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -5067,6 +5222,9 @@ class ArticlesCompanion extends UpdateCompanion<ArticleData> {
           ..write('category: $category, ')
           ..write('taxRate: $taxRate, ')
           ..write('marginRate: $marginRate, ')
+          ..write('quickTemplate: $quickTemplate, ')
+          ..write('defaultQuantity: $defaultQuantity, ')
+          ..write('quickTemplateOrder: $quickTemplateOrder, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
@@ -5948,6 +6106,930 @@ class ProjectExpensesCompanion extends UpdateCompanion<ProjectExpenseData> {
   }
 }
 
+class $RefundsTable extends Refunds with TableInfo<$RefundsTable, RefundData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $RefundsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _invoiceIdMeta = const VerificationMeta(
+    'invoiceId',
+  );
+  @override
+  late final GeneratedColumn<int> invoiceId = GeneratedColumn<int>(
+    'invoice_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES invoices (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _refundNumberMeta = const VerificationMeta(
+    'refundNumber',
+  );
+  @override
+  late final GeneratedColumn<String> refundNumber = GeneratedColumn<String>(
+    'refund_number',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 20,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _dateMeta = const VerificationMeta('date');
+  @override
+  late final GeneratedColumn<DateTime> date = GeneratedColumn<DateTime>(
+    'date',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _reasonMeta = const VerificationMeta('reason');
+  @override
+  late final GeneratedColumn<String> reason = GeneratedColumn<String>(
+    'reason',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _totalAmountMeta = const VerificationMeta(
+    'totalAmount',
+  );
+  @override
+  late final GeneratedColumn<double> totalAmount = GeneratedColumn<double>(
+    'total_amount',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _isValidatedMeta = const VerificationMeta(
+    'isValidated',
+  );
+  @override
+  late final GeneratedColumn<bool> isValidated = GeneratedColumn<bool>(
+    'is_validated',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_validated" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    invoiceId,
+    refundNumber,
+    date,
+    reason,
+    totalAmount,
+    createdAt,
+    isValidated,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'refunds';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<RefundData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('invoice_id')) {
+      context.handle(
+        _invoiceIdMeta,
+        invoiceId.isAcceptableOrUnknown(data['invoice_id']!, _invoiceIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_invoiceIdMeta);
+    }
+    if (data.containsKey('refund_number')) {
+      context.handle(
+        _refundNumberMeta,
+        refundNumber.isAcceptableOrUnknown(
+          data['refund_number']!,
+          _refundNumberMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_refundNumberMeta);
+    }
+    if (data.containsKey('date')) {
+      context.handle(
+        _dateMeta,
+        date.isAcceptableOrUnknown(data['date']!, _dateMeta),
+      );
+    }
+    if (data.containsKey('reason')) {
+      context.handle(
+        _reasonMeta,
+        reason.isAcceptableOrUnknown(data['reason']!, _reasonMeta),
+      );
+    }
+    if (data.containsKey('total_amount')) {
+      context.handle(
+        _totalAmountMeta,
+        totalAmount.isAcceptableOrUnknown(
+          data['total_amount']!,
+          _totalAmountMeta,
+        ),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    if (data.containsKey('is_validated')) {
+      context.handle(
+        _isValidatedMeta,
+        isValidated.isAcceptableOrUnknown(
+          data['is_validated']!,
+          _isValidatedMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  RefundData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return RefundData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      invoiceId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}invoice_id'],
+      )!,
+      refundNumber: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}refund_number'],
+      )!,
+      date: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}date'],
+      )!,
+      reason: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}reason'],
+      ),
+      totalAmount: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}total_amount'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      isValidated: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_validated'],
+      )!,
+    );
+  }
+
+  @override
+  $RefundsTable createAlias(String alias) {
+    return $RefundsTable(attachedDatabase, alias);
+  }
+}
+
+class RefundData extends DataClass implements Insertable<RefundData> {
+  final int id;
+  final int invoiceId;
+  final String refundNumber;
+  final DateTime date;
+  final String? reason;
+  final double totalAmount;
+  final DateTime createdAt;
+  final bool isValidated;
+  const RefundData({
+    required this.id,
+    required this.invoiceId,
+    required this.refundNumber,
+    required this.date,
+    this.reason,
+    required this.totalAmount,
+    required this.createdAt,
+    required this.isValidated,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['invoice_id'] = Variable<int>(invoiceId);
+    map['refund_number'] = Variable<String>(refundNumber);
+    map['date'] = Variable<DateTime>(date);
+    if (!nullToAbsent || reason != null) {
+      map['reason'] = Variable<String>(reason);
+    }
+    map['total_amount'] = Variable<double>(totalAmount);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['is_validated'] = Variable<bool>(isValidated);
+    return map;
+  }
+
+  RefundsCompanion toCompanion(bool nullToAbsent) {
+    return RefundsCompanion(
+      id: Value(id),
+      invoiceId: Value(invoiceId),
+      refundNumber: Value(refundNumber),
+      date: Value(date),
+      reason: reason == null && nullToAbsent
+          ? const Value.absent()
+          : Value(reason),
+      totalAmount: Value(totalAmount),
+      createdAt: Value(createdAt),
+      isValidated: Value(isValidated),
+    );
+  }
+
+  factory RefundData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return RefundData(
+      id: serializer.fromJson<int>(json['id']),
+      invoiceId: serializer.fromJson<int>(json['invoiceId']),
+      refundNumber: serializer.fromJson<String>(json['refundNumber']),
+      date: serializer.fromJson<DateTime>(json['date']),
+      reason: serializer.fromJson<String?>(json['reason']),
+      totalAmount: serializer.fromJson<double>(json['totalAmount']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      isValidated: serializer.fromJson<bool>(json['isValidated']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'invoiceId': serializer.toJson<int>(invoiceId),
+      'refundNumber': serializer.toJson<String>(refundNumber),
+      'date': serializer.toJson<DateTime>(date),
+      'reason': serializer.toJson<String?>(reason),
+      'totalAmount': serializer.toJson<double>(totalAmount),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'isValidated': serializer.toJson<bool>(isValidated),
+    };
+  }
+
+  RefundData copyWith({
+    int? id,
+    int? invoiceId,
+    String? refundNumber,
+    DateTime? date,
+    Value<String?> reason = const Value.absent(),
+    double? totalAmount,
+    DateTime? createdAt,
+    bool? isValidated,
+  }) => RefundData(
+    id: id ?? this.id,
+    invoiceId: invoiceId ?? this.invoiceId,
+    refundNumber: refundNumber ?? this.refundNumber,
+    date: date ?? this.date,
+    reason: reason.present ? reason.value : this.reason,
+    totalAmount: totalAmount ?? this.totalAmount,
+    createdAt: createdAt ?? this.createdAt,
+    isValidated: isValidated ?? this.isValidated,
+  );
+  RefundData copyWithCompanion(RefundsCompanion data) {
+    return RefundData(
+      id: data.id.present ? data.id.value : this.id,
+      invoiceId: data.invoiceId.present ? data.invoiceId.value : this.invoiceId,
+      refundNumber: data.refundNumber.present
+          ? data.refundNumber.value
+          : this.refundNumber,
+      date: data.date.present ? data.date.value : this.date,
+      reason: data.reason.present ? data.reason.value : this.reason,
+      totalAmount: data.totalAmount.present
+          ? data.totalAmount.value
+          : this.totalAmount,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      isValidated: data.isValidated.present
+          ? data.isValidated.value
+          : this.isValidated,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('RefundData(')
+          ..write('id: $id, ')
+          ..write('invoiceId: $invoiceId, ')
+          ..write('refundNumber: $refundNumber, ')
+          ..write('date: $date, ')
+          ..write('reason: $reason, ')
+          ..write('totalAmount: $totalAmount, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('isValidated: $isValidated')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    invoiceId,
+    refundNumber,
+    date,
+    reason,
+    totalAmount,
+    createdAt,
+    isValidated,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is RefundData &&
+          other.id == this.id &&
+          other.invoiceId == this.invoiceId &&
+          other.refundNumber == this.refundNumber &&
+          other.date == this.date &&
+          other.reason == this.reason &&
+          other.totalAmount == this.totalAmount &&
+          other.createdAt == this.createdAt &&
+          other.isValidated == this.isValidated);
+}
+
+class RefundsCompanion extends UpdateCompanion<RefundData> {
+  final Value<int> id;
+  final Value<int> invoiceId;
+  final Value<String> refundNumber;
+  final Value<DateTime> date;
+  final Value<String?> reason;
+  final Value<double> totalAmount;
+  final Value<DateTime> createdAt;
+  final Value<bool> isValidated;
+  const RefundsCompanion({
+    this.id = const Value.absent(),
+    this.invoiceId = const Value.absent(),
+    this.refundNumber = const Value.absent(),
+    this.date = const Value.absent(),
+    this.reason = const Value.absent(),
+    this.totalAmount = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.isValidated = const Value.absent(),
+  });
+  RefundsCompanion.insert({
+    this.id = const Value.absent(),
+    required int invoiceId,
+    required String refundNumber,
+    this.date = const Value.absent(),
+    this.reason = const Value.absent(),
+    this.totalAmount = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.isValidated = const Value.absent(),
+  }) : invoiceId = Value(invoiceId),
+       refundNumber = Value(refundNumber);
+  static Insertable<RefundData> custom({
+    Expression<int>? id,
+    Expression<int>? invoiceId,
+    Expression<String>? refundNumber,
+    Expression<DateTime>? date,
+    Expression<String>? reason,
+    Expression<double>? totalAmount,
+    Expression<DateTime>? createdAt,
+    Expression<bool>? isValidated,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (invoiceId != null) 'invoice_id': invoiceId,
+      if (refundNumber != null) 'refund_number': refundNumber,
+      if (date != null) 'date': date,
+      if (reason != null) 'reason': reason,
+      if (totalAmount != null) 'total_amount': totalAmount,
+      if (createdAt != null) 'created_at': createdAt,
+      if (isValidated != null) 'is_validated': isValidated,
+    });
+  }
+
+  RefundsCompanion copyWith({
+    Value<int>? id,
+    Value<int>? invoiceId,
+    Value<String>? refundNumber,
+    Value<DateTime>? date,
+    Value<String?>? reason,
+    Value<double>? totalAmount,
+    Value<DateTime>? createdAt,
+    Value<bool>? isValidated,
+  }) {
+    return RefundsCompanion(
+      id: id ?? this.id,
+      invoiceId: invoiceId ?? this.invoiceId,
+      refundNumber: refundNumber ?? this.refundNumber,
+      date: date ?? this.date,
+      reason: reason ?? this.reason,
+      totalAmount: totalAmount ?? this.totalAmount,
+      createdAt: createdAt ?? this.createdAt,
+      isValidated: isValidated ?? this.isValidated,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (invoiceId.present) {
+      map['invoice_id'] = Variable<int>(invoiceId.value);
+    }
+    if (refundNumber.present) {
+      map['refund_number'] = Variable<String>(refundNumber.value);
+    }
+    if (date.present) {
+      map['date'] = Variable<DateTime>(date.value);
+    }
+    if (reason.present) {
+      map['reason'] = Variable<String>(reason.value);
+    }
+    if (totalAmount.present) {
+      map['total_amount'] = Variable<double>(totalAmount.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (isValidated.present) {
+      map['is_validated'] = Variable<bool>(isValidated.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('RefundsCompanion(')
+          ..write('id: $id, ')
+          ..write('invoiceId: $invoiceId, ')
+          ..write('refundNumber: $refundNumber, ')
+          ..write('date: $date, ')
+          ..write('reason: $reason, ')
+          ..write('totalAmount: $totalAmount, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('isValidated: $isValidated')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $RefundItemsTable extends RefundItems
+    with TableInfo<$RefundItemsTable, RefundItemData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $RefundItemsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _refundIdMeta = const VerificationMeta(
+    'refundId',
+  );
+  @override
+  late final GeneratedColumn<int> refundId = GeneratedColumn<int>(
+    'refund_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES refunds (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _invoiceItemIdMeta = const VerificationMeta(
+    'invoiceItemId',
+  );
+  @override
+  late final GeneratedColumn<int> invoiceItemId = GeneratedColumn<int>(
+    'invoice_item_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES invoice_items (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _quantityMeta = const VerificationMeta(
+    'quantity',
+  );
+  @override
+  late final GeneratedColumn<double> quantity = GeneratedColumn<double>(
+    'quantity',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _unitPriceMeta = const VerificationMeta(
+    'unitPrice',
+  );
+  @override
+  late final GeneratedColumn<double> unitPrice = GeneratedColumn<double>(
+    'unit_price',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _amountMeta = const VerificationMeta('amount');
+  @override
+  late final GeneratedColumn<double> amount = GeneratedColumn<double>(
+    'amount',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    refundId,
+    invoiceItemId,
+    quantity,
+    unitPrice,
+    amount,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'refund_items';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<RefundItemData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('refund_id')) {
+      context.handle(
+        _refundIdMeta,
+        refundId.isAcceptableOrUnknown(data['refund_id']!, _refundIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_refundIdMeta);
+    }
+    if (data.containsKey('invoice_item_id')) {
+      context.handle(
+        _invoiceItemIdMeta,
+        invoiceItemId.isAcceptableOrUnknown(
+          data['invoice_item_id']!,
+          _invoiceItemIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_invoiceItemIdMeta);
+    }
+    if (data.containsKey('quantity')) {
+      context.handle(
+        _quantityMeta,
+        quantity.isAcceptableOrUnknown(data['quantity']!, _quantityMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_quantityMeta);
+    }
+    if (data.containsKey('unit_price')) {
+      context.handle(
+        _unitPriceMeta,
+        unitPrice.isAcceptableOrUnknown(data['unit_price']!, _unitPriceMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_unitPriceMeta);
+    }
+    if (data.containsKey('amount')) {
+      context.handle(
+        _amountMeta,
+        amount.isAcceptableOrUnknown(data['amount']!, _amountMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_amountMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  RefundItemData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return RefundItemData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      refundId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}refund_id'],
+      )!,
+      invoiceItemId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}invoice_item_id'],
+      )!,
+      quantity: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}quantity'],
+      )!,
+      unitPrice: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}unit_price'],
+      )!,
+      amount: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}amount'],
+      )!,
+    );
+  }
+
+  @override
+  $RefundItemsTable createAlias(String alias) {
+    return $RefundItemsTable(attachedDatabase, alias);
+  }
+}
+
+class RefundItemData extends DataClass implements Insertable<RefundItemData> {
+  final int id;
+  final int refundId;
+  final int invoiceItemId;
+  final double quantity;
+  final double unitPrice;
+  final double amount;
+  const RefundItemData({
+    required this.id,
+    required this.refundId,
+    required this.invoiceItemId,
+    required this.quantity,
+    required this.unitPrice,
+    required this.amount,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['refund_id'] = Variable<int>(refundId);
+    map['invoice_item_id'] = Variable<int>(invoiceItemId);
+    map['quantity'] = Variable<double>(quantity);
+    map['unit_price'] = Variable<double>(unitPrice);
+    map['amount'] = Variable<double>(amount);
+    return map;
+  }
+
+  RefundItemsCompanion toCompanion(bool nullToAbsent) {
+    return RefundItemsCompanion(
+      id: Value(id),
+      refundId: Value(refundId),
+      invoiceItemId: Value(invoiceItemId),
+      quantity: Value(quantity),
+      unitPrice: Value(unitPrice),
+      amount: Value(amount),
+    );
+  }
+
+  factory RefundItemData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return RefundItemData(
+      id: serializer.fromJson<int>(json['id']),
+      refundId: serializer.fromJson<int>(json['refundId']),
+      invoiceItemId: serializer.fromJson<int>(json['invoiceItemId']),
+      quantity: serializer.fromJson<double>(json['quantity']),
+      unitPrice: serializer.fromJson<double>(json['unitPrice']),
+      amount: serializer.fromJson<double>(json['amount']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'refundId': serializer.toJson<int>(refundId),
+      'invoiceItemId': serializer.toJson<int>(invoiceItemId),
+      'quantity': serializer.toJson<double>(quantity),
+      'unitPrice': serializer.toJson<double>(unitPrice),
+      'amount': serializer.toJson<double>(amount),
+    };
+  }
+
+  RefundItemData copyWith({
+    int? id,
+    int? refundId,
+    int? invoiceItemId,
+    double? quantity,
+    double? unitPrice,
+    double? amount,
+  }) => RefundItemData(
+    id: id ?? this.id,
+    refundId: refundId ?? this.refundId,
+    invoiceItemId: invoiceItemId ?? this.invoiceItemId,
+    quantity: quantity ?? this.quantity,
+    unitPrice: unitPrice ?? this.unitPrice,
+    amount: amount ?? this.amount,
+  );
+  RefundItemData copyWithCompanion(RefundItemsCompanion data) {
+    return RefundItemData(
+      id: data.id.present ? data.id.value : this.id,
+      refundId: data.refundId.present ? data.refundId.value : this.refundId,
+      invoiceItemId: data.invoiceItemId.present
+          ? data.invoiceItemId.value
+          : this.invoiceItemId,
+      quantity: data.quantity.present ? data.quantity.value : this.quantity,
+      unitPrice: data.unitPrice.present ? data.unitPrice.value : this.unitPrice,
+      amount: data.amount.present ? data.amount.value : this.amount,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('RefundItemData(')
+          ..write('id: $id, ')
+          ..write('refundId: $refundId, ')
+          ..write('invoiceItemId: $invoiceItemId, ')
+          ..write('quantity: $quantity, ')
+          ..write('unitPrice: $unitPrice, ')
+          ..write('amount: $amount')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, refundId, invoiceItemId, quantity, unitPrice, amount);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is RefundItemData &&
+          other.id == this.id &&
+          other.refundId == this.refundId &&
+          other.invoiceItemId == this.invoiceItemId &&
+          other.quantity == this.quantity &&
+          other.unitPrice == this.unitPrice &&
+          other.amount == this.amount);
+}
+
+class RefundItemsCompanion extends UpdateCompanion<RefundItemData> {
+  final Value<int> id;
+  final Value<int> refundId;
+  final Value<int> invoiceItemId;
+  final Value<double> quantity;
+  final Value<double> unitPrice;
+  final Value<double> amount;
+  const RefundItemsCompanion({
+    this.id = const Value.absent(),
+    this.refundId = const Value.absent(),
+    this.invoiceItemId = const Value.absent(),
+    this.quantity = const Value.absent(),
+    this.unitPrice = const Value.absent(),
+    this.amount = const Value.absent(),
+  });
+  RefundItemsCompanion.insert({
+    this.id = const Value.absent(),
+    required int refundId,
+    required int invoiceItemId,
+    required double quantity,
+    required double unitPrice,
+    required double amount,
+  }) : refundId = Value(refundId),
+       invoiceItemId = Value(invoiceItemId),
+       quantity = Value(quantity),
+       unitPrice = Value(unitPrice),
+       amount = Value(amount);
+  static Insertable<RefundItemData> custom({
+    Expression<int>? id,
+    Expression<int>? refundId,
+    Expression<int>? invoiceItemId,
+    Expression<double>? quantity,
+    Expression<double>? unitPrice,
+    Expression<double>? amount,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (refundId != null) 'refund_id': refundId,
+      if (invoiceItemId != null) 'invoice_item_id': invoiceItemId,
+      if (quantity != null) 'quantity': quantity,
+      if (unitPrice != null) 'unit_price': unitPrice,
+      if (amount != null) 'amount': amount,
+    });
+  }
+
+  RefundItemsCompanion copyWith({
+    Value<int>? id,
+    Value<int>? refundId,
+    Value<int>? invoiceItemId,
+    Value<double>? quantity,
+    Value<double>? unitPrice,
+    Value<double>? amount,
+  }) {
+    return RefundItemsCompanion(
+      id: id ?? this.id,
+      refundId: refundId ?? this.refundId,
+      invoiceItemId: invoiceItemId ?? this.invoiceItemId,
+      quantity: quantity ?? this.quantity,
+      unitPrice: unitPrice ?? this.unitPrice,
+      amount: amount ?? this.amount,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (refundId.present) {
+      map['refund_id'] = Variable<int>(refundId.value);
+    }
+    if (invoiceItemId.present) {
+      map['invoice_item_id'] = Variable<int>(invoiceItemId.value);
+    }
+    if (quantity.present) {
+      map['quantity'] = Variable<double>(quantity.value);
+    }
+    if (unitPrice.present) {
+      map['unit_price'] = Variable<double>(unitPrice.value);
+    }
+    if (amount.present) {
+      map['amount'] = Variable<double>(amount.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('RefundItemsCompanion(')
+          ..write('id: $id, ')
+          ..write('refundId: $refundId, ')
+          ..write('invoiceItemId: $invoiceItemId, ')
+          ..write('quantity: $quantity, ')
+          ..write('unitPrice: $unitPrice, ')
+          ..write('amount: $amount')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -5966,6 +7048,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $ProjectExpensesTable projectExpenses = $ProjectExpensesTable(
     this,
   );
+  late final $RefundsTable refunds = $RefundsTable(this);
+  late final $RefundItemsTable refundItems = $RefundItemsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -5982,6 +7066,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     articles,
     expenseTypes,
     projectExpenses,
+    refunds,
+    refundItems,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -6054,6 +7140,27 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         limitUpdateKind: UpdateKind.delete,
       ),
       result: [TableUpdate('project_expenses', kind: UpdateKind.update)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'invoices',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('refunds', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'refunds',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('refund_items', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'invoice_items',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('refund_items', kind: UpdateKind.delete)],
     ),
   ]);
 }
@@ -7479,6 +8586,25 @@ final class $$InvoicesTableReferences
       manager.$state.copyWith(prefetchedData: cache),
     );
   }
+
+  static MultiTypedResultKey<$RefundsTable, List<RefundData>> _refundsRefsTable(
+    _$AppDatabase db,
+  ) => MultiTypedResultKey.fromTable(
+    db.refunds,
+    aliasName: $_aliasNameGenerator(db.invoices.id, db.refunds.invoiceId),
+  );
+
+  $$RefundsTableProcessedTableManager get refundsRefs {
+    final manager = $$RefundsTableTableManager(
+      $_db,
+      $_db.refunds,
+    ).filter((f) => f.invoiceId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_refundsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
 }
 
 class $$InvoicesTableFilterComposer
@@ -7668,6 +8794,31 @@ class $$InvoicesTableFilterComposer
           }) => $$PaymentsTableFilterComposer(
             $db: $db,
             $table: $db.payments,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> refundsRefs(
+    Expression<bool> Function($$RefundsTableFilterComposer f) f,
+  ) {
+    final $$RefundsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.refunds,
+      getReferencedColumn: (t) => t.invoiceId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RefundsTableFilterComposer(
+            $db: $db,
+            $table: $db.refunds,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -7973,6 +9124,31 @@ class $$InvoicesTableAnnotationComposer
     );
     return f(composer);
   }
+
+  Expression<T> refundsRefs<T extends Object>(
+    Expression<T> Function($$RefundsTableAnnotationComposer a) f,
+  ) {
+    final $$RefundsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.refunds,
+      getReferencedColumn: (t) => t.invoiceId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RefundsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.refunds,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$InvoicesTableTableManager
@@ -7994,6 +9170,7 @@ class $$InvoicesTableTableManager
             bool invoiceItemsRefs,
             bool quotesRefs,
             bool paymentsRefs,
+            bool refundsRefs,
           })
         > {
   $$InvoicesTableTableManager(_$AppDatabase db, $InvoicesTable table)
@@ -8090,6 +9267,7 @@ class $$InvoicesTableTableManager
                 invoiceItemsRefs = false,
                 quotesRefs = false,
                 paymentsRefs = false,
+                refundsRefs = false,
               }) {
                 return PrefetchHooks(
                   db: db,
@@ -8097,6 +9275,7 @@ class $$InvoicesTableTableManager
                     if (invoiceItemsRefs) db.invoiceItems,
                     if (quotesRefs) db.quotes,
                     if (paymentsRefs) db.payments,
+                    if (refundsRefs) db.refunds,
                   ],
                   addJoins:
                       <
@@ -8208,6 +9387,27 @@ class $$InvoicesTableTableManager
                               ),
                           typedResults: items,
                         ),
+                      if (refundsRefs)
+                        await $_getPrefetchedData<
+                          InvoiceData,
+                          $InvoicesTable,
+                          RefundData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$InvoicesTableReferences
+                              ._refundsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$InvoicesTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).refundsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.invoiceId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
                     ];
                   },
                 );
@@ -8234,6 +9434,7 @@ typedef $$InvoicesTableProcessedTableManager =
         bool invoiceItemsRefs,
         bool quotesRefs,
         bool paymentsRefs,
+        bool refundsRefs,
       })
     >;
 typedef $$InvoiceItemsTableCreateCompanionBuilder =
@@ -8275,6 +9476,27 @@ final class $$InvoiceItemsTableReferences
     if (item == null) return manager;
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static MultiTypedResultKey<$RefundItemsTable, List<RefundItemData>>
+  _refundItemsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.refundItems,
+    aliasName: $_aliasNameGenerator(
+      db.invoiceItems.id,
+      db.refundItems.invoiceItemId,
+    ),
+  );
+
+  $$RefundItemsTableProcessedTableManager get refundItemsRefs {
+    final manager = $$RefundItemsTableTableManager(
+      $_db,
+      $_db.refundItems,
+    ).filter((f) => f.invoiceItemId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_refundItemsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
     );
   }
 }
@@ -8334,6 +9556,31 @@ class $$InvoiceItemsTableFilterComposer
           ),
     );
     return composer;
+  }
+
+  Expression<bool> refundItemsRefs(
+    Expression<bool> Function($$RefundItemsTableFilterComposer f) f,
+  ) {
+    final $$RefundItemsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.refundItems,
+      getReferencedColumn: (t) => t.invoiceItemId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RefundItemsTableFilterComposer(
+            $db: $db,
+            $table: $db.refundItems,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
   }
 }
 
@@ -8443,6 +9690,31 @@ class $$InvoiceItemsTableAnnotationComposer
     );
     return composer;
   }
+
+  Expression<T> refundItemsRefs<T extends Object>(
+    Expression<T> Function($$RefundItemsTableAnnotationComposer a) f,
+  ) {
+    final $$RefundItemsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.refundItems,
+      getReferencedColumn: (t) => t.invoiceItemId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RefundItemsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.refundItems,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$InvoiceItemsTableTableManager
@@ -8458,7 +9730,7 @@ class $$InvoiceItemsTableTableManager
           $$InvoiceItemsTableUpdateCompanionBuilder,
           (InvoiceItemData, $$InvoiceItemsTableReferences),
           InvoiceItemData,
-          PrefetchHooks Function({bool invoiceId})
+          PrefetchHooks Function({bool invoiceId, bool refundItemsRefs})
         > {
   $$InvoiceItemsTableTableManager(_$AppDatabase db, $InvoiceItemsTable table)
     : super(
@@ -8511,47 +9783,74 @@ class $$InvoiceItemsTableTableManager
                 ),
               )
               .toList(),
-          prefetchHooksCallback: ({invoiceId = false}) {
-            return PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [],
-              addJoins:
-                  <
-                    T extends TableManagerState<
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic
-                    >
-                  >(state) {
-                    if (invoiceId) {
-                      state =
-                          state.withJoin(
-                                currentTable: table,
-                                currentColumn: table.invoiceId,
-                                referencedTable: $$InvoiceItemsTableReferences
-                                    ._invoiceIdTable(db),
-                                referencedColumn: $$InvoiceItemsTableReferences
-                                    ._invoiceIdTable(db)
-                                    .id,
-                              )
-                              as T;
-                    }
+          prefetchHooksCallback:
+              ({invoiceId = false, refundItemsRefs = false}) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (refundItemsRefs) db.refundItems,
+                  ],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (invoiceId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.invoiceId,
+                                    referencedTable:
+                                        $$InvoiceItemsTableReferences
+                                            ._invoiceIdTable(db),
+                                    referencedColumn:
+                                        $$InvoiceItemsTableReferences
+                                            ._invoiceIdTable(db)
+                                            .id,
+                                  )
+                                  as T;
+                        }
 
-                    return state;
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (refundItemsRefs)
+                        await $_getPrefetchedData<
+                          InvoiceItemData,
+                          $InvoiceItemsTable,
+                          RefundItemData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$InvoiceItemsTableReferences
+                              ._refundItemsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$InvoiceItemsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).refundItemsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.invoiceItemId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
                   },
-              getPrefetchedDataCallback: (items) async {
-                return [];
+                );
               },
-            );
-          },
         ),
       );
 }
@@ -8568,7 +9867,7 @@ typedef $$InvoiceItemsTableProcessedTableManager =
       $$InvoiceItemsTableUpdateCompanionBuilder,
       (InvoiceItemData, $$InvoiceItemsTableReferences),
       InvoiceItemData,
-      PrefetchHooks Function({bool invoiceId})
+      PrefetchHooks Function({bool invoiceId, bool refundItemsRefs})
     >;
 typedef $$QuotesTableCreateCompanionBuilder =
     QuotesCompanion Function({
@@ -10417,6 +11716,9 @@ typedef $$ArticlesTableCreateCompanionBuilder =
       Value<String> category,
       Value<double> taxRate,
       Value<double> marginRate,
+      Value<String?> quickTemplate,
+      Value<double> defaultQuantity,
+      Value<int> quickTemplateOrder,
       Value<DateTime> createdAt,
     });
 typedef $$ArticlesTableUpdateCompanionBuilder =
@@ -10430,6 +11732,9 @@ typedef $$ArticlesTableUpdateCompanionBuilder =
       Value<String> category,
       Value<double> taxRate,
       Value<double> marginRate,
+      Value<String?> quickTemplate,
+      Value<double> defaultQuantity,
+      Value<int> quickTemplateOrder,
       Value<DateTime> createdAt,
     });
 
@@ -10484,6 +11789,21 @@ class $$ArticlesTableFilterComposer
 
   ColumnFilters<double> get marginRate => $composableBuilder(
     column: $table.marginRate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get quickTemplate => $composableBuilder(
+    column: $table.quickTemplate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get defaultQuantity => $composableBuilder(
+    column: $table.defaultQuantity,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get quickTemplateOrder => $composableBuilder(
+    column: $table.quickTemplateOrder,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -10547,6 +11867,21 @@ class $$ArticlesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get quickTemplate => $composableBuilder(
+    column: $table.quickTemplate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get defaultQuantity => $composableBuilder(
+    column: $table.defaultQuantity,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get quickTemplateOrder => $composableBuilder(
+    column: $table.quickTemplateOrder,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -10588,6 +11923,21 @@ class $$ArticlesTableAnnotationComposer
 
   GeneratedColumn<double> get marginRate => $composableBuilder(
     column: $table.marginRate,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get quickTemplate => $composableBuilder(
+    column: $table.quickTemplate,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get defaultQuantity => $composableBuilder(
+    column: $table.defaultQuantity,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get quickTemplateOrder => $composableBuilder(
+    column: $table.quickTemplateOrder,
     builder: (column) => column,
   );
 
@@ -10635,6 +11985,9 @@ class $$ArticlesTableTableManager
                 Value<String> category = const Value.absent(),
                 Value<double> taxRate = const Value.absent(),
                 Value<double> marginRate = const Value.absent(),
+                Value<String?> quickTemplate = const Value.absent(),
+                Value<double> defaultQuantity = const Value.absent(),
+                Value<int> quickTemplateOrder = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
               }) => ArticlesCompanion(
                 id: id,
@@ -10646,6 +11999,9 @@ class $$ArticlesTableTableManager
                 category: category,
                 taxRate: taxRate,
                 marginRate: marginRate,
+                quickTemplate: quickTemplate,
+                defaultQuantity: defaultQuantity,
+                quickTemplateOrder: quickTemplateOrder,
                 createdAt: createdAt,
               ),
           createCompanionCallback:
@@ -10659,6 +12015,9 @@ class $$ArticlesTableTableManager
                 Value<String> category = const Value.absent(),
                 Value<double> taxRate = const Value.absent(),
                 Value<double> marginRate = const Value.absent(),
+                Value<String?> quickTemplate = const Value.absent(),
+                Value<double> defaultQuantity = const Value.absent(),
+                Value<int> quickTemplateOrder = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
               }) => ArticlesCompanion.insert(
                 id: id,
@@ -10670,6 +12029,9 @@ class $$ArticlesTableTableManager
                 category: category,
                 taxRate: taxRate,
                 marginRate: marginRate,
+                quickTemplate: quickTemplate,
+                defaultQuantity: defaultQuantity,
+                quickTemplateOrder: quickTemplateOrder,
                 createdAt: createdAt,
               ),
           withReferenceMapper: (p0) => p0
@@ -11478,6 +12840,893 @@ typedef $$ProjectExpensesTableProcessedTableManager =
       ProjectExpenseData,
       PrefetchHooks Function({bool projectId, bool expenseTypeId})
     >;
+typedef $$RefundsTableCreateCompanionBuilder =
+    RefundsCompanion Function({
+      Value<int> id,
+      required int invoiceId,
+      required String refundNumber,
+      Value<DateTime> date,
+      Value<String?> reason,
+      Value<double> totalAmount,
+      Value<DateTime> createdAt,
+      Value<bool> isValidated,
+    });
+typedef $$RefundsTableUpdateCompanionBuilder =
+    RefundsCompanion Function({
+      Value<int> id,
+      Value<int> invoiceId,
+      Value<String> refundNumber,
+      Value<DateTime> date,
+      Value<String?> reason,
+      Value<double> totalAmount,
+      Value<DateTime> createdAt,
+      Value<bool> isValidated,
+    });
+
+final class $$RefundsTableReferences
+    extends BaseReferences<_$AppDatabase, $RefundsTable, RefundData> {
+  $$RefundsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $InvoicesTable _invoiceIdTable(_$AppDatabase db) => db.invoices
+      .createAlias($_aliasNameGenerator(db.refunds.invoiceId, db.invoices.id));
+
+  $$InvoicesTableProcessedTableManager get invoiceId {
+    final $_column = $_itemColumn<int>('invoice_id')!;
+
+    final manager = $$InvoicesTableTableManager(
+      $_db,
+      $_db.invoices,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_invoiceIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static MultiTypedResultKey<$RefundItemsTable, List<RefundItemData>>
+  _refundItemsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.refundItems,
+    aliasName: $_aliasNameGenerator(db.refunds.id, db.refundItems.refundId),
+  );
+
+  $$RefundItemsTableProcessedTableManager get refundItemsRefs {
+    final manager = $$RefundItemsTableTableManager(
+      $_db,
+      $_db.refundItems,
+    ).filter((f) => f.refundId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_refundItemsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$RefundsTableFilterComposer
+    extends Composer<_$AppDatabase, $RefundsTable> {
+  $$RefundsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get refundNumber => $composableBuilder(
+    column: $table.refundNumber,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get date => $composableBuilder(
+    column: $table.date,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get reason => $composableBuilder(
+    column: $table.reason,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get totalAmount => $composableBuilder(
+    column: $table.totalAmount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isValidated => $composableBuilder(
+    column: $table.isValidated,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$InvoicesTableFilterComposer get invoiceId {
+    final $$InvoicesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.invoiceId,
+      referencedTable: $db.invoices,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$InvoicesTableFilterComposer(
+            $db: $db,
+            $table: $db.invoices,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  Expression<bool> refundItemsRefs(
+    Expression<bool> Function($$RefundItemsTableFilterComposer f) f,
+  ) {
+    final $$RefundItemsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.refundItems,
+      getReferencedColumn: (t) => t.refundId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RefundItemsTableFilterComposer(
+            $db: $db,
+            $table: $db.refundItems,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$RefundsTableOrderingComposer
+    extends Composer<_$AppDatabase, $RefundsTable> {
+  $$RefundsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get refundNumber => $composableBuilder(
+    column: $table.refundNumber,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get date => $composableBuilder(
+    column: $table.date,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get reason => $composableBuilder(
+    column: $table.reason,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get totalAmount => $composableBuilder(
+    column: $table.totalAmount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isValidated => $composableBuilder(
+    column: $table.isValidated,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$InvoicesTableOrderingComposer get invoiceId {
+    final $$InvoicesTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.invoiceId,
+      referencedTable: $db.invoices,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$InvoicesTableOrderingComposer(
+            $db: $db,
+            $table: $db.invoices,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$RefundsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $RefundsTable> {
+  $$RefundsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get refundNumber => $composableBuilder(
+    column: $table.refundNumber,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get date =>
+      $composableBuilder(column: $table.date, builder: (column) => column);
+
+  GeneratedColumn<String> get reason =>
+      $composableBuilder(column: $table.reason, builder: (column) => column);
+
+  GeneratedColumn<double> get totalAmount => $composableBuilder(
+    column: $table.totalAmount,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<bool> get isValidated => $composableBuilder(
+    column: $table.isValidated,
+    builder: (column) => column,
+  );
+
+  $$InvoicesTableAnnotationComposer get invoiceId {
+    final $$InvoicesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.invoiceId,
+      referencedTable: $db.invoices,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$InvoicesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.invoices,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  Expression<T> refundItemsRefs<T extends Object>(
+    Expression<T> Function($$RefundItemsTableAnnotationComposer a) f,
+  ) {
+    final $$RefundItemsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.refundItems,
+      getReferencedColumn: (t) => t.refundId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RefundItemsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.refundItems,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$RefundsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $RefundsTable,
+          RefundData,
+          $$RefundsTableFilterComposer,
+          $$RefundsTableOrderingComposer,
+          $$RefundsTableAnnotationComposer,
+          $$RefundsTableCreateCompanionBuilder,
+          $$RefundsTableUpdateCompanionBuilder,
+          (RefundData, $$RefundsTableReferences),
+          RefundData,
+          PrefetchHooks Function({bool invoiceId, bool refundItemsRefs})
+        > {
+  $$RefundsTableTableManager(_$AppDatabase db, $RefundsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$RefundsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$RefundsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$RefundsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> invoiceId = const Value.absent(),
+                Value<String> refundNumber = const Value.absent(),
+                Value<DateTime> date = const Value.absent(),
+                Value<String?> reason = const Value.absent(),
+                Value<double> totalAmount = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<bool> isValidated = const Value.absent(),
+              }) => RefundsCompanion(
+                id: id,
+                invoiceId: invoiceId,
+                refundNumber: refundNumber,
+                date: date,
+                reason: reason,
+                totalAmount: totalAmount,
+                createdAt: createdAt,
+                isValidated: isValidated,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required int invoiceId,
+                required String refundNumber,
+                Value<DateTime> date = const Value.absent(),
+                Value<String?> reason = const Value.absent(),
+                Value<double> totalAmount = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<bool> isValidated = const Value.absent(),
+              }) => RefundsCompanion.insert(
+                id: id,
+                invoiceId: invoiceId,
+                refundNumber: refundNumber,
+                date: date,
+                reason: reason,
+                totalAmount: totalAmount,
+                createdAt: createdAt,
+                isValidated: isValidated,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$RefundsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback:
+              ({invoiceId = false, refundItemsRefs = false}) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (refundItemsRefs) db.refundItems,
+                  ],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (invoiceId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.invoiceId,
+                                    referencedTable: $$RefundsTableReferences
+                                        ._invoiceIdTable(db),
+                                    referencedColumn: $$RefundsTableReferences
+                                        ._invoiceIdTable(db)
+                                        .id,
+                                  )
+                                  as T;
+                        }
+
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (refundItemsRefs)
+                        await $_getPrefetchedData<
+                          RefundData,
+                          $RefundsTable,
+                          RefundItemData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$RefundsTableReferences
+                              ._refundItemsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$RefundsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).refundItemsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.refundId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
+              },
+        ),
+      );
+}
+
+typedef $$RefundsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $RefundsTable,
+      RefundData,
+      $$RefundsTableFilterComposer,
+      $$RefundsTableOrderingComposer,
+      $$RefundsTableAnnotationComposer,
+      $$RefundsTableCreateCompanionBuilder,
+      $$RefundsTableUpdateCompanionBuilder,
+      (RefundData, $$RefundsTableReferences),
+      RefundData,
+      PrefetchHooks Function({bool invoiceId, bool refundItemsRefs})
+    >;
+typedef $$RefundItemsTableCreateCompanionBuilder =
+    RefundItemsCompanion Function({
+      Value<int> id,
+      required int refundId,
+      required int invoiceItemId,
+      required double quantity,
+      required double unitPrice,
+      required double amount,
+    });
+typedef $$RefundItemsTableUpdateCompanionBuilder =
+    RefundItemsCompanion Function({
+      Value<int> id,
+      Value<int> refundId,
+      Value<int> invoiceItemId,
+      Value<double> quantity,
+      Value<double> unitPrice,
+      Value<double> amount,
+    });
+
+final class $$RefundItemsTableReferences
+    extends BaseReferences<_$AppDatabase, $RefundItemsTable, RefundItemData> {
+  $$RefundItemsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $RefundsTable _refundIdTable(_$AppDatabase db) =>
+      db.refunds.createAlias(
+        $_aliasNameGenerator(db.refundItems.refundId, db.refunds.id),
+      );
+
+  $$RefundsTableProcessedTableManager get refundId {
+    final $_column = $_itemColumn<int>('refund_id')!;
+
+    final manager = $$RefundsTableTableManager(
+      $_db,
+      $_db.refunds,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_refundIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $InvoiceItemsTable _invoiceItemIdTable(_$AppDatabase db) =>
+      db.invoiceItems.createAlias(
+        $_aliasNameGenerator(db.refundItems.invoiceItemId, db.invoiceItems.id),
+      );
+
+  $$InvoiceItemsTableProcessedTableManager get invoiceItemId {
+    final $_column = $_itemColumn<int>('invoice_item_id')!;
+
+    final manager = $$InvoiceItemsTableTableManager(
+      $_db,
+      $_db.invoiceItems,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_invoiceItemIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$RefundItemsTableFilterComposer
+    extends Composer<_$AppDatabase, $RefundItemsTable> {
+  $$RefundItemsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get quantity => $composableBuilder(
+    column: $table.quantity,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get unitPrice => $composableBuilder(
+    column: $table.unitPrice,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get amount => $composableBuilder(
+    column: $table.amount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$RefundsTableFilterComposer get refundId {
+    final $$RefundsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.refundId,
+      referencedTable: $db.refunds,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RefundsTableFilterComposer(
+            $db: $db,
+            $table: $db.refunds,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$InvoiceItemsTableFilterComposer get invoiceItemId {
+    final $$InvoiceItemsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.invoiceItemId,
+      referencedTable: $db.invoiceItems,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$InvoiceItemsTableFilterComposer(
+            $db: $db,
+            $table: $db.invoiceItems,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$RefundItemsTableOrderingComposer
+    extends Composer<_$AppDatabase, $RefundItemsTable> {
+  $$RefundItemsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get quantity => $composableBuilder(
+    column: $table.quantity,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get unitPrice => $composableBuilder(
+    column: $table.unitPrice,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get amount => $composableBuilder(
+    column: $table.amount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$RefundsTableOrderingComposer get refundId {
+    final $$RefundsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.refundId,
+      referencedTable: $db.refunds,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RefundsTableOrderingComposer(
+            $db: $db,
+            $table: $db.refunds,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$InvoiceItemsTableOrderingComposer get invoiceItemId {
+    final $$InvoiceItemsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.invoiceItemId,
+      referencedTable: $db.invoiceItems,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$InvoiceItemsTableOrderingComposer(
+            $db: $db,
+            $table: $db.invoiceItems,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$RefundItemsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $RefundItemsTable> {
+  $$RefundItemsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<double> get quantity =>
+      $composableBuilder(column: $table.quantity, builder: (column) => column);
+
+  GeneratedColumn<double> get unitPrice =>
+      $composableBuilder(column: $table.unitPrice, builder: (column) => column);
+
+  GeneratedColumn<double> get amount =>
+      $composableBuilder(column: $table.amount, builder: (column) => column);
+
+  $$RefundsTableAnnotationComposer get refundId {
+    final $$RefundsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.refundId,
+      referencedTable: $db.refunds,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RefundsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.refunds,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$InvoiceItemsTableAnnotationComposer get invoiceItemId {
+    final $$InvoiceItemsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.invoiceItemId,
+      referencedTable: $db.invoiceItems,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$InvoiceItemsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.invoiceItems,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$RefundItemsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $RefundItemsTable,
+          RefundItemData,
+          $$RefundItemsTableFilterComposer,
+          $$RefundItemsTableOrderingComposer,
+          $$RefundItemsTableAnnotationComposer,
+          $$RefundItemsTableCreateCompanionBuilder,
+          $$RefundItemsTableUpdateCompanionBuilder,
+          (RefundItemData, $$RefundItemsTableReferences),
+          RefundItemData,
+          PrefetchHooks Function({bool refundId, bool invoiceItemId})
+        > {
+  $$RefundItemsTableTableManager(_$AppDatabase db, $RefundItemsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$RefundItemsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$RefundItemsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$RefundItemsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> refundId = const Value.absent(),
+                Value<int> invoiceItemId = const Value.absent(),
+                Value<double> quantity = const Value.absent(),
+                Value<double> unitPrice = const Value.absent(),
+                Value<double> amount = const Value.absent(),
+              }) => RefundItemsCompanion(
+                id: id,
+                refundId: refundId,
+                invoiceItemId: invoiceItemId,
+                quantity: quantity,
+                unitPrice: unitPrice,
+                amount: amount,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required int refundId,
+                required int invoiceItemId,
+                required double quantity,
+                required double unitPrice,
+                required double amount,
+              }) => RefundItemsCompanion.insert(
+                id: id,
+                refundId: refundId,
+                invoiceItemId: invoiceItemId,
+                quantity: quantity,
+                unitPrice: unitPrice,
+                amount: amount,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$RefundItemsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({refundId = false, invoiceItemId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (refundId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.refundId,
+                                referencedTable: $$RefundItemsTableReferences
+                                    ._refundIdTable(db),
+                                referencedColumn: $$RefundItemsTableReferences
+                                    ._refundIdTable(db)
+                                    .id,
+                              )
+                              as T;
+                    }
+                    if (invoiceItemId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.invoiceItemId,
+                                referencedTable: $$RefundItemsTableReferences
+                                    ._invoiceItemIdTable(db),
+                                referencedColumn: $$RefundItemsTableReferences
+                                    ._invoiceItemIdTable(db)
+                                    .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$RefundItemsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $RefundItemsTable,
+      RefundItemData,
+      $$RefundItemsTableFilterComposer,
+      $$RefundItemsTableOrderingComposer,
+      $$RefundItemsTableAnnotationComposer,
+      $$RefundItemsTableCreateCompanionBuilder,
+      $$RefundItemsTableUpdateCompanionBuilder,
+      (RefundItemData, $$RefundItemsTableReferences),
+      RefundItemData,
+      PrefetchHooks Function({bool refundId, bool invoiceItemId})
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -11504,4 +13753,8 @@ class $AppDatabaseManager {
       $$ExpenseTypesTableTableManager(_db, _db.expenseTypes);
   $$ProjectExpensesTableTableManager get projectExpenses =>
       $$ProjectExpensesTableTableManager(_db, _db.projectExpenses);
+  $$RefundsTableTableManager get refunds =>
+      $$RefundsTableTableManager(_db, _db.refunds);
+  $$RefundItemsTableTableManager get refundItems =>
+      $$RefundItemsTableTableManager(_db, _db.refundItems);
 }

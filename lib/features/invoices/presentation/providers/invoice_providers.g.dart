@@ -183,6 +183,125 @@ final filteredInvoicesProvider =
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef FilteredInvoicesRef = AutoDisposeFutureProviderRef<List<Invoice>>;
+String _$invoiceByIdHash() => r'ab9e6377bb958a9598013386802c12dd56e7a2a4';
+
+/// See also [invoiceById].
+@ProviderFor(invoiceById)
+const invoiceByIdProvider = InvoiceByIdFamily();
+
+/// See also [invoiceById].
+class InvoiceByIdFamily extends Family<AsyncValue<Invoice?>> {
+  /// See also [invoiceById].
+  const InvoiceByIdFamily();
+
+  /// See also [invoiceById].
+  InvoiceByIdProvider call(int id) {
+    return InvoiceByIdProvider(id);
+  }
+
+  @override
+  InvoiceByIdProvider getProviderOverride(
+    covariant InvoiceByIdProvider provider,
+  ) {
+    return call(provider.id);
+  }
+
+  static const Iterable<ProviderOrFamily>? _dependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
+
+  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
+      _allTransitiveDependencies;
+
+  @override
+  String? get name => r'invoiceByIdProvider';
+}
+
+/// See also [invoiceById].
+class InvoiceByIdProvider extends AutoDisposeFutureProvider<Invoice?> {
+  /// See also [invoiceById].
+  InvoiceByIdProvider(int id)
+    : this._internal(
+        (ref) => invoiceById(ref as InvoiceByIdRef, id),
+        from: invoiceByIdProvider,
+        name: r'invoiceByIdProvider',
+        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+            ? null
+            : _$invoiceByIdHash,
+        dependencies: InvoiceByIdFamily._dependencies,
+        allTransitiveDependencies: InvoiceByIdFamily._allTransitiveDependencies,
+        id: id,
+      );
+
+  InvoiceByIdProvider._internal(
+    super._createNotifier, {
+    required super.name,
+    required super.dependencies,
+    required super.allTransitiveDependencies,
+    required super.debugGetCreateSourceHash,
+    required super.from,
+    required this.id,
+  }) : super.internal();
+
+  final int id;
+
+  @override
+  Override overrideWith(
+    FutureOr<Invoice?> Function(InvoiceByIdRef provider) create,
+  ) {
+    return ProviderOverride(
+      origin: this,
+      override: InvoiceByIdProvider._internal(
+        (ref) => create(ref as InvoiceByIdRef),
+        from: from,
+        name: null,
+        dependencies: null,
+        allTransitiveDependencies: null,
+        debugGetCreateSourceHash: null,
+        id: id,
+      ),
+    );
+  }
+
+  @override
+  AutoDisposeFutureProviderElement<Invoice?> createElement() {
+    return _InvoiceByIdProviderElement(this);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is InvoiceByIdProvider && other.id == id;
+  }
+
+  @override
+  int get hashCode {
+    var hash = _SystemHash.combine(0, runtimeType.hashCode);
+    hash = _SystemHash.combine(hash, id.hashCode);
+
+    return _SystemHash.finish(hash);
+  }
+}
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+mixin InvoiceByIdRef on AutoDisposeFutureProviderRef<Invoice?> {
+  /// The parameter `id` of this provider.
+  int get id;
+}
+
+class _InvoiceByIdProviderElement
+    extends AutoDisposeFutureProviderElement<Invoice?>
+    with InvoiceByIdRef {
+  _InvoiceByIdProviderElement(super.provider);
+
+  @override
+  int get id => (origin as InvoiceByIdProvider).id;
+}
+
 String _$invoiceFilterStatusHash() =>
     r'7d266ed96ea5a631a648a7e32f8f8bb14579607d';
 

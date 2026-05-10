@@ -30,6 +30,9 @@ mixin _$Article {
   String get category => throw _privateConstructorUsedError;
   double get taxRate => throw _privateConstructorUsedError;
   double get marginRate => throw _privateConstructorUsedError;
+  String? get quickTemplate => throw _privateConstructorUsedError;
+  double get defaultQuantity => throw _privateConstructorUsedError;
+  int get quickTemplateOrder => throw _privateConstructorUsedError;
   DateTime? get createdAt => throw _privateConstructorUsedError;
 
   /// Serializes this Article to a JSON map.
@@ -56,6 +59,9 @@ abstract class $ArticleCopyWith<$Res> {
     String category,
     double taxRate,
     double marginRate,
+    String? quickTemplate,
+    double defaultQuantity,
+    int quickTemplateOrder,
     DateTime? createdAt,
   });
 }
@@ -84,6 +90,9 @@ class _$ArticleCopyWithImpl<$Res, $Val extends Article>
     Object? category = null,
     Object? taxRate = null,
     Object? marginRate = null,
+    Object? quickTemplate = freezed,
+    Object? defaultQuantity = null,
+    Object? quickTemplateOrder = null,
     Object? createdAt = freezed,
   }) {
     return _then(
@@ -124,6 +133,18 @@ class _$ArticleCopyWithImpl<$Res, $Val extends Article>
                 ? _value.marginRate
                 : marginRate // ignore: cast_nullable_to_non_nullable
                       as double,
+            quickTemplate: freezed == quickTemplate
+                ? _value.quickTemplate
+                : quickTemplate // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            defaultQuantity: null == defaultQuantity
+                ? _value.defaultQuantity
+                : defaultQuantity // ignore: cast_nullable_to_non_nullable
+                      as double,
+            quickTemplateOrder: null == quickTemplateOrder
+                ? _value.quickTemplateOrder
+                : quickTemplateOrder // ignore: cast_nullable_to_non_nullable
+                      as int,
             createdAt: freezed == createdAt
                 ? _value.createdAt
                 : createdAt // ignore: cast_nullable_to_non_nullable
@@ -152,6 +173,9 @@ abstract class _$$ArticleImplCopyWith<$Res> implements $ArticleCopyWith<$Res> {
     String category,
     double taxRate,
     double marginRate,
+    String? quickTemplate,
+    double defaultQuantity,
+    int quickTemplateOrder,
     DateTime? createdAt,
   });
 }
@@ -179,6 +203,9 @@ class __$$ArticleImplCopyWithImpl<$Res>
     Object? category = null,
     Object? taxRate = null,
     Object? marginRate = null,
+    Object? quickTemplate = freezed,
+    Object? defaultQuantity = null,
+    Object? quickTemplateOrder = null,
     Object? createdAt = freezed,
   }) {
     return _then(
@@ -219,6 +246,18 @@ class __$$ArticleImplCopyWithImpl<$Res>
             ? _value.marginRate
             : marginRate // ignore: cast_nullable_to_non_nullable
                   as double,
+        quickTemplate: freezed == quickTemplate
+            ? _value.quickTemplate
+            : quickTemplate // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        defaultQuantity: null == defaultQuantity
+            ? _value.defaultQuantity
+            : defaultQuantity // ignore: cast_nullable_to_non_nullable
+                  as double,
+        quickTemplateOrder: null == quickTemplateOrder
+            ? _value.quickTemplateOrder
+            : quickTemplateOrder // ignore: cast_nullable_to_non_nullable
+                  as int,
         createdAt: freezed == createdAt
             ? _value.createdAt
             : createdAt // ignore: cast_nullable_to_non_nullable
@@ -241,6 +280,9 @@ class _$ArticleImpl implements _Article {
     this.category = 'materials',
     this.taxRate = 0.0,
     this.marginRate = 0.0,
+    this.quickTemplate,
+    this.defaultQuantity = 1.0,
+    this.quickTemplateOrder = 0,
     this.createdAt,
   });
 
@@ -272,11 +314,19 @@ class _$ArticleImpl implements _Article {
   @JsonKey()
   final double marginRate;
   @override
+  final String? quickTemplate;
+  @override
+  @JsonKey()
+  final double defaultQuantity;
+  @override
+  @JsonKey()
+  final int quickTemplateOrder;
+  @override
   final DateTime? createdAt;
 
   @override
   String toString() {
-    return 'Article(id: $id, name: $name, code: $code, price: $price, unit: $unit, type: $type, category: $category, taxRate: $taxRate, marginRate: $marginRate, createdAt: $createdAt)';
+    return 'Article(id: $id, name: $name, code: $code, price: $price, unit: $unit, type: $type, category: $category, taxRate: $taxRate, marginRate: $marginRate, quickTemplate: $quickTemplate, defaultQuantity: $defaultQuantity, quickTemplateOrder: $quickTemplateOrder, createdAt: $createdAt)';
   }
 
   @override
@@ -295,6 +345,12 @@ class _$ArticleImpl implements _Article {
             (identical(other.taxRate, taxRate) || other.taxRate == taxRate) &&
             (identical(other.marginRate, marginRate) ||
                 other.marginRate == marginRate) &&
+            (identical(other.quickTemplate, quickTemplate) ||
+                other.quickTemplate == quickTemplate) &&
+            (identical(other.defaultQuantity, defaultQuantity) ||
+                other.defaultQuantity == defaultQuantity) &&
+            (identical(other.quickTemplateOrder, quickTemplateOrder) ||
+                other.quickTemplateOrder == quickTemplateOrder) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt));
   }
@@ -312,6 +368,9 @@ class _$ArticleImpl implements _Article {
     category,
     taxRate,
     marginRate,
+    quickTemplate,
+    defaultQuantity,
+    quickTemplateOrder,
     createdAt,
   );
 
@@ -340,6 +399,9 @@ abstract class _Article implements Article {
     final String category,
     final double taxRate,
     final double marginRate,
+    final String? quickTemplate,
+    final double defaultQuantity,
+    final int quickTemplateOrder,
     final DateTime? createdAt,
   }) = _$ArticleImpl;
 
@@ -363,6 +425,12 @@ abstract class _Article implements Article {
   double get taxRate;
   @override
   double get marginRate;
+  @override
+  String? get quickTemplate;
+  @override
+  double get defaultQuantity;
+  @override
+  int get quickTemplateOrder;
   @override
   DateTime? get createdAt;
 

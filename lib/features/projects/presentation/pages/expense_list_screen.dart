@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:hissab_dz/core/theme/theme.dart';
+import 'package:hissab_dz/core/widgets/app_empty_state.dart';
 import 'package:hissab_dz/core/widgets/app_drawer.dart';
+import 'package:hissab_dz/core/widgets/contextual_fab.dart';
+import 'package:hissab_dz/core/widgets/entity_card.dart';
+import 'package:hissab_dz/core/widgets/responsive_content.dart';
 import 'package:hissab_dz/features/projects/presentation/providers/project_providers.dart';
 import 'package:hissab_dz/features/projects/presentation/widgets/expense_form_sheet.dart';
 import 'package:hissab_dz/l10n/app_localizations.dart';
@@ -23,91 +28,66 @@ class ExpenseListScreen extends ConsumerWidget {
       body: expensesAsync.when(
         data: (expenses) {
           if (expenses.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(
-                    Icons.receipt_long_outlined,
-                    size: 72,
-                    color: Colors.grey,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    l10n.noExpenses,
-                    style: const TextStyle(color: Colors.grey),
-                  ),
-                  const SizedBox(height: 20),
-                  FilledButton.icon(
-                    onPressed: () => _showExpenseSheet(context),
-                    icon: const Icon(Icons.add),
-                    label: Text(l10n.addExpense),
-                  ),
-                ],
+            return AppEmptyState(
+              icon: Icons.receipt_long_outlined,
+              title: l10n.noExpenses,
+              action: FilledButton.icon(
+                onPressed: () => _showExpenseSheet(context),
+                icon: const Icon(Icons.add),
+                label: Text(l10n.addExpense),
               ),
             );
           }
 
-          return ListView.builder(
-            padding: const EdgeInsets.fromLTRB(12, 12, 12, 112),
-            itemCount: expenses.length,
-            itemBuilder: (context, index) {
-              final expense = expenses[index];
-              return Card(
-                child: ListTile(
-                  leading: CircleAvatar(
-                    child: Icon(
-                      expense.receiptPath == null
-                          ? Icons.receipt_long_outlined
-                          : Icons.document_scanner_outlined,
-                    ),
-                  ),
-                  title: Text(
-                    expense.label,
-                    style: const TextStyle(fontWeight: FontWeight.w700),
-                  ),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        [
-                              expense.projectName ?? l10n.noProject,
-                              expense.expenseTypeName,
-                              expense.supplier,
-                            ]
-                            .whereType<String>()
-                            .where((value) => value.isNotEmpty)
-                            .join(' - '),
-                      ),
-                      Text(
-                        DateFormat.yMMMd(l10n.localeName).format(expense.date),
-                      ),
-                      if (expense.paymentMethod != null)
-                        Text('${l10n.paymentMethod}: ${expense.paymentMethod}'),
-                    ],
-                  ),
+          return ResponsiveContent(
+            child: ListView.builder(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.sm,
+                AppSpacing.sm,
+                AppSpacing.sm,
+                AppSpacing.bottomNavClearance,
+              ),
+              itemCount: expenses.length,
+              itemBuilder: (context, index) {
+                final expense = expenses[index];
+                return EntityCard(
+                  icon: expense.receiptPath == null
+                      ? Icons.receipt_long_outlined
+                      : Icons.document_scanner_outlined,
+                  color: AppColors.expense,
+                  title: expense.label,
+                  subtitle: [
+                    [
+                          expense.projectName ?? l10n.noProject,
+                          expense.expenseTypeName,
+                          expense.supplier,
+                        ]
+                        .whereType<String>()
+                        .where((value) => value.isNotEmpty)
+                        .join(' - '),
+                    DateFormat.yMMMd(l10n.localeName).format(expense.date),
+                    if (expense.paymentMethod != null)
+                      '${l10n.paymentMethod}: ${expense.paymentMethod}',
+                  ].join('\n'),
                   trailing: Text(
                     currencyFormat.format(expense.amount),
-                    style: const TextStyle(
-                      color: Colors.red,
-                      fontWeight: FontWeight.w800,
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      color: AppColors.expense,
+                      fontWeight: FontWeight.w900,
                     ),
                   ),
-                ),
-              );
-            },
+                );
+              },
+            ),
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, st) => Center(child: Text('${l10n.error}: $e')),
       ),
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 72),
-        child: FloatingActionButton(
-          onPressed: () => _showExpenseSheet(context),
-          tooltip: l10n.addExpense,
-          child: const Icon(Icons.add),
-        ),
+      floatingActionButton: ContextualFab(
+        onPressed: () => _showExpenseSheet(context),
+        tooltip: l10n.addExpense,
+        icon: Icons.add,
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );

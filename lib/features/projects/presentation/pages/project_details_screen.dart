@@ -1,8 +1,15 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:open_filex/open_filex.dart';
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
 import 'package:hissab_dz/core/widgets/status_badge.dart';
+import 'package:hissab_dz/core/widgets/contextual_fab.dart';
+import 'package:hissab_dz/features/invoices/domain/entities/invoice.dart';
 import 'package:hissab_dz/features/invoices/domain/entities/invoice_status.dart';
 import 'package:hissab_dz/features/invoices/presentation/providers/invoice_providers.dart';
 import 'package:hissab_dz/features/payments/presentation/providers/payment_providers.dart';
@@ -11,7 +18,11 @@ import 'package:hissab_dz/features/projects/domain/entities/project_status.dart'
 import 'package:hissab_dz/features/projects/domain/entities/project_expense.dart';
 import 'package:hissab_dz/features/projects/presentation/providers/project_providers.dart';
 import 'package:hissab_dz/features/projects/presentation/widgets/expense_form_sheet.dart';
+import 'package:hissab_dz/features/projects/services/pdf_project_report_service.dart';
 import 'package:hissab_dz/l10n/app_localizations.dart';
+import 'package:hissab_dz/features/refunds/presentation/providers/refund_providers.dart';
+import 'package:hissab_dz/features/refunds/data/repositories/refund_repository_impl.dart';
+import 'package:hissab_dz/features/refunds/domain/entities/refund.dart';
 
 class ProjectDetailsScreen extends ConsumerWidget {
   final int projectId;
@@ -28,7 +39,16 @@ class ProjectDetailsScreen extends ConsumerWidget {
     final currencyFormat = NumberFormat.currency(symbol: l10n.currencySymbol);
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.projectDetails)),
+      appBar: AppBar(
+        title: Text(l10n.projectDetails),
+        actions: [
+          IconButton(
+            tooltip: l10n.downloadPdf,
+            icon: const Icon(Icons.picture_as_pdf_outlined),
+            onPressed: () => _exportProjectReport(context, ref, l10n),
+          ),
+        ],
+      ),
       body: projectAsync.when(
         data: (project) {
           if (project == null) return Center(child: Text(l10n.noData));
@@ -79,13 +99,10 @@ class ProjectDetailsScreen extends ConsumerWidget {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, st) => Center(child: Text('${l10n.error}: $e')),
       ),
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 72),
-        child: FloatingActionButton(
-          onPressed: () => _showProjectAddSheet(context, ref, l10n),
-          tooltip: l10n.addToProject,
-          child: const Icon(Icons.add),
-        ),
+      floatingActionButton: ContextualFab(
+        onPressed: () => _showProjectAddSheet(context, ref, l10n),
+        tooltip: l10n.addToProject,
+        icon: Icons.add,
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
@@ -97,7 +114,7 @@ class ProjectDetailsScreen extends ConsumerWidget {
     AppLocalizations l10n,
     NumberFormat currencyFormat,
     Project project,
-    List<dynamic> projectInvoices,
+    List<Invoice> projectInvoices,
     Map<int, double> paidByInvoice,
     double paidTotal,
     double unpaidTotal,
@@ -227,9 +244,15 @@ class ProjectDetailsScreen extends ConsumerWidget {
                       ),
                     ),
                     Expanded(
-                      child: _metric(
-                        l10n.estimatedProfit,
-                        currencyFormat.format(project.balance),
+                      child: ref.watch(FutureProvider((ref) => 
+                        ref.watch(refundRepositoryProvider).calculateProjectProfitability(projectId))).when(
+                        data: (profit) => _metric(
+                          l10n.projectProfitability,
+                          currencyFormat.format(profit),
+                          valueColor: profit >= 0 ? Colors.green : Colors.red,
+                        ),
+                        loading: () => const LinearProgressIndicator(),
+                        error: (_, __) => const SizedBox(),
                       ),
                     ),
                   ],
@@ -291,6 +314,8 @@ class ProjectDetailsScreen extends ConsumerWidget {
               );
             }).toList(),
           ),
+        const SizedBox(height: 16),
+        _buildRefundsSection(context, ref, l10n, currencyFormat),
         const SizedBox(height: 16),
         if (projectInvoices.any(
           (invoice) =>
@@ -383,11 +408,52 @@ class ProjectDetailsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _metric(String label, String value) {
+  Widget _buildRefundsSection(BuildContext context, WidgetRef ref, AppLocalizations l10n, NumberFormat currencyFormat) {
+    final refundsAsync = ref.watch(projectRefundsProvider(projectId));
+    
+    return refundsAsync.when(
+      data: (refunds) {
+        if (refunds.isEmpty) return const SizedBox.shrink();
+        
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(l10n.refunds, style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 8),
+            ...refunds.map((Refund refund) => Card(
+              child: ListTile(
+                onTap: () => context.pushNamed(
+                  'refund_details',
+                  pathParameters: {'id': refund.id!.toString()},
+                ),
+                leading: const Icon(Icons.assignment_return_outlined, color: Colors.orange),
+                title: Text(refund.refundNumber),
+                subtitle: Text(DateFormat.yMMMd(l10n.localeName).format(refund.date)),
+                trailing: Text(
+                  '- ${currencyFormat.format(refund.totalAmount)}',
+                  style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+                ),
+              ),
+            )),
+          ],
+        );
+      },
+      loading: () => const LinearProgressIndicator(),
+      error: (_, __) => const SizedBox(),
+    );
+  }
+
+  Widget _metric(String label, String value, {Color? valueColor}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(value, style: const TextStyle(fontWeight: FontWeight.bold)),
+        Text(
+          value,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: valueColor,
+          ),
+        ),
         const SizedBox(height: 4),
         Text(label, style: const TextStyle(color: Colors.grey, fontSize: 12)),
       ],
@@ -404,6 +470,102 @@ class ProjectDetailsScreen extends ConsumerWidget {
         return l10n.completed;
       case ProjectStatus.awaitingPayment:
         return l10n.awaitingPayment;
+    }
+  }
+
+  Future<void> _exportProjectReport(
+    BuildContext context,
+    WidgetRef ref,
+    AppLocalizations l10n,
+  ) async {
+    final project = ref.read(projectDetailsProvider(projectId)).value;
+    final expenses = ref.read(projectExpensesProvider(projectId)).value;
+    final invoices = ref.read(invoicesListProvider()).value;
+    final payments = ref.read(paymentsListProvider).value;
+
+    if (project == null ||
+        expenses == null ||
+        invoices == null ||
+        payments == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.noData)));
+      return;
+    }
+
+    final projectInvoices = invoices
+        .where((invoice) => invoice.projectId == projectId)
+        .toList();
+    final invoiceIds = projectInvoices
+        .map((invoice) => invoice.id)
+        .whereType<int>()
+        .toSet();
+    final projectPayments = payments
+        .where((payment) => invoiceIds.contains(payment.invoiceId))
+        .toList();
+
+    final refunds = await ref.read(projectRefundsProvider(projectId).future);
+
+    try {
+      final tempFile = await PdfProjectReportService.generateProjectReportPdf(
+        project: project,
+        invoices: projectInvoices,
+        expenses: expenses,
+        payments: projectPayments,
+        refunds: refunds,
+        l10n: l10n,
+      );
+
+      final baseDir = Platform.isWindows
+          ? await getDownloadsDirectory()
+          : await getApplicationDocumentsDirectory();
+      final saveDir = Directory(
+        p.join(baseDir!.path, 'InvoicePro', 'project_reports'),
+      );
+      if (!saveDir.existsSync()) saveDir.createSync(recursive: true);
+
+      final safeProjectName = project.name
+          .replaceAll(RegExp(r'[<>:"/\\|?*]'), '_')
+          .replaceAll(RegExp(r'\s+'), '_')
+          .toLowerCase();
+      var savedPath = p.join(
+        saveDir.path,
+        'project_report_$safeProjectName.pdf',
+      );
+      final targetFile = File(savedPath);
+
+      try {
+        if (targetFile.existsSync()) {
+          await targetFile.delete();
+        }
+      } catch (_) {
+        final timestamp = DateFormat('HHmmss').format(DateTime.now());
+        savedPath = p.join(
+          saveDir.path,
+          'project_report_${safeProjectName}_$timestamp.pdf',
+        );
+      }
+
+      await tempFile.copy(savedPath);
+      await OpenFilex.open(savedPath);
+
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            '${l10n.pdfDownloadedAndOpened}\n${p.basename(savedPath)}',
+          ),
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('${l10n.error}: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 

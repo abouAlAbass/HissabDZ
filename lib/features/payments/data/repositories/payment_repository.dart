@@ -22,7 +22,7 @@ class PaymentRepositoryImpl implements PaymentRepository {
     final query = _db.select(_db.payments).join([
       leftOuterJoin(_db.clients, _db.clients.id.equalsExp(_db.payments.clientId)),
       leftOuterJoin(_db.invoices, _db.invoices.id.equalsExp(_db.payments.invoiceId)),
-    ]);
+    ])..orderBy([OrderingTerm.desc(_db.payments.date)]);
 
     return query.watch().map((rows) {
       return rows.map((row) {
@@ -51,7 +51,9 @@ class PaymentRepositoryImpl implements PaymentRepository {
 
   @override
   Stream<List<Payment>> watchPaymentsForInvoice(int invoiceId) {
-    return (_db.select(_db.payments)..where((t) => t.invoiceId.equals(invoiceId)))
+    return (_db.select(_db.payments)
+          ..where((t) => t.invoiceId.equals(invoiceId))
+          ..orderBy([(t) => OrderingTerm.desc(t.date)]))
         .watch()
         .map((rows) => rows.map((r) => _mapToEntity(r)).toList());
   }

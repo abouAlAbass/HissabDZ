@@ -15,6 +15,9 @@ class Article with _$Article {
     @Default('materials') String category,
     @Default(0.0) double taxRate,
     @Default(0.0) double marginRate,
+    String? quickTemplate,
+    @Default(1.0) double defaultQuantity,
+    @Default(0) int quickTemplateOrder,
     DateTime? createdAt,
   }) = _Article;
 

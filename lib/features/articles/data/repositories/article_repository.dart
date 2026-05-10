@@ -31,6 +31,9 @@ class ArticleRepositoryImpl implements ArticleRepository {
               category: data.category,
               taxRate: data.taxRate,
               marginRate: data.marginRate,
+              quickTemplate: data.quickTemplate,
+              defaultQuantity: data.defaultQuantity,
+              quickTemplateOrder: data.quickTemplateOrder,
               createdAt: data.createdAt,
             ),
           )
@@ -52,6 +55,9 @@ class ArticleRepositoryImpl implements ArticleRepository {
             category: Value(article.category),
             taxRate: Value(article.taxRate),
             marginRate: Value(article.marginRate),
+            quickTemplate: Value(article.quickTemplate),
+            defaultQuantity: Value(article.defaultQuantity),
+            quickTemplateOrder: Value(article.quickTemplateOrder),
           ),
         );
   }
@@ -70,6 +76,9 @@ class ArticleRepositoryImpl implements ArticleRepository {
         category: Value(article.category),
         taxRate: Value(article.taxRate),
         marginRate: Value(article.marginRate),
+        quickTemplate: Value(article.quickTemplate),
+        defaultQuantity: Value(article.defaultQuantity),
+        quickTemplateOrder: Value(article.quickTemplateOrder),
       ),
     );
   }
