@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:hissab_dz/core/utils/app_formatters.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
@@ -19,6 +20,8 @@ import 'package:hissab_dz/features/projects/domain/entities/project_expense.dart
 import 'package:hissab_dz/features/projects/presentation/providers/project_providers.dart';
 import 'package:hissab_dz/features/projects/presentation/widgets/expense_form_sheet.dart';
 import 'package:hissab_dz/features/projects/services/pdf_project_report_service.dart';
+import 'package:hissab_dz/features/projects/presentation/widgets/project_photos_section.dart';
+import 'package:hissab_dz/features/projects/presentation/widgets/photo_capture_sheet.dart';
 import 'package:hissab_dz/l10n/app_localizations.dart';
 import 'package:hissab_dz/features/refunds/presentation/providers/refund_providers.dart';
 import 'package:hissab_dz/features/refunds/data/repositories/refund_repository_impl.dart';
@@ -211,19 +214,19 @@ class ProjectDetailsScreen extends ConsumerWidget {
                     Expanded(
                       child: _metric(
                         l10n.invoices,
-                        currencyFormat.format(project.invoiceTotal),
+                        AppFormatters.formatCurrency(project.invoiceTotal, l10n),
                       ),
                     ),
                     Expanded(
                       child: _metric(
                         l10n.expenses,
-                        currencyFormat.format(project.expenseTotal),
+                        AppFormatters.formatCurrency(project.expenseTotal, l10n),
                       ),
                     ),
                     Expanded(
                       child: _metric(
                         l10n.balance,
-                        currencyFormat.format(project.balance),
+                        AppFormatters.formatCurrency(project.balance, l10n),
                       ),
                     ),
                   ],
@@ -234,13 +237,13 @@ class ProjectDetailsScreen extends ConsumerWidget {
                     Expanded(
                       child: _metric(
                         l10n.paidAmount,
-                        currencyFormat.format(paidTotal),
+                        AppFormatters.formatCurrency(paidTotal, l10n),
                       ),
                     ),
                     Expanded(
                       child: _metric(
                         l10n.remainingToPay,
-                        currencyFormat.format(unpaidTotal),
+                        AppFormatters.formatCurrency(unpaidTotal, l10n),
                       ),
                     ),
                     Expanded(
@@ -248,7 +251,7 @@ class ProjectDetailsScreen extends ConsumerWidget {
                         ref.watch(refundRepositoryProvider).calculateProjectProfitability(projectId))).when(
                         data: (profit) => _metric(
                           l10n.projectProfitability,
-                          currencyFormat.format(profit),
+                          AppFormatters.formatCurrency(profit, l10n),
                           valueColor: profit >= 0 ? Colors.green : Colors.red,
                         ),
                         loading: () => const LinearProgressIndicator(),
@@ -293,14 +296,14 @@ class ProjectDetailsScreen extends ConsumerWidget {
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                   subtitle: Text(
-                    '${invoice.client?.name ?? l10n.unknownClient} - ${l10n.remainingToPay}: ${currencyFormat.format(remaining < 0 ? 0 : remaining)}',
+                    '${invoice.client?.name ?? l10n.unknownClient} - ${l10n.remainingToPay}: ${AppFormatters.formatCurrency(remaining < 0 ? 0 : remaining, l10n)}',
                   ),
                   trailing: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Text(
-                        currencyFormat.format(invoice.total),
+                        AppFormatters.formatCurrency(invoice.total, l10n),
                         style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                       StatusBadge(status: invoice.status),
@@ -342,7 +345,7 @@ class ProjectDetailsScreen extends ConsumerWidget {
                     ),
                     title: Text(invoice.invoiceNumber),
                     subtitle: Text(
-                      '${l10n.remainingToPay}: ${currencyFormat.format(invoice.total - (paidByInvoice[invoice.id] ?? 0))}',
+                      '${l10n.remainingToPay}: ${AppFormatters.formatCurrency(invoice.total - (paidByInvoice[invoice.id] ?? 0), l10n)}',
                     ),
                     trailing: TextButton(
                       onPressed: () => context.pushNamed(
@@ -386,11 +389,13 @@ class ProjectDetailsScreen extends ConsumerWidget {
                         expense.expenseTypeName ?? l10n.expense,
                         expense.supplier,
                         expense.paymentMethod,
-                        DateFormat.yMMMd(l10n.localeName).format(expense.date),
+                        l10n.localeName == 'ar'
+                            ? DateFormat('dd/MM/yyyy', 'en').format(expense.date)
+                            : DateFormat.yMMMd(l10n.localeName).format(expense.date),
                       ].whereType<String>().join(' - '),
                     ),
                     trailing: Text(
-                      currencyFormat.format(expense.amount),
+                      AppFormatters.formatCurrency(expense.amount, l10n),
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         color: Colors.red,
@@ -404,6 +409,7 @@ class ProjectDetailsScreen extends ConsumerWidget {
           loading: () => const LinearProgressIndicator(),
           error: (e, st) => Text('${l10n.error}: $e'),
         ),
+        ProjectPhotosSection(projectId: projectId),
       ],
     );
   }
@@ -428,9 +434,13 @@ class ProjectDetailsScreen extends ConsumerWidget {
                 ),
                 leading: const Icon(Icons.assignment_return_outlined, color: Colors.orange),
                 title: Text(refund.refundNumber),
-                subtitle: Text(DateFormat.yMMMd(l10n.localeName).format(refund.date)),
+                subtitle: Text(
+                  l10n.localeName == 'ar'
+                      ? DateFormat('dd/MM/yyyy', 'en').format(refund.date)
+                      : DateFormat.yMMMd(l10n.localeName).format(refund.date),
+                ),
                 trailing: Text(
-                  '- ${currencyFormat.format(refund.totalAmount)}',
+                  '- ${AppFormatters.formatCurrency(refund.totalAmount, l10n)}',
                   style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
                 ),
               ),
@@ -632,10 +642,31 @@ class ProjectDetailsScreen extends ConsumerWidget {
                   _showExpenseSheet(context, ref, l10n);
                 },
               ),
+              ListTile(
+                leading: const Icon(Icons.camera_alt_outlined),
+                title: Text(l10n.addPhoto),
+                onTap: () {
+                  Navigator.pop(sheetContext);
+                  _showPhotoSheet(context, ref, l10n);
+                },
+              ),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  void _showPhotoSheet(
+    BuildContext context,
+    WidgetRef ref,
+    AppLocalizations l10n,
+  ) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (context) => PhotoCaptureSheet(projectId: projectId),
     );
   }
 }

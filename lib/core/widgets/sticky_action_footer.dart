@@ -31,9 +31,9 @@ class StickyActionFooter extends StatelessWidget {
           AppSpacing.md,
           AppSpacing.sm,
         ),
-        decoration: const BoxDecoration(
-          color: AppColors.surface,
-          border: Border(top: BorderSide(color: AppColors.border)),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          border: Border(top: BorderSide(color: Theme.of(context).dividerTheme.color ?? AppColors.border)),
         ),
         child: Row(
           children: [

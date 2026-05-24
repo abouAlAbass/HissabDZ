@@ -2,14 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import '../../../invoices/domain/entities/invoice.dart';
-import '../../../invoices/domain/entities/invoice_item.dart';
-import '../../../invoices/presentation/providers/invoice_providers.dart';
-import '../../domain/entities/refund.dart';
-import '../../domain/entities/refund_item.dart';
-import '../providers/refund_providers.dart';
-import '../../data/repositories/refund_repository_impl.dart';
-import '../../../../l10n/app_localizations.dart';
+import 'package:hissab_dz/features/invoices/domain/entities/invoice.dart';
+import 'package:hissab_dz/features/invoices/domain/entities/invoice_item.dart';
+import 'package:hissab_dz/features/invoices/presentation/providers/invoice_providers.dart';
+import 'package:hissab_dz/features/refunds/domain/entities/refund.dart';
+import 'package:hissab_dz/features/refunds/domain/entities/refund_item.dart';
+import 'package:hissab_dz/features/refunds/presentation/providers/refund_providers.dart';
+import 'package:hissab_dz/features/refunds/data/repositories/refund_repository_impl.dart';
+import 'package:hissab_dz/features/projects/presentation/providers/project_providers.dart';
+import 'package:hissab_dz/l10n/app_localizations.dart';
 
 class CreateRefundScreen extends ConsumerStatefulWidget {
   final int invoiceId;
@@ -123,7 +124,7 @@ class _CreateRefundScreenState extends ConsumerState<CreateRefundScreen> {
                           suffixText: '/ $available',
                         ),
                         onChanged: (val) {
-                          final qty = double.tryParse(val) ?? 0;
+                          final qty = double.tryParse(val.replaceAll(',', '.')) ?? 0;
                           if (qty > available) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(content: Text('${l10n.error}: Max $available')),
@@ -233,8 +234,14 @@ class _CreateRefundScreenState extends ConsumerState<CreateRefundScreen> {
       
       // Invalidate providers to refresh UI
       ref.invalidate(invoiceRefundsProvider(invoice.id!));
+      ref.invalidate(allRefundsProvider); // Refresh global list
+      ref.invalidate(invoicesListProvider);
+      ref.invalidate(filteredInvoicesProvider);
+      ref.invalidate(invoiceByIdProvider(invoice.id!));
+      
       if (invoice.projectId != null) {
         ref.invalidate(projectRefundsProvider(invoice.projectId!));
+        ref.invalidate(projectDetailsProvider(invoice.projectId!));
       }
       
       if (mounted) {

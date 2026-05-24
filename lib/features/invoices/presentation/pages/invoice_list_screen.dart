@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:hissab_dz/core/utils/app_formatters.dart';
 import 'package:hissab_dz/core/theme/theme.dart';
 import 'package:hissab_dz/core/widgets/app_empty_state.dart';
 import 'package:hissab_dz/core/widgets/app_drawer.dart';
@@ -131,7 +132,7 @@ class _InvoiceListScreenState extends ConsumerState<InvoiceListScreen>
           borderRadius: BorderRadius.circular(24),
         ),
         labelColor: AppTheme.primaryIndigo,
-        unselectedLabelColor: AppTheme.textSecondary,
+        unselectedLabelColor: Theme.of(context).textTheme.bodySmall?.color,
         labelStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12),
         unselectedLabelStyle: const TextStyle(
           fontWeight: FontWeight.w600,
@@ -149,7 +150,6 @@ class _InvoiceListScreenState extends ConsumerState<InvoiceListScreen>
     final overdueCount = invoices
         .where((invoice) => invoice.status.name == 'overdue')
         .length;
-    final currencyFormat = NumberFormat.currency(symbol: l10n.currencySymbol);
     final total = invoices.fold(0.0, (sum, invoice) => sum + invoice.total);
 
     return Card(
@@ -165,7 +165,7 @@ class _InvoiceListScreenState extends ConsumerState<InvoiceListScreen>
             _statDivider(),
             Expanded(
               child: _statItem(
-                currencyFormat.format(total),
+                AppFormatters.formatCurrency(total, l10n),
                 l10n.total,
                 compact: true,
               ),
@@ -185,7 +185,7 @@ class _InvoiceListScreenState extends ConsumerState<InvoiceListScreen>
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: TextStyle(
-            color: AppTheme.textPrimary,
+            color: Theme.of(context).textTheme.bodyLarge?.color,
             fontSize: compact ? 15 : 22,
             fontWeight: FontWeight.w800,
           ),
@@ -195,8 +195,8 @@ class _InvoiceListScreenState extends ConsumerState<InvoiceListScreen>
           label,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: const TextStyle(
-            color: AppTheme.textSecondary,
+          style: TextStyle(
+            color: Theme.of(context).textTheme.bodySmall?.color,
             fontSize: 11,
             fontWeight: FontWeight.w600,
           ),
@@ -221,7 +221,9 @@ class _InvoiceListScreenState extends ConsumerState<InvoiceListScreen>
   ) {
     final grouped = <String, List<Invoice>>{};
     for (final invoice in invoices) {
-      final date = DateFormat.yMMMMd(l10n.localeName).format(invoice.issueDate);
+      final date = l10n.localeName == 'ar'
+          ? DateFormat('dd/MM/yyyy', 'en').format(invoice.issueDate)
+          : DateFormat.yMMMMd(l10n.localeName).format(invoice.issueDate);
       grouped.putIfAbsent(date, () => []).add(invoice);
     }
 
@@ -232,8 +234,8 @@ class _InvoiceListScreenState extends ConsumerState<InvoiceListScreen>
           padding: const EdgeInsets.fromLTRB(16, 18, 16, 8),
           child: Text(
             entry.key.toUpperCase(),
-            style: const TextStyle(
-              color: AppTheme.textSecondary,
+            style: TextStyle(
+              color: Theme.of(context).textTheme.bodySmall?.color,
               fontSize: 11,
               fontWeight: FontWeight.w800,
               letterSpacing: 0.8,
@@ -290,9 +292,7 @@ class _InvoiceListScreenState extends ConsumerState<InvoiceListScreen>
         color: AppColors.invoice,
         title: invoice.client?.name ?? l10n.unknownClient,
         subtitle: invoice.invoiceNumber,
-        amount: NumberFormat.currency(
-          symbol: l10n.currencySymbol,
-        ).format(invoice.total),
+        amount: AppFormatters.formatCurrency(invoice.total, l10n),
         badge: StatusBadge(status: invoice.status),
         onTap: () => context.pushNamed(
           'invoice_details',

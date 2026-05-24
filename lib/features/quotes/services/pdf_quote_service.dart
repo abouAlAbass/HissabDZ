@@ -1,4 +1,5 @@
 import 'dart:io';
+
 import 'package:intl/intl.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
@@ -10,18 +11,18 @@ import 'package:printing/printing.dart';
 
 import '../../../l10n/app_localizations.dart';
 import '../../settings/domain/entities/business_profile.dart';
-import '../../invoices/domain/entities/invoice.dart';
-import '../domain/entities/refund.dart';
+import '../domain/entities/quote.dart';
+import '../domain/entities/quote_status.dart';
 
-class PdfRefundService {
+class PdfQuoteService {
   static const _ink = PdfColors.blueGrey900;
   static const _muted = PdfColors.blueGrey600;
   static const _line = PdfColors.blueGrey100;
   static const _soft = PdfColors.grey100;
+  static const _accent = PdfColors.deepPurple700;
 
-  static Future<File> generateRefundPdf({
-    required Refund refund,
-    required Invoice invoice,
+  static Future<File> generateQuotePdf({
+    required Quote quote,
     BusinessProfile? profile,
     required AppLocalizations l10n,
   }) async {
@@ -70,13 +71,13 @@ class PdfRefundService {
         margin: const pw.EdgeInsets.symmetric(horizontal: 34, vertical: 30),
         textDirection: textDirection,
         build: (context) => [
-          _header(refund, invoice, profile, logoImage, l10n, isRtl),
+          _header(quote, profile, logoImage, l10n, isRtl),
           pw.SizedBox(height: 16),
-          _infoRow(refund, invoice, l10n, isRtl),
+          _infoRow(quote, l10n, isRtl),
           pw.SizedBox(height: 20),
-          _itemsTable(refund, l10n, textDirection, isRtl),
+          _itemsTable(quote, l10n, textDirection, isRtl),
           pw.SizedBox(height: 18),
-          _totals(refund, invoice, l10n, isRtl),
+          _totals(quote, l10n, isRtl),
         ],
         footer: (context) => _footer(context, l10n, isRtl),
       ),
@@ -84,15 +85,14 @@ class PdfRefundService {
 
     final output = await getTemporaryDirectory();
     final file = File(
-      p.join(output.path, 'refund_${refund.refundNumber}.pdf'),
+      p.join(output.path, 'quote_${quote.quoteNumber}.pdf'),
     );
     await file.writeAsBytes(await pdf.save());
     return file;
   }
 
   static pw.Widget _header(
-    Refund refund,
-    Invoice invoice,
+    Quote quote,
     BusinessProfile? profile,
     pw.MemoryImage? logo,
     AppLocalizations l10n,
@@ -120,7 +120,7 @@ class PdfRefundService {
                   : pw.CrossAxisAlignment.end,
               children: [
                 pw.Text(
-                  _headline(l10n.refund, isRtl),
+                  _headline(l10n.quoteLabel, isRtl),
                   style: pw.TextStyle(
                     color: PdfColors.white,
                     fontSize: 25,
@@ -129,23 +129,26 @@ class PdfRefundService {
                 ),
                 pw.SizedBox(height: 8),
                 pw.Text(
-                  refund.refundNumber,
+                  quote.quoteNumber,
                   style: const pw.TextStyle(
                     color: PdfColors.blueGrey100,
                     fontSize: 11,
                   ),
                 ),
                 pw.SizedBox(height: 10),
+                _statusPill(quote.status, l10n),
+                pw.SizedBox(height: 10),
                 _headerMeta(
-                  l10n.refundDate,
-                  _formatDate(refund.date, l10n, isRtl),
+                  l10n.issueDate,
+                  _formatDate(quote.issueDate, l10n, isRtl),
                   isRtl,
                 ),
-                _headerMeta(
-                  l10n.invoiceNumberShort,
-                  invoice.invoiceNumber,
-                  isRtl,
-                ),
+                if (quote.validUntil != null)
+                  _headerMeta(
+                    l10n.validUntil,
+                    _formatDate(quote.validUntil!, l10n, isRtl),
+                    isRtl,
+                  ),
               ],
             ),
           ),
@@ -160,7 +163,10 @@ class PdfRefundService {
     AppLocalizations l10n,
     bool isRtl,
   ) {
-    final companyName = profile?.companyName ?? l10n.companyName;
+    final profileName = profile?.companyName.trim();
+    final companyName = profileName != null && profileName.isNotEmpty
+        ? profileName
+        : l10n.companyName;
 
     return pw.Row(
       crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -182,9 +188,14 @@ class PdfRefundService {
                 ),
               ),
               pw.SizedBox(height: 6),
-              if (profile?.address != null) _businessLine(profile!.address!),
-              if (profile?.phone != null) _businessLine(profile!.phone!),
-              if (profile?.email != null) _businessLine(profile!.email!),
+              if (profile?.address != null && profile!.address!.isNotEmpty)
+                _businessLine(profile.address!),
+              if (profile?.phone != null && profile!.phone!.isNotEmpty)
+                _businessLine(profile.phone!),
+              if (profile?.email != null && profile!.email!.isNotEmpty)
+                _businessLine(profile.email!),
+              if (profile?.website != null && profile!.website!.isNotEmpty)
+                _businessLine(profile.website!),
             ],
           ),
         ),
@@ -205,7 +216,33 @@ class PdfRefundService {
         child: pw.Image(logo, fit: pw.BoxFit.contain),
       );
     }
-    return pw.SizedBox(width: 62, height: 62);
+
+    final letters = companyName
+        .split(RegExp(r'\s+'))
+        .where((part) => part.isNotEmpty)
+        .take(2)
+        .map((part) => part.substring(0, 1))
+        .join()
+        .toUpperCase();
+
+    return pw.Container(
+      width: 62,
+      height: 62,
+      decoration: pw.BoxDecoration(
+        color: PdfColors.white,
+        borderRadius: pw.BorderRadius.circular(8),
+      ),
+      child: pw.Center(
+        child: pw.Text(
+          letters.isEmpty ? 'HD' : letters,
+          style: pw.TextStyle(
+            color: _ink,
+            fontSize: 18,
+            fontWeight: pw.FontWeight.bold,
+          ),
+        ),
+      ),
+    );
   }
 
   static pw.Widget _businessLine(String value) {
@@ -247,8 +284,7 @@ class PdfRefundService {
   }
 
   static pw.Widget _infoRow(
-    Refund refund,
-    Invoice invoice,
+    Quote quote,
     AppLocalizations l10n,
     bool isRtl,
   ) {
@@ -265,7 +301,7 @@ class PdfRefundService {
                   : pw.CrossAxisAlignment.start,
               children: [
                 pw.Text(
-                  invoice.client?.name ?? l10n.unknownClient,
+                  quote.client?.name ?? l10n.unknownClient,
                   style: pw.TextStyle(
                     color: _ink,
                     fontSize: 14,
@@ -273,10 +309,14 @@ class PdfRefundService {
                   ),
                 ),
                 pw.SizedBox(height: 5),
-                if (invoice.client?.address != null)
-                  _detailLine(invoice.client!.address!),
-                if (invoice.projectName != null)
-                  _detailLine('${l10n.project}: ${invoice.projectName!}'),
+                if (quote.client?.email != null)
+                  _detailLine(quote.client!.email!),
+                if (quote.client?.phone != null)
+                  _detailLine(quote.client!.phone!),
+                if (quote.client?.address != null)
+                  _detailLine(quote.client!.address!),
+                if (quote.projectName != null && quote.projectName!.isNotEmpty)
+                  _detailLine('${l10n.project}: ${quote.projectName!}'),
               ],
             ),
           ),
@@ -285,18 +325,30 @@ class PdfRefundService {
         pw.Expanded(
           flex: 4,
           child: _panel(
-            title: l10n.refundDetails,
+            title: l10n.quoteDetails,
             child: pw.Column(
               children: [
-                _infoLine(l10n.refundNumber, refund.refundNumber, isRtl),
+                _infoLine(l10n.quoteNumber, quote.quoteNumber, isRtl),
                 _thinDivider(),
                 _infoLine(
-                  l10n.refundDate,
-                  _formatDate(refund.date, l10n, isRtl),
+                  l10n.issueDate,
+                  _formatDate(quote.issueDate, l10n, isRtl),
                   isRtl,
                 ),
+                if (quote.validUntil != null) ...[
+                  _thinDivider(),
+                  _infoLine(
+                    l10n.validUntil,
+                    _formatDate(quote.validUntil!, l10n, isRtl),
+                    isRtl,
+                  ),
+                ],
                 _thinDivider(),
-                _infoLine(l10n.invoiceNumberShort, invoice.invoiceNumber, isRtl),
+                _infoLine(
+                  l10n.status,
+                  _quoteStatusLabel(quote.status, l10n),
+                  isRtl,
+                ),
               ],
             ),
           ),
@@ -332,6 +384,7 @@ class PdfRefundService {
   }
 
   static pw.Widget _detailLine(String value) {
+    if (value.trim().isEmpty) return pw.SizedBox();
     return pw.Padding(
       padding: const pw.EdgeInsets.only(bottom: 3),
       child: pw.Text(
@@ -368,7 +421,7 @@ class PdfRefundService {
   }
 
   static pw.Widget _itemsTable(
-    Refund refund,
+    Quote quote,
     AppLocalizations l10n,
     pw.TextDirection textDirection,
     bool isRtl,
@@ -381,9 +434,9 @@ class PdfRefundService {
           headers: isRtl 
             ? [l10n.amount, l10n.price, l10n.quantity, l10n.description]
             : [l10n.description, l10n.quantity, l10n.price, l10n.amount],
-          data: refund.items.map((item) {
+          data: quote.items.map((item) {
             final row = [
-              item.description ?? '',
+              item.description,
               _quantity(item.quantity),
               _formatCurrency(item.unitPrice, l10n, isRtl),
               _formatCurrency(item.amount, l10n, isRtl),
@@ -393,8 +446,13 @@ class PdfRefundService {
           border: const pw.TableBorder(
             top: pw.BorderSide(color: _line, width: 0.8),
             bottom: pw.BorderSide(color: _line, width: 0.8),
+            horizontalInside: pw.BorderSide(
+              color: PdfColors.grey200,
+              width: 0.5,
+            ),
           ),
           headerDecoration: const pw.BoxDecoration(color: _ink),
+          oddRowDecoration: const pw.BoxDecoration(color: _soft),
           headerStyle: pw.TextStyle(
             color: PdfColors.white,
             fontSize: 9,
@@ -403,6 +461,14 @@ class PdfRefundService {
           cellStyle: const pw.TextStyle(
             color: PdfColors.blueGrey800,
             fontSize: 9,
+          ),
+          cellPadding: const pw.EdgeInsets.symmetric(
+            horizontal: 8,
+            vertical: 8,
+          ),
+          headerPadding: const pw.EdgeInsets.symmetric(
+            horizontal: 8,
+            vertical: 8,
           ),
           headerAlignment: pw.Alignment.center,
           cellAlignment: pw.Alignment.centerLeft,
@@ -430,39 +496,69 @@ class PdfRefundService {
   static pw.Widget _sectionTitle(String title) {
     return pw.Padding(
       padding: const pw.EdgeInsets.only(bottom: 8),
-      child: pw.Text(
-        title,
-        style: pw.TextStyle(
-          color: _ink,
-          fontSize: 13,
-          fontWeight: pw.FontWeight.bold,
-        ),
+      child: pw.Row(
+        children: [
+          pw.Container(width: 4, height: 15, color: _accent),
+          pw.SizedBox(width: 7),
+          pw.Text(
+            title,
+            style: pw.TextStyle(
+              color: _ink,
+              fontSize: 13,
+              fontWeight: pw.FontWeight.bold,
+            ),
+          ),
+        ],
       ),
     );
   }
 
   static pw.Widget _totals(
-    Refund refund,
-    Invoice invoice,
+    Quote quote,
     AppLocalizations l10n,
     bool isRtl,
   ) {
+    final taxAmount = quote.subtotal * quote.taxRate / 100;
+
     return pw.Row(
       crossAxisAlignment: pw.CrossAxisAlignment.start,
       children: [
-        pw.Expanded(flex: 5, child: _notes(refund.reason, l10n)),
+        pw.Expanded(flex: 5, child: _notes(quote.notes, l10n)),
         pw.SizedBox(width: 18),
         pw.Expanded(
           flex: 4,
-          child: pw.Column(
-            children: [
-              _totalRow(
-                l10n.refundAmount,
-                '- ${_formatCurrency(refund.totalAmount, l10n, isRtl)}',
-                isRtl,
-                isHighlighted: true,
-              ),
-            ],
+          child: pw.Container(
+            decoration: pw.BoxDecoration(
+              border: pw.Border.all(color: _line, width: 0.8),
+              borderRadius: pw.BorderRadius.circular(8),
+            ),
+            child: pw.Column(
+              children: [
+                _totalRow(
+                  l10n.subtotal,
+                  _formatCurrency(quote.subtotal, l10n, isRtl),
+                  isRtl,
+                ),
+                _thinDivider(),
+                _totalRow(
+                  '${l10n.totalTax} (${_quantity(quote.taxRate)}%)',
+                  _formatCurrency(taxAmount, l10n, isRtl),
+                  isRtl,
+                ),
+                _thinDivider(),
+                _totalRow(
+                  l10n.discount,
+                  '- ${_formatCurrency(quote.discountAmount, l10n, isRtl)}',
+                  isRtl,
+                ),
+                _totalRow(
+                  l10n.total,
+                  _formatCurrency(quote.total, l10n, isRtl),
+                  isRtl,
+                  isHighlighted: true,
+                ),
+              ],
+            ),
           ),
         ),
       ],
@@ -481,7 +577,7 @@ class PdfRefundService {
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
           pw.Text(
-            l10n.refundReason,
+            l10n.notes,
             style: pw.TextStyle(
               color: _muted,
               fontSize: 9,
@@ -490,7 +586,9 @@ class PdfRefundService {
           ),
           pw.SizedBox(height: 7),
           pw.Text(
-            notes ?? '',
+            notes?.trim().isNotEmpty == true
+                ? notes!.trim()
+                : l10n.paymentTerms,
             style: const pw.TextStyle(
               color: PdfColors.blueGrey700,
               fontSize: 9,
@@ -510,17 +608,27 @@ class PdfRefundService {
     final color = isHighlighted ? PdfColors.white : _ink;
     return pw.Container(
       color: isHighlighted ? _ink : PdfColors.white,
-      padding: const pw.EdgeInsets.all(12),
+      padding: pw.EdgeInsets.symmetric(
+        horizontal: 12,
+        vertical: isHighlighted ? 10 : 7,
+      ),
       child: pw.Row(
         mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
         children: [
-          pw.Text(label, style: pw.TextStyle(color: color, fontSize: 10)),
+          pw.Text(
+            label,
+            style: pw.TextStyle(
+              color: color,
+              fontSize: isHighlighted ? 12 : 9,
+              fontWeight: isHighlighted ? pw.FontWeight.bold : null,
+            ),
+          ),
           pw.Text(
             value,
             style: pw.TextStyle(
               color: color,
-              fontSize: 12,
-              fontWeight: pw.FontWeight.bold,
+              fontSize: isHighlighted ? 13 : 9,
+              fontWeight: isHighlighted ? pw.FontWeight.bold : null,
             ),
           ),
         ],
@@ -542,10 +650,10 @@ class PdfRefundService {
         mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
         children: [
           pw.Text(
-            l10n.refund,
+            l10n.thankyou,
             style: pw.TextStyle(
-              color: _muted,
-              fontSize: 8,
+              color: _ink,
+              fontSize: 9,
               fontWeight: pw.FontWeight.bold,
             ),
           ),
@@ -558,13 +666,66 @@ class PdfRefundService {
     );
   }
 
-  static String _quantity(double value) {
-    if (value == value.roundToDouble()) return value.toStringAsFixed(0);
-    return value.toStringAsFixed(2);
+  static pw.Widget _statusPill(QuoteStatus status, AppLocalizations l10n) {
+    final colors = _statusColors(status);
+    return pw.Container(
+      padding: const pw.EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: pw.BoxDecoration(
+        color: colors.$1,
+        borderRadius: pw.BorderRadius.circular(20),
+      ),
+      child: pw.Text(
+        _quoteStatusLabel(status, l10n),
+        style: pw.TextStyle(
+          color: colors.$2,
+          fontSize: 8.5,
+          fontWeight: pw.FontWeight.bold,
+        ),
+      ),
+    );
+  }
+
+  static (PdfColor, PdfColor) _statusColors(QuoteStatus status) {
+    switch (status) {
+      case QuoteStatus.accepted:
+        return (PdfColors.green100, PdfColors.green800);
+      case QuoteStatus.sent:
+        return (PdfColors.blue100, PdfColors.blue800);
+      case QuoteStatus.converted:
+        return (PdfColors.indigo100, PdfColors.indigo800);
+      case QuoteStatus.rejected:
+        return (PdfColors.red100, PdfColors.red800);
+      case QuoteStatus.draft:
+        return (PdfColors.blueGrey100, PdfColors.blueGrey800);
+      case QuoteStatus.expired:
+        return (PdfColors.orange100, PdfColors.orange800);
+    }
+  }
+
+  static String _quoteStatusLabel(QuoteStatus status, AppLocalizations l10n) {
+    switch (status) {
+      case QuoteStatus.draft:
+        return l10n.draft;
+      case QuoteStatus.sent:
+        return l10n.sent;
+      case QuoteStatus.accepted:
+        return l10n.accepted;
+      case QuoteStatus.converted:
+        return l10n.converted;
+      case QuoteStatus.rejected:
+        return l10n.rejected;
+      case QuoteStatus.expired:
+        return l10n.expired;
+    }
   }
 
   static pw.Widget _thinDivider() {
-    return pw.Container(height: 0.5, color: _line);
+    return pw.Container(height: 0.7, color: _line);
+  }
+
+  static String _quantity(double value) {
+    if (value == value.roundToDouble()) return value.toStringAsFixed(0);
+    return value.toStringAsFixed(2);
   }
 
   static String _headline(String value, bool isRtl) {

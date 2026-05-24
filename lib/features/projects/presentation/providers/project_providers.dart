@@ -5,6 +5,8 @@ import 'package:hissab_dz/features/projects/domain/entities/expense_type.dart';
 import 'package:hissab_dz/features/projects/domain/entities/project.dart';
 import 'package:hissab_dz/features/projects/domain/entities/project_expense.dart';
 
+import 'package:hissab_dz/features/projects/domain/entities/project_photo.dart';
+
 final projectRepositoryProvider = Provider<ProjectRepository>((ref) {
   final db = ref.watch(appDatabaseProvider);
   return ProjectRepository(db);
@@ -27,6 +29,11 @@ final projectExpensesProvider =
           .watch(projectRepositoryProvider)
           .watchExpensesForProject(projectId);
     });
+
+final projectPhotosProvider =
+    StreamProvider.family<List<ProjectPhoto>, int>((ref, projectId) {
+  return ref.watch(projectRepositoryProvider).watchPhotosForProject(projectId);
+});
 
 final expensesListProvider = StreamProvider<List<ProjectExpense>>((ref) {
   return ref.watch(projectRepositoryProvider).watchExpenses();

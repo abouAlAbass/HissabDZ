@@ -353,7 +353,7 @@ class __$$InvoiceImplCopyWithImpl<$Res>
 
 /// @nodoc
 @JsonSerializable()
-class _$InvoiceImpl implements _Invoice {
+class _$InvoiceImpl extends _Invoice {
   const _$InvoiceImpl({
     this.id,
     required this.clientId,
@@ -373,7 +373,8 @@ class _$InvoiceImpl implements _Invoice {
     final List<InvoiceItem> items = const [],
     this.client,
     this.projectName,
-  }) : _items = items;
+  }) : _items = items,
+       super._();
 
   factory _$InvoiceImpl.fromJson(Map<String, dynamic> json) =>
       _$$InvoiceImplFromJson(json);
@@ -505,7 +506,7 @@ class _$InvoiceImpl implements _Invoice {
   }
 }
 
-abstract class _Invoice implements Invoice {
+abstract class _Invoice extends Invoice {
   const factory _Invoice({
     final int? id,
     required final int clientId,
@@ -526,6 +527,7 @@ abstract class _Invoice implements Invoice {
     final Client? client,
     final String? projectName,
   }) = _$InvoiceImpl;
+  const _Invoice._() : super._();
 
   factory _Invoice.fromJson(Map<String, dynamic> json) = _$InvoiceImpl.fromJson;
 

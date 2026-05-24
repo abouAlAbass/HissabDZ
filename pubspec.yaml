@@ -45,6 +45,8 @@ dependencies:
   file_selector: ^1.0.3
   open_filex: ^4.5.0
   google_fonts: ^6.2.1
+  shared_preferences: ^2.5.5
+  image_picker: ^1.2.2
 
 dev_dependencies:
   flutter_test:
@@ -70,3 +72,11 @@ flutter:
   generate: true
   assets:
     - assets/images/iconHissabDZ.jpg
+    - assets/fonts/Amiri-Regular.ttf
+    - assets/fonts/Amiri-Bold.ttf
+    - assets/fonts/Amiri-Italic.ttf
+    - assets/fonts/Amiri-BoldItalic.ttf
+
+
+
+

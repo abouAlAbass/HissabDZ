@@ -8,6 +8,7 @@ import '../providers/settings_providers.dart';
 import '../../domain/entities/business_profile.dart';
 import '../../../projects/presentation/providers/project_providers.dart';
 import '../../../../core/providers/locale_provider.dart';
+import '../../../../core/providers/theme_provider.dart';
 import '../../../../l10n/app_localizations.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -95,6 +96,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 children: [
                   // ── Logo Section ──────────────────────────────────────────
                   _buildLanguageSection(l10n, currentLocale),
+                  const SizedBox(height: 16),
+                  _buildThemeSection(l10n),
                   const SizedBox(height: 24),
 
                   Text(
@@ -189,6 +192,55 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, st) => Center(child: Text('${l10n.error}: $e')),
       ),
+    );
+  }
+
+  Widget _buildThemeSection(AppLocalizations l10n) {
+    final themeMode = ref.watch(themeProvider);
+    final themeLabel = themeMode == ThemeMode.system
+        ? l10n.systemTheme
+        : themeMode == ThemeMode.dark
+            ? l10n.darkTheme
+            : l10n.lightTheme;
+
+    return Card(
+      child: ListTile(
+        leading: const Icon(Icons.brightness_medium),
+        title: Text(l10n.theme),
+        subtitle: Text(themeLabel),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () => _showThemeDialog(l10n, themeMode),
+      ),
+    );
+  }
+
+  void _showThemeDialog(AppLocalizations l10n, ThemeMode currentMode) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(l10n.selectTheme),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _themeTile(l10n.systemTheme, ThemeMode.system, currentMode),
+            _themeTile(l10n.lightTheme, ThemeMode.light, currentMode),
+            _themeTile(l10n.darkTheme, ThemeMode.dark, currentMode),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _themeTile(String label, ThemeMode mode, ThemeMode currentMode) {
+    return ListTile(
+      title: Text(label),
+      trailing: mode == currentMode
+          ? const Icon(Icons.check_circle, color: Colors.green)
+          : null,
+      onTap: () {
+        ref.read(themeProvider.notifier).setThemeMode(mode);
+        Navigator.pop(context);
+      },
     );
   }
 

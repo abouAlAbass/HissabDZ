@@ -88,15 +88,18 @@ class EntityCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: AppSpacing.xxs),
-                    const Icon(
+                    Icon(
                       Icons.chevron_right,
                       size: 18,
-                      color: AppColors.textMuted,
+                      color: Theme.of(context).textTheme.bodySmall?.color,
                     ),
                   ],
                 )
               else
-                const Icon(Icons.chevron_right, color: AppColors.textMuted),
+                Icon(
+                  Icons.chevron_right,
+                  color: Theme.of(context).textTheme.bodySmall?.color,
+                ),
             ],
           ),
         ),

@@ -5,7 +5,9 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
+import 'package:flutter/services.dart';
 import 'package:printing/printing.dart';
+
 
 import '../../../l10n/app_localizations.dart';
 import '../../invoices/domain/entities/invoice.dart';
@@ -33,12 +35,24 @@ class PdfProjectReportService {
   }) async {
     final isRtl = l10n.localeName == 'ar';
     final textDirection = isRtl ? pw.TextDirection.rtl : pw.TextDirection.ltr;
+    
+    // Load Fonts
     final regular = await PdfGoogleFonts.notoSansRegular();
     final bold = await PdfGoogleFonts.notoSansBold();
-    final arabicRegular = await PdfGoogleFonts.cairoRegular();
-    final arabicBold = await PdfGoogleFonts.cairoBold();
-    final currencyFormat = NumberFormat.currency(symbol: l10n.currencySymbol);
-    final dateFormat = DateFormat.yMMMd(l10n.localeName);
+    
+    pw.Font arabicRegular;
+    pw.Font arabicBold;
+    
+    try {
+      final arabicRegularData = await rootBundle.load('assets/fonts/Amiri-Regular.ttf');
+      final arabicBoldData = await rootBundle.load('assets/fonts/Amiri-Bold.ttf');
+      arabicRegular = pw.Font.ttf(arabicRegularData);
+      arabicBold = pw.Font.ttf(arabicBoldData);
+    } catch (e) {
+      // Fallback to Google Fonts if local assets are missing
+      arabicRegular = await PdfGoogleFonts.amiriRegular();
+      arabicBold = await PdfGoogleFonts.amiriBold();
+    }
 
     final paidByInvoice = <int, double>{};
     for (final payment in payments) {
@@ -75,16 +89,16 @@ class PdfProjectReportService {
         margin: const pw.EdgeInsets.symmetric(horizontal: 30, vertical: 30),
         textDirection: textDirection,
         build: (context) => [
-          _header(project, l10n, dateFormat, isRtl),
+          _header(project, l10n, isRtl),
           pw.SizedBox(height: 16),
           _summaryGrid(
             l10n,
-            currencyFormat,
             invoiceTotal,
             expenseTotal,
             paidTotal,
             remainingTotal,
             profit,
+            isRtl,
           ),
           pw.SizedBox(height: 20),
           _sectionTitle(l10n.relatedInvoices),
@@ -92,18 +106,16 @@ class PdfProjectReportService {
             invoices,
             paidByInvoice,
             l10n,
-            currencyFormat,
-            dateFormat,
             textDirection,
+            isRtl,
           ),
           pw.SizedBox(height: 18),
           _sectionTitle(l10n.expenses),
           _expensesTable(
             expenses,
             l10n,
-            currencyFormat,
-            dateFormat,
             textDirection,
+            isRtl,
           ),
           pw.SizedBox(height: 18),
           _sectionTitle(l10n.payments),
@@ -111,9 +123,8 @@ class PdfProjectReportService {
             payments,
             invoiceById,
             l10n,
-            currencyFormat,
-            dateFormat,
             textDirection,
+            isRtl,
           ),
           if (refunds.isNotEmpty) ...[
             pw.SizedBox(height: 18),
@@ -122,13 +133,12 @@ class PdfProjectReportService {
               refunds,
               invoiceById,
               l10n,
-              currencyFormat,
-              dateFormat,
               textDirection,
+              isRtl,
             ),
           ],
         ],
-        footer: (context) => _footer(context, project, dateFormat, l10n, isRtl),
+        footer: (context) => _footer(context, project, l10n, isRtl),
       ),
     );
 
@@ -143,7 +153,6 @@ class PdfProjectReportService {
   static pw.Widget _header(
     Project project,
     AppLocalizations l10n,
-    DateFormat dateFormat,
     bool isRtl,
   ) {
     return pw.Container(
@@ -160,7 +169,7 @@ class PdfProjectReportService {
           pw.Row(
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-            children: _ordered(isRtl, [
+            children: [
               pw.Expanded(
                 child: pw.Column(
                   crossAxisAlignment: isRtl
@@ -188,7 +197,7 @@ class PdfProjectReportService {
                 ),
               ),
               _statusPill(project.status, l10n),
-            ]),
+            ],
           ),
           pw.SizedBox(height: 14),
           pw.Wrap(
@@ -199,7 +208,7 @@ class PdfProjectReportService {
                 l10n.clientName,
                 project.clientName ?? l10n.notProvided,
               ),
-              _headerChip(l10n.date, dateFormat.format(DateTime.now())),
+              _headerChip(l10n.date, _formatDate(DateTime.now(), l10n, isRtl)),
               if (project.siteAddress != null &&
                   project.siteAddress!.isNotEmpty)
                 _headerChip(l10n.siteAddress, project.siteAddress!),
@@ -226,37 +235,37 @@ class PdfProjectReportService {
 
   static pw.Widget _summaryGrid(
     AppLocalizations l10n,
-    NumberFormat currencyFormat,
     double invoiceTotal,
     double expenseTotal,
     double paidTotal,
     double remainingTotal,
     double profit,
+    bool isRtl,
   ) {
     final items = [
       _SummaryItem(
         l10n.invoices,
-        currencyFormat.format(invoiceTotal),
+        _formatCurrency(invoiceTotal, l10n, isRtl),
         PdfColors.indigo700,
       ),
       _SummaryItem(
         l10n.expenses,
-        currencyFormat.format(expenseTotal),
+        _formatCurrency(expenseTotal, l10n, isRtl),
         PdfColors.red700,
       ),
       _SummaryItem(
         l10n.paidAmount,
-        currencyFormat.format(paidTotal),
+        _formatCurrency(paidTotal, l10n, isRtl),
         PdfColors.green700,
       ),
       _SummaryItem(
         l10n.remainingToPay,
-        currencyFormat.format(remainingTotal),
+        _formatCurrency(remainingTotal, l10n, isRtl),
         PdfColors.orange700,
       ),
       _SummaryItem(
         l10n.estimatedProfit,
-        currencyFormat.format(profit),
+        _formatCurrency(profit, l10n, isRtl),
         profit >= 0 ? PdfColors.teal700 : PdfColors.red700,
       ),
     ];
@@ -320,9 +329,8 @@ class PdfProjectReportService {
     List<Invoice> invoices,
     Map<int, double> paidByInvoice,
     AppLocalizations l10n,
-    NumberFormat currencyFormat,
-    DateFormat dateFormat,
     pw.TextDirection textDirection,
+    bool isRtl,
   ) {
     if (invoices.isEmpty) return _emptyLine(l10n.noInvoices);
 
@@ -331,16 +339,23 @@ class PdfProjectReportService {
       final remaining = invoice.total - paid;
       return [
         invoice.invoiceNumber,
-        dateFormat.format(invoice.issueDate),
+        _formatDate(invoice.issueDate, l10n, isRtl),
         _invoiceStatusPill(invoice.status, l10n),
-        currencyFormat.format(invoice.total),
-        currencyFormat.format(paid),
-        currencyFormat.format(remaining > 0 ? remaining : 0),
+        _formatCurrency(invoice.total, l10n, isRtl),
+        _formatCurrency(paid, l10n, isRtl),
+        _formatCurrency(remaining > 0 ? remaining : 0, l10n, isRtl),
       ];
     }).toList();
 
     return _table(
-      headers: [
+      headers: isRtl ? [
+        l10n.remainingToPay,
+        l10n.paidAmount,
+        l10n.total,
+        l10n.status,
+        l10n.date,
+        l10n.invoiceNumber,
+      ] : [
         l10n.invoiceNumber,
         l10n.date,
         l10n.status,
@@ -348,9 +363,27 @@ class PdfProjectReportService {
         l10n.paidAmount,
         l10n.remainingToPay,
       ],
-      rows: rows,
+      rows: isRtl ? rows.map((r) => r.reversed.toList()).toList() : rows,
       textDirection: textDirection,
-      columnWidths: const {
+      isRtl: isRtl,
+      alignments: isRtl ? {
+        0: pw.Alignment.centerLeft,
+        1: pw.Alignment.centerLeft,
+        2: pw.Alignment.centerLeft,
+        5: pw.Alignment.centerRight,
+      } : {
+        3: pw.Alignment.centerRight,
+        4: pw.Alignment.centerRight,
+        5: pw.Alignment.centerRight,
+      },
+      columnWidths: isRtl ? const {
+        0: pw.FlexColumnWidth(1.4),
+        1: pw.FlexColumnWidth(1.3),
+        2: pw.FlexColumnWidth(1.3),
+        3: pw.FlexColumnWidth(1.2),
+        4: pw.FlexColumnWidth(1.4),
+        5: pw.FlexColumnWidth(1.5),
+      } : const {
         0: pw.FlexColumnWidth(1.5),
         1: pw.FlexColumnWidth(1.4),
         2: pw.FlexColumnWidth(1.2),
@@ -358,25 +391,25 @@ class PdfProjectReportService {
         4: pw.FlexColumnWidth(1.3),
         5: pw.FlexColumnWidth(1.4),
       },
-      alignments: const {
-        3: pw.Alignment.centerRight,
-        4: pw.Alignment.centerRight,
-        5: pw.Alignment.centerRight,
-      },
     );
   }
-
   static pw.Widget _expensesTable(
     List<ProjectExpense> expenses,
     AppLocalizations l10n,
-    NumberFormat currencyFormat,
-    DateFormat dateFormat,
     pw.TextDirection textDirection,
+    bool isRtl,
   ) {
     if (expenses.isEmpty) return _emptyLine(l10n.noExpenses);
 
     return _table(
-      headers: [
+      headers: isRtl ? [
+        l10n.amount,
+        l10n.paymentMethod,
+        l10n.supplier,
+        l10n.expenseType,
+        l10n.expense,
+        l10n.date,
+      ] : [
         l10n.date,
         l10n.expense,
         l10n.expenseType,
@@ -385,17 +418,32 @@ class PdfProjectReportService {
         l10n.amount,
       ],
       rows: expenses.map<List<dynamic>>((expense) {
-        return [
-          dateFormat.format(expense.date),
+        final row = [
+          _formatDate(expense.date, l10n, isRtl),
           expense.label,
           expense.expenseTypeName ?? '',
           expense.supplier ?? '',
           expense.paymentMethod ?? '',
-          currencyFormat.format(expense.amount),
+          _formatCurrency(expense.amount, l10n, isRtl),
         ];
+        return isRtl ? row.reversed.toList() : row;
       }).toList(),
       textDirection: textDirection,
-      columnWidths: const {
+      isRtl: isRtl,
+      alignments: isRtl ? {
+        0: pw.Alignment.centerLeft,
+        5: pw.Alignment.centerRight,
+      } : {
+        5: pw.Alignment.centerRight,
+      },
+      columnWidths: isRtl ? const {
+        0: pw.FlexColumnWidth(1.2),
+        1: pw.FlexColumnWidth(1.4),
+        2: pw.FlexColumnWidth(1.4),
+        3: pw.FlexColumnWidth(1.4),
+        4: pw.FlexColumnWidth(2.2),
+        5: pw.FlexColumnWidth(1.2),
+      } : const {
         0: pw.FlexColumnWidth(1.2),
         1: pw.FlexColumnWidth(2.2),
         2: pw.FlexColumnWidth(1.4),
@@ -403,22 +451,25 @@ class PdfProjectReportService {
         4: pw.FlexColumnWidth(1.4),
         5: pw.FlexColumnWidth(1.2),
       },
-      alignments: const {5: pw.Alignment.centerRight},
     );
   }
-
   static pw.Widget _paymentsTable(
     List<Payment> payments,
     Map<int, Invoice> invoiceById,
     AppLocalizations l10n,
-    NumberFormat currencyFormat,
-    DateFormat dateFormat,
     pw.TextDirection textDirection,
+    bool isRtl,
   ) {
     if (payments.isEmpty) return _emptyLine(l10n.noPayments);
 
     return _table(
-      headers: [
+      headers: isRtl ? [
+        l10n.amount,
+        l10n.paymentMethod,
+        l10n.clientName,
+        l10n.invoiceNumber,
+        l10n.date,
+      ] : [
         l10n.date,
         l10n.invoiceNumber,
         l10n.clientName,
@@ -427,36 +478,52 @@ class PdfProjectReportService {
       ],
       rows: payments.map<List<dynamic>>((payment) {
         final invoice = invoiceById[payment.invoiceId];
-        return [
-          dateFormat.format(payment.date),
+        final row = [
+          _formatDate(payment.date, l10n, isRtl),
           invoice?.invoiceNumber ?? '${payment.invoiceId}',
           payment.client?.name ?? invoice?.client?.name ?? '',
           payment.method ?? '',
-          currencyFormat.format(payment.amount),
+          _formatCurrency(payment.amount, l10n, isRtl),
         ];
+        return isRtl ? row.reversed.toList() : row;
       }).toList(),
       textDirection: textDirection,
-      columnWidths: const {
+      isRtl: isRtl,
+      alignments: isRtl ? {
+        0: pw.Alignment.centerLeft,
+        4: pw.Alignment.centerRight,
+      } : {
+        4: pw.Alignment.centerRight,
+      },
+      columnWidths: isRtl ? const {
+        0: pw.FlexColumnWidth(1.2),
+        1: pw.FlexColumnWidth(1.4),
+        2: pw.FlexColumnWidth(2),
+        3: pw.FlexColumnWidth(1.4),
+        4: pw.FlexColumnWidth(1.2),
+      } : const {
         0: pw.FlexColumnWidth(1.2),
         1: pw.FlexColumnWidth(1.4),
         2: pw.FlexColumnWidth(2),
         3: pw.FlexColumnWidth(1.4),
         4: pw.FlexColumnWidth(1.2),
       },
-      alignments: const {4: pw.Alignment.centerRight},
     );
   }
-
   static pw.Widget _refundsTable(
     List<Refund> refunds,
     Map<int, Invoice> invoiceById,
     AppLocalizations l10n,
-    NumberFormat currencyFormat,
-    DateFormat dateFormat,
     pw.TextDirection textDirection,
+    bool isRtl,
   ) {
     return _table(
-      headers: [
+      headers: isRtl ? [
+        l10n.amount,
+        l10n.invoiceNumberShort,
+        l10n.refundNumber,
+        l10n.date,
+      ] : [
         l10n.date,
         l10n.refundNumber,
         l10n.invoiceNumberShort,
@@ -464,20 +531,33 @@ class PdfProjectReportService {
       ],
       rows: refunds.map<List<dynamic>>((refund) {
         final invoice = invoiceById[refund.invoiceId];
-        return [
-          dateFormat.format(refund.date),
+        final row = [
+          _formatDate(refund.date, l10n, isRtl),
           refund.refundNumber,
           invoice?.invoiceNumber ?? '',
-          currencyFormat.format(refund.totalAmount),
+          _formatCurrency(refund.totalAmount, l10n, isRtl),
         ];
+        return isRtl ? row.reversed.toList() : row;
       }).toList(),
       textDirection: textDirection,
-      columnWidths: const {
+      isRtl: isRtl,
+      alignments: isRtl ? {
+        0: pw.Alignment.centerLeft,
+        3: pw.Alignment.centerRight,
+      } : {
+        3: pw.Alignment.centerRight,
+      },
+      columnWidths: isRtl ? const {
+        0: pw.FlexColumnWidth(1.2),
+        1: pw.FlexColumnWidth(1.2),
+        2: pw.FlexColumnWidth(1.5),
+        3: pw.FlexColumnWidth(1.2),
+      } : const {
         0: pw.FlexColumnWidth(1.2),
         1: pw.FlexColumnWidth(1.5),
         2: pw.FlexColumnWidth(1.2),
+        3: pw.FlexColumnWidth(1.2),
       },
-      alignments: const {2: pw.Alignment.centerRight},
     );
   }
 
@@ -486,6 +566,7 @@ class PdfProjectReportService {
     required List<List<dynamic>> rows,
     required pw.TextDirection textDirection,
     required Map<int, pw.TableColumnWidth> columnWidths,
+    required bool isRtl,
     Map<int, pw.AlignmentGeometry> alignments = const {},
   }) {
     return pw.TableHelper.fromTextArray(
@@ -509,11 +590,10 @@ class PdfProjectReportService {
       ),
       cellPadding: const pw.EdgeInsets.symmetric(horizontal: 6, vertical: 7),
       headerPadding: const pw.EdgeInsets.symmetric(horizontal: 6, vertical: 7),
+      headerAlignment: pw.Alignment.center,
       cellAlignment: pw.Alignment.centerLeft,
       cellAlignments: alignments,
       columnWidths: columnWidths,
-      tableDirection: textDirection,
-      headerDirection: textDirection,
     );
   }
 
@@ -536,7 +616,6 @@ class PdfProjectReportService {
   static pw.Widget _footer(
     pw.Context context,
     Project project,
-    DateFormat dateFormat,
     AppLocalizations l10n,
     bool isRtl,
   ) {
@@ -547,7 +626,7 @@ class PdfProjectReportService {
       ),
       child: pw.Row(
         mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-        children: _ordered(isRtl, [
+        children: [
           pw.Text(
             project.name,
             style: pw.TextStyle(
@@ -557,10 +636,10 @@ class PdfProjectReportService {
             ),
           ),
           pw.Text(
-            '${dateFormat.format(DateTime.now())} - ${context.pageNumber}/${context.pagesCount}',
+            '${_formatDate(DateTime.now(), l10n, isRtl)} - ${context.pageNumber}/${context.pagesCount}',
             style: const pw.TextStyle(color: _muted, fontSize: 8),
           ),
-        ]),
+        ],
       ),
     );
   }
@@ -680,8 +759,19 @@ class PdfProjectReportService {
         .toLowerCase();
   }
 
-  static List<pw.Widget> _ordered(bool isRtl, List<pw.Widget> children) {
-    return isRtl ? children.reversed.toList() : children;
+  static String _formatDate(DateTime date, AppLocalizations l10n, bool isRtl) {
+    if (!isRtl) return DateFormat.yMMMd(l10n.localeName).format(date);
+    return DateFormat('dd/MM/yyyy', 'en').format(date);
+  }
+
+  static String _formatCurrency(double amount, AppLocalizations l10n, bool isRtl) {
+    final formatter = NumberFormat.currency(locale: 'en_US', symbol: '');
+    final formattedAmount = formatter.format(amount).trim();
+    if (!isRtl) return '${l10n.currencySymbol} $formattedAmount';
+    if (isRtl) {
+      return '\u200F$formattedAmount ${l10n.currencySymbol}';
+    }
+    return '${l10n.currencySymbol} $formattedAmount';
   }
 }
 

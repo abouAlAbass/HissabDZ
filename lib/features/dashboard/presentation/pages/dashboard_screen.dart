@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
+import 'package:hissab_dz/core/utils/app_formatters.dart';
 
 import '../../../../core/theme/theme.dart';
+import '../../../../core/providers/theme_provider.dart';
 import '../../../../core/widgets/app_drawer.dart';
 import '../../../../core/widgets/app_empty_state.dart';
 import '../../../../core/widgets/entity_card.dart';
@@ -28,6 +29,15 @@ class DashboardScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(l10n.dashboard),
         actions: [
+          IconButton(
+            tooltip: 'Toggle Theme',
+            icon: Icon(
+              Theme.of(context).brightness == Brightness.dark
+                  ? Icons.light_mode_outlined
+                  : Icons.dark_mode_outlined,
+            ),
+            onPressed: () => ref.read(themeProvider.notifier).toggleTheme(),
+          ),
           IconButton(
             tooltip: l10n.globalSearch,
             icon: const Icon(Icons.search),
@@ -107,7 +117,6 @@ class DashboardScreen extends ConsumerWidget {
     AppLocalizations l10n,
     Map<String, dynamic> stats,
   ) {
-    final currencyFormat = NumberFormat.currency(symbol: l10n.currencySymbol);
 
     return Container(
       width: double.infinity,
@@ -146,7 +155,7 @@ class DashboardScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: AppSpacing.lg),
                 Text(
-                  currencyFormat.format(stats['collectedThisMonth']),
+                  AppFormatters.formatCurrency(stats['collectedThisMonth'], l10n),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
@@ -194,7 +203,7 @@ class DashboardScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: AppSpacing.sm),
                   Text(
-                    currencyFormat.format(stats['outstandingAmount']),
+                    AppFormatters.formatCurrency(stats['outstandingAmount'], l10n),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: Theme.of(
@@ -313,7 +322,6 @@ class DashboardScreen extends ConsumerWidget {
     AppLocalizations l10n,
     Map<String, dynamic> stats,
   ) {
-    final currencyFormat = NumberFormat.currency(symbol: l10n.currencySymbol);
     final width = MediaQuery.sizeOf(context).width;
     final crossAxisCount = width >= AppBreakpoints.tablet ? 3 : 2;
     final childAspectRatio = width >= AppBreakpoints.tablet ? 2.0 : 1.45;
@@ -328,26 +336,26 @@ class DashboardScreen extends ConsumerWidget {
       children: [
         MetricCard(
           label: l10n.collectedThisMonth,
-          value: currencyFormat.format(stats['collectedThisMonth']),
+          value: AppFormatters.formatCurrency(stats['collectedThisMonth'], l10n),
           icon: Icons.account_balance_wallet_outlined,
           color: AppColors.income,
           emphasized: true,
         ),
         MetricCard(
           label: l10n.outstanding,
-          value: currencyFormat.format(stats['outstandingAmount']),
+          value: AppFormatters.formatCurrency(stats['outstandingAmount'], l10n),
           icon: Icons.pending_actions,
           color: AppColors.warning,
         ),
         MetricCard(
           label: l10n.monthlyExpenses,
-          value: currencyFormat.format(stats['expensesThisMonth']),
+          value: AppFormatters.formatCurrency(stats['expensesThisMonth'], l10n),
           icon: Icons.receipt_long_outlined,
           color: AppColors.expense,
         ),
         MetricCard(
           label: l10n.estimatedProfit,
-          value: currencyFormat.format(stats['estimatedProfit']),
+          value: AppFormatters.formatCurrency(stats['estimatedProfit'], l10n),
           icon: Icons.trending_up,
           color: AppColors.profit,
           emphasized: true,
@@ -374,7 +382,9 @@ class DashboardScreen extends ConsumerWidget {
     List<Invoice> overdue,
   ) {
     return Card(
-      color: AppColors.dangerSoft,
+      color: Theme.of(context).brightness == Brightness.dark
+          ? AppColors.darkDangerSoft
+          : AppColors.dangerSoft,
       child: ListTile(
         leading: const Icon(
           Icons.warning_amber_rounded,
@@ -389,7 +399,7 @@ class DashboardScreen extends ConsumerWidget {
         ),
         subtitle: Text(
           l10n.immediateAction,
-          style: const TextStyle(color: AppColors.textPrimary),
+          style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color),
         ),
         trailing: const Icon(Icons.chevron_right),
         onTap: () => context.pushNamed('invoices'),
@@ -417,9 +427,7 @@ class DashboardScreen extends ConsumerWidget {
               color: AppColors.invoice,
               title: invoice.invoiceNumber,
               subtitle: invoice.client?.name ?? '',
-              amount: NumberFormat.currency(
-                symbol: l10n.currencySymbol,
-              ).format(invoice.total),
+              amount: AppFormatters.formatCurrency(invoice.total, l10n),
               badge: StatusBadge(status: invoice.status),
               onTap: () => context.pushNamed(
                 'invoice_details',

@@ -205,6 +205,24 @@ class RefundItems extends Table {
   RealColumn get amount => real()();
 }
 
+@DataClassName('UserPreferenceData')
+class UserPreferences extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get language => text().withDefault(const Constant('en'))();
+  TextColumn get themeMode => text().withDefault(const Constant('system'))(); // light, dark, system
+}
+
+@DataClassName('ProjectPhotoData')
+class ProjectPhotos extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get projectId =>
+      integer().references(Projects, #id, onDelete: KeyAction.cascade)();
+  TextColumn get imagePath => text()();
+  TextColumn get category => text()(); // before, during, after
+  TextColumn get comment => text().nullable()();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+}
+
 @DriftDatabase(
   tables: [
     Clients,
@@ -220,13 +238,15 @@ class RefundItems extends Table {
     ProjectExpenses,
     Refunds,
     RefundItems,
+    UserPreferences,
+    ProjectPhotos,
   ],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 13;
+  int get schemaVersion => 15;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -348,6 +368,12 @@ class AppDatabase extends _$AppDatabase {
       if (from < 13) {
         await _createTableIfMissing(m, refunds);
         await _createTableIfMissing(m, refundItems);
+      }
+      if (from < 14) {
+        await _createTableIfMissing(m, userPreferences);
+      }
+      if (from < 15) {
+        await _createTableIfMissing(m, projectPhotos);
       }
     },
     beforeOpen: (details) async {

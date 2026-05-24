@@ -34,9 +34,6 @@ class ArticleListScreen extends ConsumerWidget {
                 hintText: l10n.searchArticles,
                 prefixIcon: const Icon(Icons.search),
                 contentPadding: const EdgeInsets.symmetric(vertical: 0),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(30),
-                ),
               ),
             ),
           ),

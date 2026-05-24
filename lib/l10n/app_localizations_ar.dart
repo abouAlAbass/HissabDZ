@@ -21,6 +21,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get invoiceLabel => 'فاتورة';
 
   @override
+  String get quoteLabel => 'عرض سعر';
+
+  @override
   String get clients => 'العملاء';
 
   @override
@@ -66,6 +69,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get cancelled => 'ملغاة';
 
   @override
+  String get expired => 'منتهي';
+
+  @override
   String get language => 'اللغة';
 
   @override
@@ -76,6 +82,15 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get lightTheme => 'المظهر الفاتح';
+
+  @override
+  String get systemTheme => 'تلقائي (حسب النظام)';
+
+  @override
+  String get selectTheme => 'اختر المظهر';
+
+  @override
+  String get selectLanguage => 'اختر اللغة';
 
   @override
   String get total => 'الإجمالي';
@@ -162,6 +177,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get pdfSaved => 'تم حفظ PDF في المستندات';
 
   @override
+  String get viewPdf => 'عرض PDF';
+
+  @override
   String get share => 'مشاركة';
 
   @override
@@ -214,6 +232,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get selectClient => 'اختر العميل';
+
+  @override
+  String get selectArticle => 'اختر الصنف';
 
   @override
   String get recordPayment => 'تسجيل دفعة';
@@ -351,9 +372,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get addFirstClient => 'أضف أول عميل';
-
-  @override
-  String get selectLanguage => 'اختر اللغة';
 
   @override
   String get english => 'الإنجليزية';
@@ -850,4 +868,50 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get validated => 'مصدق';
+
+  @override
+  String get includePayments => 'تضمين المدفوعات';
+
+  @override
+  String get paymentHistoryAndBalance => 'سجل المدفوعات والرصيد المتبقي';
+
+  @override
+  String get confirm => 'تأكيد';
+
+  @override
+  String get cash => 'نقداً';
+
+  @override
+  String get transfer => 'تحويل';
+
+  @override
+  String get errorPaymentExceedsBalance =>
+      'مبلغ الدفعة لا يمكن أن يتجاوز الرصيد المتبقي';
+
+  @override
+  String get before => 'قبل';
+
+  @override
+  String get during => 'أثناء العمل';
+
+  @override
+  String get after => 'بعد';
+
+  @override
+  String get addPhoto => 'إضافة صورة';
+
+  @override
+  String get camera => 'الكاميرا';
+
+  @override
+  String get gallery => 'المعرض';
+
+  @override
+  String get projectPhotos => 'صور المشروع';
+
+  @override
+  String get photoCategory => 'الفئة';
+
+  @override
+  String get comment => 'تعليق';
 }

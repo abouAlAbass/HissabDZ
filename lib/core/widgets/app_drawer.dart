@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../l10n/app_localizations.dart';
 import '../providers/locale_provider.dart';
+import '../providers/theme_provider.dart';
 import '../theme/theme.dart';
 
 class AppDrawer extends ConsumerWidget {
@@ -12,12 +13,17 @@ class AppDrawer extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final currentLocale = ref.watch(appLocaleProvider);
+    final themeMode = ref.watch(themeProvider);
+    final isDarkMode = themeMode == ThemeMode.dark ||
+        (themeMode == ThemeMode.system &&
+            Theme.of(context).brightness == Brightness.dark);
 
     return Drawer(
       child: SafeArea(
         child: ListView(
           padding: EdgeInsets.zero,
           children: [
+            // ... (keep previous header)
             Container(
               height: 180,
               decoration: BoxDecoration(gradient: AppTheme.primaryGradient),
@@ -47,6 +53,7 @@ class AppDrawer extends ConsumerWidget {
                 ),
               ),
             ),
+            // ... (keep other menu items)
             ListTile(
               leading: const Icon(Icons.search),
               title: Text(l10n.globalSearch),
@@ -137,17 +144,25 @@ class AppDrawer extends ConsumerWidget {
                 context.pushNamed('settings');
               },
             ),
+            SwitchListTile(
+              secondary: Icon(
+                isDarkMode ? Icons.dark_mode : Icons.light_mode,
+                color: isDarkMode ? Colors.amber : Colors.blueGrey,
+              ),
+              title: Text(isDarkMode ? 'Dark Mode' : 'Light Mode'),
+              value: isDarkMode,
+              onChanged: (_) => ref.read(themeProvider.notifier).toggleTheme(),
+            ),
             ListTile(
               leading: const Icon(Icons.language),
               title: Text(l10n.selectLanguage),
               trailing: Text(
                 supportedLocalesInfo.firstWhere(
-                      (m) =>
-                          (m['locale'] as Locale).languageCode ==
-                          currentLocale.languageCode,
-                      orElse: () => supportedLocalesInfo.first,
-                    )['flag']
-                    as String,
+                  (m) =>
+                      (m['locale'] as Locale).languageCode ==
+                      currentLocale.languageCode,
+                  orElse: () => supportedLocalesInfo.first,
+                )['flag'] as String,
                 style: const TextStyle(fontSize: 22),
               ),
               onTap: () =>

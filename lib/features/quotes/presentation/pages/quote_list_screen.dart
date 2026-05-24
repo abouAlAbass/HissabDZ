@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:hissab_dz/core/utils/app_formatters.dart';
 import 'package:hissab_dz/core/theme/theme.dart';
 import 'package:hissab_dz/core/widgets/app_empty_state.dart';
 import 'package:hissab_dz/core/widgets/app_drawer.dart';
@@ -19,8 +20,9 @@ class QuoteListScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final quotesAsync = ref.watch(quotesListProvider);
-    final currencyFormat = NumberFormat.currency(symbol: l10n.currencySymbol);
-    final dateFormat = DateFormat.yMMMd(l10n.localeName);
+    final dateFormat = l10n.localeName == 'ar'
+        ? DateFormat('dd/MM/yyyy', 'en')
+        : DateFormat.yMMMd(l10n.localeName);
 
     return Scaffold(
       drawer: MediaQuery.sizeOf(context).width >= 1100
@@ -61,7 +63,7 @@ class QuoteListScreen extends ConsumerWidget {
                     if (quote.projectName != null)
                       '${l10n.project}: ${quote.projectName}',
                   ].join('\n'),
-                  amount: currencyFormat.format(quote.total),
+                  amount: AppFormatters.formatCurrency(quote.total, l10n),
                   badge: QuoteStatusChip(status: quote.status),
                   onTap: () => context.pushNamed(
                     'quote_details',

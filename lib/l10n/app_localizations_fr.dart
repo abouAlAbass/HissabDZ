@@ -21,6 +21,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get invoiceLabel => 'Facture';
 
   @override
+  String get quoteLabel => 'Devis';
+
+  @override
   String get clients => 'Clients';
 
   @override
@@ -66,6 +69,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get cancelled => 'Annulée';
 
   @override
+  String get expired => 'Expiré';
+
+  @override
   String get language => 'Langue';
 
   @override
@@ -76,6 +82,15 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get lightTheme => 'Thème clair';
+
+  @override
+  String get systemTheme => 'Système par défaut';
+
+  @override
+  String get selectTheme => 'Choisir le thème';
+
+  @override
+  String get selectLanguage => 'Choisir la langue';
 
   @override
   String get total => 'Total';
@@ -162,6 +177,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get pdfSaved => 'PDF enregistré dans Documents';
 
   @override
+  String get viewPdf => 'Voir le PDF';
+
+  @override
   String get share => 'Partager';
 
   @override
@@ -214,6 +232,9 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get selectClient => 'Sélectionner un client';
+
+  @override
+  String get selectArticle => 'Sélectionner un article';
 
   @override
   String get recordPayment => 'Enregistrer un paiement';
@@ -353,9 +374,6 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get addFirstClient => 'Ajouter votre premier client';
-
-  @override
-  String get selectLanguage => 'Choisir la langue';
 
   @override
   String get english => 'Anglais';
@@ -515,7 +533,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get phoneNumber => 'Numéro de téléphone';
 
   @override
-  String get companyLogo => 'Logo de l’entreprise';
+  String get companyLogo => 'Logo de l\'entreprise';
 
   @override
   String get companyLogoSubtitle =>
@@ -543,7 +561,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get invoiceNumberShort => 'Facture n°';
 
   @override
-  String get addClientFirst => 'Ajoutez d’abord un client';
+  String get addClientFirst => 'Ajoutez d\'abord un client';
 
   @override
   String get quotes => 'Devis';
@@ -564,7 +582,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get quoteNumber => 'Devis n°';
 
   @override
-  String get validUntil => 'Valable jusqu’au';
+  String get validUntil => 'Valable jusqu\'au';
 
   @override
   String get noQuotes => 'Aucun devis trouvé';
@@ -576,7 +594,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get quoteConverted => 'Devis converti en facture';
 
   @override
-  String get approvalSignature => 'Signature d’accord client';
+  String get approvalSignature => 'Signature d\'accord client';
 
   @override
   String get goodForApproval => 'Bon pour accord';
@@ -627,7 +645,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get articleCategory => 'Catégorie';
 
   @override
-  String get laborCategory => 'Main d’œuvre';
+  String get laborCategory => 'Main d\'œuvre';
 
   @override
   String get materialsCategory => 'Matériaux';
@@ -654,7 +672,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get plasterAndSanding => 'Enduit et ponçage';
 
   @override
-  String get paintingLabor => 'Peinture main d’œuvre';
+  String get paintingLabor => 'Peinture main d\'œuvre';
 
   @override
   String get leakDiagnosis => 'Diagnostic fuite';
@@ -666,7 +684,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get wiringProtection => 'Câblage et protection';
 
   @override
-  String get electricalLabor => 'Main d’œuvre électricité';
+  String get electricalLabor => 'Main d\'œuvre électricité';
 
   @override
   String get masonryPreparation => 'Préparation chantier';
@@ -740,10 +758,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get supplier => 'Fournisseur';
 
   @override
-  String get attachReceipt => 'Joindre un re?u photo';
+  String get attachReceipt => 'Joindre un reçu photo';
 
   @override
-  String get changeReceipt => 'Changer le re?u';
+  String get changeReceipt => 'Changer le reçu';
 
   @override
   String get quickClient => 'Client rapide';
@@ -755,13 +773,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get mobileQuickActions => 'Actions rapides';
 
   @override
-  String get draftAutoSaved => 'Brouillon sauvegard? automatiquement';
+  String get draftAutoSaved => 'Brouillon sauvegardé automatiquement';
 
   @override
-  String get collectedThisMonth => 'Total encaiss? ce mois';
+  String get collectedThisMonth => 'Total encaissé ce mois';
 
   @override
-  String get monthlyExpenses => 'D?penses du mois';
+  String get monthlyExpenses => 'Dépenses du mois';
 
   @override
   String get ongoingProjects => 'Chantiers en cours';
@@ -853,4 +871,50 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get validated => 'Validé';
+
+  @override
+  String get includePayments => 'Inclure les paiements';
+
+  @override
+  String get paymentHistoryAndBalance => 'Historique des paiements et solde';
+
+  @override
+  String get confirm => 'Confirmer';
+
+  @override
+  String get cash => 'Cash';
+
+  @override
+  String get transfer => 'Versement';
+
+  @override
+  String get errorPaymentExceedsBalance =>
+      'Le montant du paiement ne peut pas dépasser le solde restant';
+
+  @override
+  String get before => 'Avant';
+
+  @override
+  String get during => 'En cours';
+
+  @override
+  String get after => 'Après';
+
+  @override
+  String get addPhoto => 'Ajouter une photo';
+
+  @override
+  String get camera => 'Appareil photo';
+
+  @override
+  String get gallery => 'Galerie';
+
+  @override
+  String get projectPhotos => 'Photos du projet';
+
+  @override
+  String get photoCategory => 'Catégorie';
+
+  @override
+  String get comment => 'Commentaire';
 }

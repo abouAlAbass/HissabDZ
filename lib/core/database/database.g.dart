@@ -7030,6 +7030,658 @@ class RefundItemsCompanion extends UpdateCompanion<RefundItemData> {
   }
 }
 
+class $UserPreferencesTable extends UserPreferences
+    with TableInfo<$UserPreferencesTable, UserPreferenceData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $UserPreferencesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _languageMeta = const VerificationMeta(
+    'language',
+  );
+  @override
+  late final GeneratedColumn<String> language = GeneratedColumn<String>(
+    'language',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('en'),
+  );
+  static const VerificationMeta _themeModeMeta = const VerificationMeta(
+    'themeMode',
+  );
+  @override
+  late final GeneratedColumn<String> themeMode = GeneratedColumn<String>(
+    'theme_mode',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('system'),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, language, themeMode];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'user_preferences';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<UserPreferenceData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('language')) {
+      context.handle(
+        _languageMeta,
+        language.isAcceptableOrUnknown(data['language']!, _languageMeta),
+      );
+    }
+    if (data.containsKey('theme_mode')) {
+      context.handle(
+        _themeModeMeta,
+        themeMode.isAcceptableOrUnknown(data['theme_mode']!, _themeModeMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  UserPreferenceData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return UserPreferenceData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      language: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}language'],
+      )!,
+      themeMode: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}theme_mode'],
+      )!,
+    );
+  }
+
+  @override
+  $UserPreferencesTable createAlias(String alias) {
+    return $UserPreferencesTable(attachedDatabase, alias);
+  }
+}
+
+class UserPreferenceData extends DataClass
+    implements Insertable<UserPreferenceData> {
+  final int id;
+  final String language;
+  final String themeMode;
+  const UserPreferenceData({
+    required this.id,
+    required this.language,
+    required this.themeMode,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['language'] = Variable<String>(language);
+    map['theme_mode'] = Variable<String>(themeMode);
+    return map;
+  }
+
+  UserPreferencesCompanion toCompanion(bool nullToAbsent) {
+    return UserPreferencesCompanion(
+      id: Value(id),
+      language: Value(language),
+      themeMode: Value(themeMode),
+    );
+  }
+
+  factory UserPreferenceData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return UserPreferenceData(
+      id: serializer.fromJson<int>(json['id']),
+      language: serializer.fromJson<String>(json['language']),
+      themeMode: serializer.fromJson<String>(json['themeMode']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'language': serializer.toJson<String>(language),
+      'themeMode': serializer.toJson<String>(themeMode),
+    };
+  }
+
+  UserPreferenceData copyWith({int? id, String? language, String? themeMode}) =>
+      UserPreferenceData(
+        id: id ?? this.id,
+        language: language ?? this.language,
+        themeMode: themeMode ?? this.themeMode,
+      );
+  UserPreferenceData copyWithCompanion(UserPreferencesCompanion data) {
+    return UserPreferenceData(
+      id: data.id.present ? data.id.value : this.id,
+      language: data.language.present ? data.language.value : this.language,
+      themeMode: data.themeMode.present ? data.themeMode.value : this.themeMode,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('UserPreferenceData(')
+          ..write('id: $id, ')
+          ..write('language: $language, ')
+          ..write('themeMode: $themeMode')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, language, themeMode);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is UserPreferenceData &&
+          other.id == this.id &&
+          other.language == this.language &&
+          other.themeMode == this.themeMode);
+}
+
+class UserPreferencesCompanion extends UpdateCompanion<UserPreferenceData> {
+  final Value<int> id;
+  final Value<String> language;
+  final Value<String> themeMode;
+  const UserPreferencesCompanion({
+    this.id = const Value.absent(),
+    this.language = const Value.absent(),
+    this.themeMode = const Value.absent(),
+  });
+  UserPreferencesCompanion.insert({
+    this.id = const Value.absent(),
+    this.language = const Value.absent(),
+    this.themeMode = const Value.absent(),
+  });
+  static Insertable<UserPreferenceData> custom({
+    Expression<int>? id,
+    Expression<String>? language,
+    Expression<String>? themeMode,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (language != null) 'language': language,
+      if (themeMode != null) 'theme_mode': themeMode,
+    });
+  }
+
+  UserPreferencesCompanion copyWith({
+    Value<int>? id,
+    Value<String>? language,
+    Value<String>? themeMode,
+  }) {
+    return UserPreferencesCompanion(
+      id: id ?? this.id,
+      language: language ?? this.language,
+      themeMode: themeMode ?? this.themeMode,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (language.present) {
+      map['language'] = Variable<String>(language.value);
+    }
+    if (themeMode.present) {
+      map['theme_mode'] = Variable<String>(themeMode.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('UserPreferencesCompanion(')
+          ..write('id: $id, ')
+          ..write('language: $language, ')
+          ..write('themeMode: $themeMode')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $ProjectPhotosTable extends ProjectPhotos
+    with TableInfo<$ProjectPhotosTable, ProjectPhotoData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ProjectPhotosTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _projectIdMeta = const VerificationMeta(
+    'projectId',
+  );
+  @override
+  late final GeneratedColumn<int> projectId = GeneratedColumn<int>(
+    'project_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES projects (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _imagePathMeta = const VerificationMeta(
+    'imagePath',
+  );
+  @override
+  late final GeneratedColumn<String> imagePath = GeneratedColumn<String>(
+    'image_path',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _categoryMeta = const VerificationMeta(
+    'category',
+  );
+  @override
+  late final GeneratedColumn<String> category = GeneratedColumn<String>(
+    'category',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _commentMeta = const VerificationMeta(
+    'comment',
+  );
+  @override
+  late final GeneratedColumn<String> comment = GeneratedColumn<String>(
+    'comment',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    projectId,
+    imagePath,
+    category,
+    comment,
+    createdAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'project_photos';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ProjectPhotoData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('project_id')) {
+      context.handle(
+        _projectIdMeta,
+        projectId.isAcceptableOrUnknown(data['project_id']!, _projectIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_projectIdMeta);
+    }
+    if (data.containsKey('image_path')) {
+      context.handle(
+        _imagePathMeta,
+        imagePath.isAcceptableOrUnknown(data['image_path']!, _imagePathMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_imagePathMeta);
+    }
+    if (data.containsKey('category')) {
+      context.handle(
+        _categoryMeta,
+        category.isAcceptableOrUnknown(data['category']!, _categoryMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_categoryMeta);
+    }
+    if (data.containsKey('comment')) {
+      context.handle(
+        _commentMeta,
+        comment.isAcceptableOrUnknown(data['comment']!, _commentMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ProjectPhotoData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ProjectPhotoData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      projectId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}project_id'],
+      )!,
+      imagePath: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}image_path'],
+      )!,
+      category: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}category'],
+      )!,
+      comment: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}comment'],
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $ProjectPhotosTable createAlias(String alias) {
+    return $ProjectPhotosTable(attachedDatabase, alias);
+  }
+}
+
+class ProjectPhotoData extends DataClass
+    implements Insertable<ProjectPhotoData> {
+  final int id;
+  final int projectId;
+  final String imagePath;
+  final String category;
+  final String? comment;
+  final DateTime createdAt;
+  const ProjectPhotoData({
+    required this.id,
+    required this.projectId,
+    required this.imagePath,
+    required this.category,
+    this.comment,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['project_id'] = Variable<int>(projectId);
+    map['image_path'] = Variable<String>(imagePath);
+    map['category'] = Variable<String>(category);
+    if (!nullToAbsent || comment != null) {
+      map['comment'] = Variable<String>(comment);
+    }
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  ProjectPhotosCompanion toCompanion(bool nullToAbsent) {
+    return ProjectPhotosCompanion(
+      id: Value(id),
+      projectId: Value(projectId),
+      imagePath: Value(imagePath),
+      category: Value(category),
+      comment: comment == null && nullToAbsent
+          ? const Value.absent()
+          : Value(comment),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory ProjectPhotoData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ProjectPhotoData(
+      id: serializer.fromJson<int>(json['id']),
+      projectId: serializer.fromJson<int>(json['projectId']),
+      imagePath: serializer.fromJson<String>(json['imagePath']),
+      category: serializer.fromJson<String>(json['category']),
+      comment: serializer.fromJson<String?>(json['comment']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'projectId': serializer.toJson<int>(projectId),
+      'imagePath': serializer.toJson<String>(imagePath),
+      'category': serializer.toJson<String>(category),
+      'comment': serializer.toJson<String?>(comment),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  ProjectPhotoData copyWith({
+    int? id,
+    int? projectId,
+    String? imagePath,
+    String? category,
+    Value<String?> comment = const Value.absent(),
+    DateTime? createdAt,
+  }) => ProjectPhotoData(
+    id: id ?? this.id,
+    projectId: projectId ?? this.projectId,
+    imagePath: imagePath ?? this.imagePath,
+    category: category ?? this.category,
+    comment: comment.present ? comment.value : this.comment,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  ProjectPhotoData copyWithCompanion(ProjectPhotosCompanion data) {
+    return ProjectPhotoData(
+      id: data.id.present ? data.id.value : this.id,
+      projectId: data.projectId.present ? data.projectId.value : this.projectId,
+      imagePath: data.imagePath.present ? data.imagePath.value : this.imagePath,
+      category: data.category.present ? data.category.value : this.category,
+      comment: data.comment.present ? data.comment.value : this.comment,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ProjectPhotoData(')
+          ..write('id: $id, ')
+          ..write('projectId: $projectId, ')
+          ..write('imagePath: $imagePath, ')
+          ..write('category: $category, ')
+          ..write('comment: $comment, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, projectId, imagePath, category, comment, createdAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ProjectPhotoData &&
+          other.id == this.id &&
+          other.projectId == this.projectId &&
+          other.imagePath == this.imagePath &&
+          other.category == this.category &&
+          other.comment == this.comment &&
+          other.createdAt == this.createdAt);
+}
+
+class ProjectPhotosCompanion extends UpdateCompanion<ProjectPhotoData> {
+  final Value<int> id;
+  final Value<int> projectId;
+  final Value<String> imagePath;
+  final Value<String> category;
+  final Value<String?> comment;
+  final Value<DateTime> createdAt;
+  const ProjectPhotosCompanion({
+    this.id = const Value.absent(),
+    this.projectId = const Value.absent(),
+    this.imagePath = const Value.absent(),
+    this.category = const Value.absent(),
+    this.comment = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  });
+  ProjectPhotosCompanion.insert({
+    this.id = const Value.absent(),
+    required int projectId,
+    required String imagePath,
+    required String category,
+    this.comment = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  }) : projectId = Value(projectId),
+       imagePath = Value(imagePath),
+       category = Value(category);
+  static Insertable<ProjectPhotoData> custom({
+    Expression<int>? id,
+    Expression<int>? projectId,
+    Expression<String>? imagePath,
+    Expression<String>? category,
+    Expression<String>? comment,
+    Expression<DateTime>? createdAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (projectId != null) 'project_id': projectId,
+      if (imagePath != null) 'image_path': imagePath,
+      if (category != null) 'category': category,
+      if (comment != null) 'comment': comment,
+      if (createdAt != null) 'created_at': createdAt,
+    });
+  }
+
+  ProjectPhotosCompanion copyWith({
+    Value<int>? id,
+    Value<int>? projectId,
+    Value<String>? imagePath,
+    Value<String>? category,
+    Value<String?>? comment,
+    Value<DateTime>? createdAt,
+  }) {
+    return ProjectPhotosCompanion(
+      id: id ?? this.id,
+      projectId: projectId ?? this.projectId,
+      imagePath: imagePath ?? this.imagePath,
+      category: category ?? this.category,
+      comment: comment ?? this.comment,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (projectId.present) {
+      map['project_id'] = Variable<int>(projectId.value);
+    }
+    if (imagePath.present) {
+      map['image_path'] = Variable<String>(imagePath.value);
+    }
+    if (category.present) {
+      map['category'] = Variable<String>(category.value);
+    }
+    if (comment.present) {
+      map['comment'] = Variable<String>(comment.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ProjectPhotosCompanion(')
+          ..write('id: $id, ')
+          ..write('projectId: $projectId, ')
+          ..write('imagePath: $imagePath, ')
+          ..write('category: $category, ')
+          ..write('comment: $comment, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -7050,6 +7702,10 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   );
   late final $RefundsTable refunds = $RefundsTable(this);
   late final $RefundItemsTable refundItems = $RefundItemsTable(this);
+  late final $UserPreferencesTable userPreferences = $UserPreferencesTable(
+    this,
+  );
+  late final $ProjectPhotosTable projectPhotos = $ProjectPhotosTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -7068,6 +7724,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     projectExpenses,
     refunds,
     refundItems,
+    userPreferences,
+    projectPhotos,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -7161,6 +7819,13 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         limitUpdateKind: UpdateKind.delete,
       ),
       result: [TableUpdate('refund_items', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'projects',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('project_photos', kind: UpdateKind.delete)],
     ),
   ]);
 }
@@ -7875,6 +8540,24 @@ final class $$ProjectsTableReferences
       manager.$state.copyWith(prefetchedData: cache),
     );
   }
+
+  static MultiTypedResultKey<$ProjectPhotosTable, List<ProjectPhotoData>>
+  _projectPhotosRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.projectPhotos,
+    aliasName: $_aliasNameGenerator(db.projects.id, db.projectPhotos.projectId),
+  );
+
+  $$ProjectPhotosTableProcessedTableManager get projectPhotosRefs {
+    final manager = $$ProjectPhotosTableTableManager(
+      $_db,
+      $_db.projectPhotos,
+    ).filter((f) => f.projectId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_projectPhotosRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
 }
 
 class $$ProjectsTableFilterComposer
@@ -8015,6 +8698,31 @@ class $$ProjectsTableFilterComposer
           }) => $$ProjectExpensesTableFilterComposer(
             $db: $db,
             $table: $db.projectExpenses,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> projectPhotosRefs(
+    Expression<bool> Function($$ProjectPhotosTableFilterComposer f) f,
+  ) {
+    final $$ProjectPhotosTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.projectPhotos,
+      getReferencedColumn: (t) => t.projectId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ProjectPhotosTableFilterComposer(
+            $db: $db,
+            $table: $db.projectPhotos,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -8232,6 +8940,31 @@ class $$ProjectsTableAnnotationComposer
     );
     return f(composer);
   }
+
+  Expression<T> projectPhotosRefs<T extends Object>(
+    Expression<T> Function($$ProjectPhotosTableAnnotationComposer a) f,
+  ) {
+    final $$ProjectPhotosTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.projectPhotos,
+      getReferencedColumn: (t) => t.projectId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ProjectPhotosTableAnnotationComposer(
+            $db: $db,
+            $table: $db.projectPhotos,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$ProjectsTableTableManager
@@ -8252,6 +8985,7 @@ class $$ProjectsTableTableManager
             bool invoicesRefs,
             bool quotesRefs,
             bool projectExpensesRefs,
+            bool projectPhotosRefs,
           })
         > {
   $$ProjectsTableTableManager(_$AppDatabase db, $ProjectsTable table)
@@ -8323,6 +9057,7 @@ class $$ProjectsTableTableManager
                 invoicesRefs = false,
                 quotesRefs = false,
                 projectExpensesRefs = false,
+                projectPhotosRefs = false,
               }) {
                 return PrefetchHooks(
                   db: db,
@@ -8330,6 +9065,7 @@ class $$ProjectsTableTableManager
                     if (invoicesRefs) db.invoices,
                     if (quotesRefs) db.quotes,
                     if (projectExpensesRefs) db.projectExpenses,
+                    if (projectPhotosRefs) db.projectPhotos,
                   ],
                   addJoins:
                       <
@@ -8428,6 +9164,27 @@ class $$ProjectsTableTableManager
                               ),
                           typedResults: items,
                         ),
+                      if (projectPhotosRefs)
+                        await $_getPrefetchedData<
+                          ProjectData,
+                          $ProjectsTable,
+                          ProjectPhotoData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$ProjectsTableReferences
+                              ._projectPhotosRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$ProjectsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).projectPhotosRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.projectId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
                     ];
                   },
                 );
@@ -8453,6 +9210,7 @@ typedef $$ProjectsTableProcessedTableManager =
         bool invoicesRefs,
         bool quotesRefs,
         bool projectExpensesRefs,
+        bool projectPhotosRefs,
       })
     >;
 typedef $$InvoicesTableCreateCompanionBuilder =
@@ -13727,6 +14485,509 @@ typedef $$RefundItemsTableProcessedTableManager =
       RefundItemData,
       PrefetchHooks Function({bool refundId, bool invoiceItemId})
     >;
+typedef $$UserPreferencesTableCreateCompanionBuilder =
+    UserPreferencesCompanion Function({
+      Value<int> id,
+      Value<String> language,
+      Value<String> themeMode,
+    });
+typedef $$UserPreferencesTableUpdateCompanionBuilder =
+    UserPreferencesCompanion Function({
+      Value<int> id,
+      Value<String> language,
+      Value<String> themeMode,
+    });
+
+class $$UserPreferencesTableFilterComposer
+    extends Composer<_$AppDatabase, $UserPreferencesTable> {
+  $$UserPreferencesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get language => $composableBuilder(
+    column: $table.language,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get themeMode => $composableBuilder(
+    column: $table.themeMode,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$UserPreferencesTableOrderingComposer
+    extends Composer<_$AppDatabase, $UserPreferencesTable> {
+  $$UserPreferencesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get language => $composableBuilder(
+    column: $table.language,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get themeMode => $composableBuilder(
+    column: $table.themeMode,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$UserPreferencesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $UserPreferencesTable> {
+  $$UserPreferencesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get language =>
+      $composableBuilder(column: $table.language, builder: (column) => column);
+
+  GeneratedColumn<String> get themeMode =>
+      $composableBuilder(column: $table.themeMode, builder: (column) => column);
+}
+
+class $$UserPreferencesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $UserPreferencesTable,
+          UserPreferenceData,
+          $$UserPreferencesTableFilterComposer,
+          $$UserPreferencesTableOrderingComposer,
+          $$UserPreferencesTableAnnotationComposer,
+          $$UserPreferencesTableCreateCompanionBuilder,
+          $$UserPreferencesTableUpdateCompanionBuilder,
+          (
+            UserPreferenceData,
+            BaseReferences<
+              _$AppDatabase,
+              $UserPreferencesTable,
+              UserPreferenceData
+            >,
+          ),
+          UserPreferenceData,
+          PrefetchHooks Function()
+        > {
+  $$UserPreferencesTableTableManager(
+    _$AppDatabase db,
+    $UserPreferencesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$UserPreferencesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$UserPreferencesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$UserPreferencesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> language = const Value.absent(),
+                Value<String> themeMode = const Value.absent(),
+              }) => UserPreferencesCompanion(
+                id: id,
+                language: language,
+                themeMode: themeMode,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> language = const Value.absent(),
+                Value<String> themeMode = const Value.absent(),
+              }) => UserPreferencesCompanion.insert(
+                id: id,
+                language: language,
+                themeMode: themeMode,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$UserPreferencesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $UserPreferencesTable,
+      UserPreferenceData,
+      $$UserPreferencesTableFilterComposer,
+      $$UserPreferencesTableOrderingComposer,
+      $$UserPreferencesTableAnnotationComposer,
+      $$UserPreferencesTableCreateCompanionBuilder,
+      $$UserPreferencesTableUpdateCompanionBuilder,
+      (
+        UserPreferenceData,
+        BaseReferences<
+          _$AppDatabase,
+          $UserPreferencesTable,
+          UserPreferenceData
+        >,
+      ),
+      UserPreferenceData,
+      PrefetchHooks Function()
+    >;
+typedef $$ProjectPhotosTableCreateCompanionBuilder =
+    ProjectPhotosCompanion Function({
+      Value<int> id,
+      required int projectId,
+      required String imagePath,
+      required String category,
+      Value<String?> comment,
+      Value<DateTime> createdAt,
+    });
+typedef $$ProjectPhotosTableUpdateCompanionBuilder =
+    ProjectPhotosCompanion Function({
+      Value<int> id,
+      Value<int> projectId,
+      Value<String> imagePath,
+      Value<String> category,
+      Value<String?> comment,
+      Value<DateTime> createdAt,
+    });
+
+final class $$ProjectPhotosTableReferences
+    extends
+        BaseReferences<_$AppDatabase, $ProjectPhotosTable, ProjectPhotoData> {
+  $$ProjectPhotosTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $ProjectsTable _projectIdTable(_$AppDatabase db) =>
+      db.projects.createAlias(
+        $_aliasNameGenerator(db.projectPhotos.projectId, db.projects.id),
+      );
+
+  $$ProjectsTableProcessedTableManager get projectId {
+    final $_column = $_itemColumn<int>('project_id')!;
+
+    final manager = $$ProjectsTableTableManager(
+      $_db,
+      $_db.projects,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_projectIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$ProjectPhotosTableFilterComposer
+    extends Composer<_$AppDatabase, $ProjectPhotosTable> {
+  $$ProjectPhotosTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get imagePath => $composableBuilder(
+    column: $table.imagePath,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get category => $composableBuilder(
+    column: $table.category,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get comment => $composableBuilder(
+    column: $table.comment,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$ProjectsTableFilterComposer get projectId {
+    final $$ProjectsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.projectId,
+      referencedTable: $db.projects,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ProjectsTableFilterComposer(
+            $db: $db,
+            $table: $db.projects,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ProjectPhotosTableOrderingComposer
+    extends Composer<_$AppDatabase, $ProjectPhotosTable> {
+  $$ProjectPhotosTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get imagePath => $composableBuilder(
+    column: $table.imagePath,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get category => $composableBuilder(
+    column: $table.category,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get comment => $composableBuilder(
+    column: $table.comment,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$ProjectsTableOrderingComposer get projectId {
+    final $$ProjectsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.projectId,
+      referencedTable: $db.projects,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ProjectsTableOrderingComposer(
+            $db: $db,
+            $table: $db.projects,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ProjectPhotosTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ProjectPhotosTable> {
+  $$ProjectPhotosTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get imagePath =>
+      $composableBuilder(column: $table.imagePath, builder: (column) => column);
+
+  GeneratedColumn<String> get category =>
+      $composableBuilder(column: $table.category, builder: (column) => column);
+
+  GeneratedColumn<String> get comment =>
+      $composableBuilder(column: $table.comment, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  $$ProjectsTableAnnotationComposer get projectId {
+    final $$ProjectsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.projectId,
+      referencedTable: $db.projects,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ProjectsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.projects,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ProjectPhotosTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ProjectPhotosTable,
+          ProjectPhotoData,
+          $$ProjectPhotosTableFilterComposer,
+          $$ProjectPhotosTableOrderingComposer,
+          $$ProjectPhotosTableAnnotationComposer,
+          $$ProjectPhotosTableCreateCompanionBuilder,
+          $$ProjectPhotosTableUpdateCompanionBuilder,
+          (ProjectPhotoData, $$ProjectPhotosTableReferences),
+          ProjectPhotoData,
+          PrefetchHooks Function({bool projectId})
+        > {
+  $$ProjectPhotosTableTableManager(_$AppDatabase db, $ProjectPhotosTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ProjectPhotosTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ProjectPhotosTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ProjectPhotosTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> projectId = const Value.absent(),
+                Value<String> imagePath = const Value.absent(),
+                Value<String> category = const Value.absent(),
+                Value<String?> comment = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+              }) => ProjectPhotosCompanion(
+                id: id,
+                projectId: projectId,
+                imagePath: imagePath,
+                category: category,
+                comment: comment,
+                createdAt: createdAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required int projectId,
+                required String imagePath,
+                required String category,
+                Value<String?> comment = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+              }) => ProjectPhotosCompanion.insert(
+                id: id,
+                projectId: projectId,
+                imagePath: imagePath,
+                category: category,
+                comment: comment,
+                createdAt: createdAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$ProjectPhotosTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({projectId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (projectId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.projectId,
+                                referencedTable: $$ProjectPhotosTableReferences
+                                    ._projectIdTable(db),
+                                referencedColumn: $$ProjectPhotosTableReferences
+                                    ._projectIdTable(db)
+                                    .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$ProjectPhotosTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ProjectPhotosTable,
+      ProjectPhotoData,
+      $$ProjectPhotosTableFilterComposer,
+      $$ProjectPhotosTableOrderingComposer,
+      $$ProjectPhotosTableAnnotationComposer,
+      $$ProjectPhotosTableCreateCompanionBuilder,
+      $$ProjectPhotosTableUpdateCompanionBuilder,
+      (ProjectPhotoData, $$ProjectPhotosTableReferences),
+      ProjectPhotoData,
+      PrefetchHooks Function({bool projectId})
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -13757,4 +15018,8 @@ class $AppDatabaseManager {
       $$RefundsTableTableManager(_db, _db.refunds);
   $$RefundItemsTableTableManager get refundItems =>
       $$RefundItemsTableTableManager(_db, _db.refundItems);
+  $$UserPreferencesTableTableManager get userPreferences =>
+      $$UserPreferencesTableTableManager(_db, _db.userPreferences);
+  $$ProjectPhotosTableTableManager get projectPhotos =>
+      $$ProjectPhotosTableTableManager(_db, _db.projectPhotos);
 }

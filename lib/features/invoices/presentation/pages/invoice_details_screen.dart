@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:hissab_dz/core/utils/app_formatters.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
@@ -40,12 +41,12 @@ class InvoiceDetailsScreen extends ConsumerWidget {
           IconButton(
             tooltip: l10n.downloadPdf,
             icon: const Icon(Icons.download_outlined),
-            onPressed: () => _downloadPdf(context, ref, businessProfile),
+            onPressed: () => _handlePdfAction(context, ref, businessProfile, isShare: false),
           ),
           IconButton(
             tooltip: l10n.share,
             icon: const Icon(Icons.share),
-            onPressed: () => _sharePdf(context, ref, businessProfile),
+            onPressed: () => _handlePdfAction(context, ref, businessProfile, isShare: true),
           ),
           IconButton(
             tooltip: l10n.editInvoice,
@@ -78,9 +79,8 @@ class InvoiceDetailsScreen extends ConsumerWidget {
               color: Colors.transparent,
               child: _InvoiceDetailsBody(
                 invoice: invoice,
-                onSharePdf: () => _sharePdf(context, ref, businessProfile),
-                onDownloadPdf: () =>
-                    _downloadPdf(context, ref, businessProfile),
+                onSharePdf: () => _handlePdfAction(context, ref, businessProfile, isShare: true),
+                onDownloadPdf: () => _handlePdfAction(context, ref, businessProfile, isShare: false),
               ),
             ),
           );
@@ -91,24 +91,87 @@ class InvoiceDetailsScreen extends ConsumerWidget {
     );
   }
 
+  Future<void> _handlePdfAction(
+    BuildContext context,
+    WidgetRef ref,
+    BusinessProfile? profile, {
+    required bool isShare,
+  }) async {
+    final l10n = AppLocalizations.of(context)!;
+    final includePayments = await _showPdfOptionsDialog(context, l10n);
+    if (includePayments == null) return;
+
+    if (isShare) {
+      if (!context.mounted) return;
+      await _sharePdf(context, ref, profile, includePayments: includePayments);
+    } else {
+      if (!context.mounted) return;
+      await _downloadPdf(context, ref, profile, includePayments: includePayments);
+    }
+  }
+
+  Future<bool?> _showPdfOptionsDialog(
+    BuildContext context,
+    AppLocalizations l10n,
+  ) {
+    return showDialog<bool>(
+      context: context,
+      builder: (ctx) {
+        bool includePayments = false;
+        return StatefulBuilder(
+          builder: (ctx, setDialogState) {
+            return AlertDialog(
+              title: Text(l10n.exportPdf),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CheckboxListTile(
+                    title: Text(l10n.includePayments),
+                    subtitle: Text(l10n.paymentHistoryAndBalance),
+                    value: includePayments,
+                    onChanged: (val) =>
+                        setDialogState(() => includePayments = val ?? false),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: Text(l10n.cancel),
+                ),
+                FilledButton(
+                  onPressed: () => Navigator.pop(ctx, includePayments),
+                  child: Text(l10n.confirm),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
   Future<void> _downloadPdf(
     BuildContext context,
     WidgetRef ref,
-    BusinessProfile? profile,
-  ) async {
+    BusinessProfile? profile, {
+    bool includePayments = false,
+  }) async {
     final invoices = ref.read(invoicesListProvider()).value ?? [];
     final index = invoices.indexWhere((i) => i.id == invoiceId);
     if (index == -1) return;
 
     final invoice = invoices[index];
+    final payments = ref.read(invoicePaymentsProvider(invoiceId)).value;
     final l10n = AppLocalizations.of(context)!;
 
     try {
-      // Generate PDF in temp first
       final tempFile = await PdfInvoiceService.generateInvoicePdf(
         invoice: invoice,
         profile: profile,
         l10n: l10n,
+        payments: payments,
+        showPayments: includePayments,
       );
 
       // Save to Downloads folder
@@ -171,13 +234,15 @@ class InvoiceDetailsScreen extends ConsumerWidget {
   Future<void> _sharePdf(
     BuildContext context,
     WidgetRef ref,
-    BusinessProfile? profile,
-  ) async {
+    BusinessProfile? profile, {
+    bool includePayments = false,
+  }) async {
     final invoices = ref.read(invoicesListProvider()).value ?? [];
     final index = invoices.indexWhere((i) => i.id == invoiceId);
     if (index == -1) return;
 
     final invoice = invoices[index];
+    final payments = ref.read(invoicePaymentsProvider(invoiceId)).value;
     final l10n = AppLocalizations.of(context)!;
 
     try {
@@ -185,6 +250,8 @@ class InvoiceDetailsScreen extends ConsumerWidget {
         invoice: invoice,
         profile: profile,
         l10n: l10n,
+        payments: payments,
+        showPayments: includePayments,
       );
       await Share.shareXFiles([
         XFile(file.path),
@@ -367,7 +434,7 @@ class _InvoiceDetailsBodyState extends ConsumerState<_InvoiceDetailsBody> {
   Icon _statusIcon(InvoiceStatus status) {
     switch (status) {
       case InvoiceStatus.draft:
-        return const Icon(Icons.edit_note, color: AppTheme.textSecondary);
+        return Icon(Icons.edit_note, color: Theme.of(context).textTheme.bodySmall?.color);
       case InvoiceStatus.sent:
         return const Icon(Icons.send, color: AppTheme.statusIssued);
       case InvoiceStatus.accepted:
@@ -407,7 +474,6 @@ class _InvoiceDetailsBodyState extends ConsumerState<_InvoiceDetailsBody> {
   Widget build(BuildContext context) {
     final invoice = widget.invoice;
     final l10n = AppLocalizations.of(context)!;
-    final currencyFormat = NumberFormat.currency(symbol: l10n.currencySymbol);
 
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
@@ -432,12 +498,16 @@ class _InvoiceDetailsBodyState extends ConsumerState<_InvoiceDetailsBody> {
                                 ?.copyWith(fontWeight: FontWeight.bold),
                           ),
                           Text(
-                            DateFormat.yMMMd().format(invoice.issueDate),
+                            l10n.localeName == 'ar'
+                                ? DateFormat('dd/MM/yyyy', 'en').format(invoice.issueDate)
+                                : DateFormat.yMMMd().format(invoice.issueDate),
                             style: const TextStyle(color: Colors.grey),
                           ),
                           if (invoice.dueDate != null)
                             Text(
-                              '${l10n.dueDate}: ${DateFormat.yMMMd().format(invoice.dueDate!)}',
+                              l10n.localeName == 'ar'
+                                  ? '${l10n.dueDate}: ${DateFormat('dd/MM/yyyy', 'en').format(invoice.dueDate!)}'
+                                  : '${l10n.dueDate}: ${DateFormat.yMMMd().format(invoice.dueDate!)}',
                               style: TextStyle(
                                 color: invoice.status == InvoiceStatus.overdue
                                     ? Colors.red
@@ -651,7 +721,7 @@ class _InvoiceDetailsBodyState extends ConsumerState<_InvoiceDetailsBody> {
                         SizedBox(
                           width: 80,
                           child: Text(
-                            currencyFormat.format(item.unitPrice),
+                            AppFormatters.formatCurrency(item.unitPrice, l10n),
                             textAlign: TextAlign.right,
                             style: const TextStyle(fontSize: 12),
                           ),
@@ -659,7 +729,7 @@ class _InvoiceDetailsBodyState extends ConsumerState<_InvoiceDetailsBody> {
                         SizedBox(
                           width: 80,
                           child: Text(
-                            currencyFormat.format(item.amount),
+                            AppFormatters.formatCurrency(item.amount, l10n),
                             textAlign: TextAlign.right,
                             style: const TextStyle(fontWeight: FontWeight.w600),
                           ),
@@ -689,33 +759,33 @@ class _InvoiceDetailsBodyState extends ConsumerState<_InvoiceDetailsBody> {
                   padding: const EdgeInsets.all(16),
                   child: Column(
                     children: [
-                      _totalRow(l10n.subtotal, currencyFormat.format(invoice.subtotal)),
+                      _totalRow(l10n.subtotal, AppFormatters.formatCurrency(invoice.subtotal, l10n)),
                       const SizedBox(height: 6),
                       _totalRow(
                         '${l10n.totalTax} (${invoice.taxRate}%)',
-                        currencyFormat.format(invoice.subtotal * invoice.taxRate / 100),
+                        AppFormatters.formatCurrency(invoice.subtotal * invoice.taxRate / 100, l10n),
                       ),
                       const SizedBox(height: 6),
-                      _totalRow(l10n.discount, '- ${currencyFormat.format(invoice.discountAmount)}'),
+                      _totalRow(l10n.discount, '- ${AppFormatters.formatCurrency(invoice.discountAmount, l10n)}'),
                       const Divider(height: 20),
                       _totalRow(
                         l10n.total,
-                        currencyFormat.format(invoice.total),
+                        AppFormatters.formatCurrency(invoice.total, l10n),
                         isBold: true,
                         fontSize: 16,
                       ),
                       netAmountAsync.maybeWhen(
-                        data: (netAmount) => netAmount < invoice.total ? Column(
+                        data: (netAmount) => invoice.total != netAmount ? Column(
                           children: [
                             const SizedBox(height: 6),
                             _totalRow(
                               l10n.refundAmount,
-                              '- ${currencyFormat.format(invoice.total - netAmount)}',
+                              '- ${AppFormatters.formatCurrency(invoice.total - netAmount, l10n)}',
                               color: Colors.red,
                             ),
                             _totalRow(
                               l10n.netAmount,
-                              currencyFormat.format(netAmount),
+                              AppFormatters.formatCurrency(netAmount, l10n),
                               isBold: true,
                               fontSize: 16,
                               color: Colors.teal,
@@ -727,14 +797,14 @@ class _InvoiceDetailsBodyState extends ConsumerState<_InvoiceDetailsBody> {
                       const SizedBox(height: 6),
                       _totalRow(
                         l10n.paidAmount,
-                        currencyFormat.format(paidAmount),
+                        AppFormatters.formatCurrency(paidAmount, l10n),
                         color: Colors.green,
                         fontSize: 16,
                       ),
                       const Divider(height: 20),
                       _totalRow(
                         l10n.remaining,
-                        currencyFormat.format(remainingAmount < 0 ? 0 : remainingAmount),
+                        AppFormatters.formatCurrency(remainingAmount < 0 ? 0 : remainingAmount, l10n),
                         isBold: true,
                         fontSize: 18,
                         color: remainingAmount > 0 ? Colors.red : Colors.green,
@@ -784,12 +854,14 @@ class _InvoiceDetailsBodyState extends ConsumerState<_InvoiceDetailsBody> {
                                 color: Colors.green,
                               ),
                               title: Text(
-                                currencyFormat.format(p.amount),
+                                AppFormatters.formatCurrency(p.amount, l10n),
                                 style: const TextStyle(
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              subtitle: Text(DateFormat.yMMMd().format(p.date)),
+                              subtitle: Text(
+                                '${l10n.localeName == 'ar' ? DateFormat('dd/MM/yyyy', 'en').format(p.date) : DateFormat.yMMMd(l10n.localeName).format(p.date)}${p.method != null ? ' • ${p.method == 'cash' ? l10n.cash : p.method == 'transfer' ? l10n.transfer : p.method}' : ''}',
+                              ),
                               trailing: p.notes != null
                                   ? const Icon(Icons.info_outline, size: 14)
                                   : null,
@@ -887,7 +959,7 @@ class _InvoiceDetailsBodyState extends ConsumerState<_InvoiceDetailsBody> {
                 title: Text(refund.refundNumber),
                 subtitle: Text(DateFormat.yMMMd(l10n.localeName).format(refund.date)),
                 trailing: Text(
-                  '- ${NumberFormat.currency(symbol: l10n.currencySymbol).format(refund.totalAmount)}',
+                  '- ${AppFormatters.formatCurrency(refund.totalAmount, l10n)}',
                   style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
                 ),
               ),

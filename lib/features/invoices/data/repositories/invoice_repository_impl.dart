@@ -105,27 +105,28 @@ class InvoiceRepositoryImpl implements InvoiceRepository {
 
   @override
   Future<int> createInvoice(entity.Invoice invoice) async {
+    final invoiceToSave = invoice.recalculateTotals();
     return _database.transaction(() async {
       final invoiceId = await _database
           .into(_database.invoices)
           .insert(
             db.InvoicesCompanion.insert(
-              clientId: invoice.clientId,
-              projectId: Value(invoice.projectId),
-              invoiceNumber: invoice.invoiceNumber,
-              status: invoice.status,
-              issueDate: invoice.issueDate,
-              dueDate: Value(invoice.dueDate),
-              lastReminderAt: Value(invoice.lastReminderAt),
-              notes: Value(invoice.notes),
-              subtotal: Value(invoice.subtotal),
-              taxRate: Value(invoice.taxRate),
-              discountAmount: Value(invoice.discountAmount),
-              total: Value(invoice.total),
+              clientId: invoiceToSave.clientId,
+              projectId: Value(invoiceToSave.projectId),
+              invoiceNumber: invoiceToSave.invoiceNumber,
+              status: invoiceToSave.status,
+              issueDate: invoiceToSave.issueDate,
+              dueDate: Value(invoiceToSave.dueDate),
+              lastReminderAt: Value(invoiceToSave.lastReminderAt),
+              notes: Value(invoiceToSave.notes),
+              subtotal: Value(invoiceToSave.subtotal),
+              taxRate: Value(invoiceToSave.taxRate),
+              discountAmount: Value(invoiceToSave.discountAmount),
+              total: Value(invoiceToSave.total),
             ),
           );
 
-      for (final item in invoice.items) {
+      for (final item in invoiceToSave.items) {
         await _database
             .into(_database.invoiceItems)
             .insert(
@@ -145,38 +146,39 @@ class InvoiceRepositoryImpl implements InvoiceRepository {
 
   @override
   Future<void> updateInvoice(entity.Invoice invoice) async {
+    final invoiceToUpdate = invoice.recalculateTotals();  
     return _database.transaction(() async {
       await _database
           .update(_database.invoices)
           .replace(
             db.InvoicesCompanion(
-              id: Value(invoice.id!),
-              clientId: Value(invoice.clientId),
-              projectId: Value(invoice.projectId),
-              invoiceNumber: Value(invoice.invoiceNumber),
-              status: Value(invoice.status),
-              issueDate: Value(invoice.issueDate),
-              dueDate: Value(invoice.dueDate),
-              lastReminderAt: Value(invoice.lastReminderAt),
-              notes: Value(invoice.notes),
-              subtotal: Value(invoice.subtotal),
-              taxRate: Value(invoice.taxRate),
-              discountAmount: Value(invoice.discountAmount),
-              total: Value(invoice.total),
+              id: Value(invoiceToUpdate.id!),
+              clientId: Value(invoiceToUpdate.clientId),
+              projectId: Value(invoiceToUpdate.projectId),
+              invoiceNumber: Value(invoiceToUpdate.invoiceNumber),
+              status: Value(invoiceToUpdate.status),
+              issueDate: Value(invoiceToUpdate.issueDate),
+              dueDate: Value(invoiceToUpdate.dueDate),
+              lastReminderAt: Value(invoiceToUpdate.lastReminderAt),
+              notes: Value(invoiceToUpdate.notes),
+              subtotal: Value(invoiceToUpdate.subtotal),
+              taxRate: Value(invoiceToUpdate.taxRate),
+              discountAmount: Value(invoiceToUpdate.discountAmount),
+              total: Value(invoiceToUpdate.total),
               updatedAt: Value(DateTime.now()),
             ),
           );
 
       await (_database.delete(
         _database.invoiceItems,
-      )..where((t) => t.invoiceId.equals(invoice.id!))).go();
+      )..where((t) => t.invoiceId.equals(invoiceToUpdate.id!))).go();
 
-      for (final item in invoice.items) {
+      for (final item in invoiceToUpdate.items) {
         await _database
             .into(_database.invoiceItems)
             .insert(
               db.InvoiceItemsCompanion.insert(
-                invoiceId: invoice.id!,
+                invoiceId: invoiceToUpdate.id!,
                 description: item.description,
                 quantity: Value(item.quantity),
                 unitPrice: Value(item.unitPrice),

@@ -28,7 +28,27 @@ class Invoice with _$Invoice {
     Client? client,
     String? projectName,
   }) = _Invoice;
+  const Invoice._();
 
+  Invoice recalculateTotals() {
+    // Calcul du sous-total en additionnant le (prix unitaire * quantité) de chaque article
+    final calculatedSubtotal = items.fold(
+      0.0,
+      (sum, item) => sum + (item.quantity * item.unitPrice), // Adaptez ces noms selon votre InvoiceItem
+    );
+
+    // Calcul de la taxe
+    final taxAmount = calculatedSubtotal * (taxRate / 100);
+
+    // Calcul du total final
+    final calculatedTotal = calculatedSubtotal + taxAmount - discountAmount;
+
+    // Renvoie une NOUVELLE instance de la facture avec les montants mis à jour
+    return copyWith(
+      subtotal: calculatedSubtotal,
+      total: calculatedTotal,
+    );
+  }
   factory Invoice.fromJson(Map<String, dynamic> json) =>
       _$InvoiceFromJson(json);
 }

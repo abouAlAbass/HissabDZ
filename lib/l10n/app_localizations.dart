@@ -124,6 +124,12 @@ abstract class AppLocalizations {
   /// **'Invoice'**
   String get invoiceLabel;
 
+  /// No description provided for @quoteLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Quote'**
+  String get quoteLabel;
+
   /// No description provided for @clients.
   ///
   /// In en, this message translates to:
@@ -214,6 +220,12 @@ abstract class AppLocalizations {
   /// **'Cancelled'**
   String get cancelled;
 
+  /// No description provided for @expired.
+  ///
+  /// In en, this message translates to:
+  /// **'Expired'**
+  String get expired;
+
   /// No description provided for @language.
   ///
   /// In en, this message translates to:
@@ -237,6 +249,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Light Theme'**
   String get lightTheme;
+
+  /// No description provided for @systemTheme.
+  ///
+  /// In en, this message translates to:
+  /// **'System Default'**
+  String get systemTheme;
+
+  /// No description provided for @selectTheme.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Theme'**
+  String get selectTheme;
+
+  /// No description provided for @selectLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Language'**
+  String get selectLanguage;
 
   /// No description provided for @total.
   ///
@@ -406,6 +436,12 @@ abstract class AppLocalizations {
   /// **'PDF saved to Documents'**
   String get pdfSaved;
 
+  /// No description provided for @viewPdf.
+  ///
+  /// In en, this message translates to:
+  /// **'View PDF'**
+  String get viewPdf;
+
   /// No description provided for @share.
   ///
   /// In en, this message translates to:
@@ -513,6 +549,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Select Client'**
   String get selectClient;
+
+  /// No description provided for @selectArticle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Article'**
+  String get selectArticle;
 
   /// No description provided for @recordPayment.
   ///
@@ -783,12 +825,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Add Your First Client'**
   String get addFirstClient;
-
-  /// No description provided for @selectLanguage.
-  ///
-  /// In en, this message translates to:
-  /// **'Select Language'**
-  String get selectLanguage;
 
   /// No description provided for @english.
   ///
@@ -1761,6 +1797,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Validated'**
   String get validated;
+
+  /// No description provided for @includePayments.
+  ///
+  /// In en, this message translates to:
+  /// **'Include Payments'**
+  String get includePayments;
+
+  /// No description provided for @paymentHistoryAndBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment history and balance due'**
+  String get paymentHistoryAndBalance;
+
+  /// No description provided for @confirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get confirm;
+
+  /// No description provided for @cash.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash'**
+  String get cash;
+
+  /// No description provided for @transfer.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfer'**
+  String get transfer;
+
+  /// No description provided for @errorPaymentExceedsBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment amount cannot exceed the remaining balance'**
+  String get errorPaymentExceedsBalance;
+
+  /// No description provided for @before.
+  ///
+  /// In en, this message translates to:
+  /// **'Before'**
+  String get before;
+
+  /// No description provided for @during.
+  ///
+  /// In en, this message translates to:
+  /// **'During'**
+  String get during;
+
+  /// No description provided for @after.
+  ///
+  /// In en, this message translates to:
+  /// **'After'**
+  String get after;
+
+  /// No description provided for @addPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Photo'**
+  String get addPhoto;
+
+  /// No description provided for @camera.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera'**
+  String get camera;
+
+  /// No description provided for @gallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Gallery'**
+  String get gallery;
+
+  /// No description provided for @projectPhotos.
+  ///
+  /// In en, this message translates to:
+  /// **'Project Photos'**
+  String get projectPhotos;
+
+  /// No description provided for @photoCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get photoCategory;
+
+  /// No description provided for @comment.
+  ///
+  /// In en, this message translates to:
+  /// **'Comment'**
+  String get comment;
 }
 
 class _AppLocalizationsDelegate

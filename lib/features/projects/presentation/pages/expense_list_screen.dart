@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:hissab_dz/core/utils/app_formatters.dart';
 import 'package:hissab_dz/core/theme/theme.dart';
 import 'package:hissab_dz/core/widgets/app_empty_state.dart';
 import 'package:hissab_dz/core/widgets/app_drawer.dart';
@@ -18,7 +19,6 @@ class ExpenseListScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final expensesAsync = ref.watch(expensesListProvider);
-    final currencyFormat = NumberFormat.currency(symbol: l10n.currencySymbol);
 
     return Scaffold(
       drawer: MediaQuery.sizeOf(context).width >= 1100
@@ -65,12 +65,14 @@ class ExpenseListScreen extends ConsumerWidget {
                         .whereType<String>()
                         .where((value) => value.isNotEmpty)
                         .join(' - '),
-                    DateFormat.yMMMd(l10n.localeName).format(expense.date),
+                    l10n.localeName == 'ar'
+                        ? DateFormat('dd/MM/yyyy', 'en').format(expense.date)
+                        : DateFormat.yMMMd(l10n.localeName).format(expense.date),
                     if (expense.paymentMethod != null)
                       '${l10n.paymentMethod}: ${expense.paymentMethod}',
                   ].join('\n'),
                   trailing: Text(
-                    currencyFormat.format(expense.amount),
+                    AppFormatters.formatCurrency(expense.amount, l10n),
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
                       color: AppColors.expense,
                       fontWeight: FontWeight.w900,

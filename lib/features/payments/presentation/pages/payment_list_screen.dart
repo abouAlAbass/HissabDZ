@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:hissab_dz/core/utils/app_formatters.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../../../core/theme/theme.dart';
 import '../../../../l10n/app_localizations.dart';
@@ -20,7 +21,6 @@ class PaymentListScreen extends ConsumerWidget {
     final l10n = AppLocalizations.of(context)!;
     final paymentsAsync = ref.watch(paymentsListProvider);
     final invoicesAsync = ref.watch(invoicesListProvider());
-    final currencyFormat = NumberFormat.currency(symbol: l10n.currencySymbol);
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.payments)),
@@ -68,7 +68,6 @@ class PaymentListScreen extends ConsumerWidget {
                   _buildPaymentSummary(
                     context,
                     l10n,
-                    currencyFormat,
                     unpaidInvoices.length,
                     unpaidTotal,
                     overdueCount,
@@ -100,10 +99,10 @@ class PaymentListScreen extends ConsumerWidget {
                             children: [
                               Text(invoice.invoiceNumber),
                               Text(
-                                '${l10n.paidAmount}: ${currencyFormat.format(paid)}',
+                                '${l10n.paidAmount}: ${AppFormatters.formatCurrency(paid, l10n)}',
                               ),
                               Text(
-                                '${l10n.lastReminder}: ${invoice.lastReminderAt == null ? l10n.notProvided : DateFormat.yMMMd(l10n.localeName).format(invoice.lastReminderAt!)}',
+                                '${l10n.lastReminder}: ${invoice.lastReminderAt == null ? l10n.notProvided : (l10n.localeName == 'ar' ? DateFormat('dd/MM/yyyy', 'en').format(invoice.lastReminderAt!) : DateFormat.yMMMd(l10n.localeName).format(invoice.lastReminderAt!))}',
                               ),
                             ],
                           ),
@@ -112,7 +111,7 @@ class PaymentListScreen extends ConsumerWidget {
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
                               Text(
-                                currencyFormat.format(remaining),
+                                AppFormatters.formatCurrency(remaining, l10n),
                                 style: const TextStyle(
                                   color: AppColors.warning,
                                   fontWeight: FontWeight.w800,
@@ -179,7 +178,7 @@ class PaymentListScreen extends ConsumerWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                '${l10n.invoiceNumberShort}${payment.invoiceId} - ${DateFormat.yMMMd(l10n.localeName).format(payment.date)}',
+                                '${l10n.invoiceNumberShort}${payment.invoiceId} - ${l10n.localeName == 'ar' ? DateFormat('dd/MM/yyyy', 'en').format(payment.date) : DateFormat.yMMMd(l10n.localeName).format(payment.date)}',
                                 style: const TextStyle(
                                   color: AppColors.textSecondary,
                                   fontSize: 12,
@@ -187,7 +186,7 @@ class PaymentListScreen extends ConsumerWidget {
                               ),
                               if (payment.method != null)
                                 Text(
-                                  '${l10n.paymentMethod}: ${payment.method}',
+                                  '${l10n.paymentMethod}: ${payment.method == 'cash' ? l10n.cash : payment.method == 'transfer' ? l10n.transfer : payment.method}',
                                   style: const TextStyle(
                                     color: AppColors.textMuted,
                                     fontSize: 11,
@@ -196,7 +195,7 @@ class PaymentListScreen extends ConsumerWidget {
                             ],
                           ),
                           trailing: Text(
-                            currencyFormat.format(payment.amount),
+                            AppFormatters.formatCurrency(payment.amount, l10n),
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 16,
@@ -230,7 +229,6 @@ class PaymentListScreen extends ConsumerWidget {
   Widget _buildPaymentSummary(
     BuildContext context,
     AppLocalizations l10n,
-    NumberFormat currencyFormat,
     int unpaidCount,
     double unpaidTotal,
     int overdueCount,
@@ -246,7 +244,7 @@ class PaymentListScreen extends ConsumerWidget {
       ),
       (
         label: l10n.remainingToPay,
-        value: currencyFormat.format(unpaidTotal),
+        value: AppFormatters.formatCurrency(unpaidTotal, l10n),
         icon: Icons.account_balance_wallet_outlined,
         color: AppColors.expense,
       ),
@@ -323,7 +321,7 @@ class PaymentListScreen extends ConsumerWidget {
     await Share.share(
       '${l10n.sendReminder}: ${invoice.invoiceNumber}\n'
       '${l10n.clientName}: $clientName\n'
-      '${l10n.remainingToPay}: ${invoice.total.toStringAsFixed(2)} ${l10n.currencySymbol}',
+      '${l10n.remainingToPay}: ${AppFormatters.formatCurrency(invoice.total, l10n)}',
       subject: '${l10n.sendReminder} ${invoice.invoiceNumber}',
     );
     await ref

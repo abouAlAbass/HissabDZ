@@ -15,6 +15,8 @@ String quoteStatusText(AppLocalizations l10n, QuoteStatus status) {
       return l10n.rejected;
     case QuoteStatus.converted:
       return l10n.converted;
+    case QuoteStatus.expired:
+      return l10n.expired;
   }
 }
 
@@ -30,6 +32,8 @@ Color quoteStatusColor(QuoteStatus status) {
       return AppColors.danger;
     case QuoteStatus.converted:
       return AppColors.quote;
+    case QuoteStatus.expired:
+      return AppColors.textMuted;
   }
 }
 

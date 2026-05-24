@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:hissab_dz/core/utils/app_formatters.dart';
 import '../providers/refund_providers.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../core/widgets/app_drawer.dart';
@@ -13,7 +14,6 @@ class RefundListScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final refundsAsync = ref.watch(allRefundsProvider);
-    final currencyFormat = NumberFormat.currency(symbol: l10n.currencySymbol);
 
     return Scaffold(
       appBar: AppBar(
@@ -59,14 +59,16 @@ class RefundListScreen extends ConsumerWidget {
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                   subtitle: Text(
-                    DateFormat.yMMMd(l10n.localeName).format(refund.date),
+                    l10n.localeName == 'ar'
+                        ? DateFormat('dd/MM/yyyy', 'en').format(refund.date)
+                        : DateFormat.yMMMd(l10n.localeName).format(refund.date),
                   ),
                   trailing: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Text(
-                        '- ${currencyFormat.format(refund.totalAmount)}',
+                        '- ${AppFormatters.formatCurrency(refund.totalAmount, l10n)}',
                         style: const TextStyle(
                           color: Colors.red,
                           fontWeight: FontWeight.bold,

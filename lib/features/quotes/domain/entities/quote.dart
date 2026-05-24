@@ -46,7 +46,20 @@ class Quote {
     this.client,
     this.projectName,
   });
+Quote recalculateTotals() {
+    double calculatedSubtotal = 0.0;
+    for (final item in items) {
+      calculatedSubtotal += item.quantity * item.unitPrice; // À adapter selon QuoteItem
+    }
+    
+    final taxAmount = calculatedSubtotal * (taxRate / 100);
+    final calculatedTotal = calculatedSubtotal + taxAmount - discountAmount;
 
+    return copyWith(
+      subtotal: calculatedSubtotal,
+      total: calculatedTotal,
+    );
+  }
   Quote copyWith({
     int? id,
     int? clientId,

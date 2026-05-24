@@ -6,6 +6,7 @@ import 'package:hissab_dz/features/projects/domain/entities/project.dart'
     as entity;
 import 'package:hissab_dz/features/projects/domain/entities/project_expense.dart'
     as entity;
+import 'package:hissab_dz/features/projects/domain/entities/project_photo.dart';
 import 'package:hissab_dz/features/projects/domain/entities/project_status.dart';
 
 class ProjectRepository {
@@ -32,9 +33,7 @@ class ProjectRepository {
   }
 
   Future<int> createProject(entity.Project project) {
-    return _db
-        .into(_db.projects)
-        .insert(
+    return _db.into(_db.projects).insert(
           ProjectsCompanion.insert(
             clientId: Value(project.clientId),
             name: project.name,
@@ -132,9 +131,7 @@ class ProjectRepository {
   }
 
   Future<int> addExpense(entity.ProjectExpense expense) {
-    return _db
-        .into(_db.projectExpenses)
-        .insert(
+    return _db.into(_db.projectExpenses).insert(
           ProjectExpensesCompanion.insert(
             projectId: Value(expense.projectId),
             expenseTypeId: Value(expense.expenseTypeId),
@@ -156,10 +153,7 @@ class ProjectRepository {
   }
 
   Stream<List<entity.ExpenseType>> watchExpenseTypes() {
-    return _db
-        .select(_db.expenseTypes)
-        .watch()
-        .map(
+    return _db.select(_db.expenseTypes).watch().map(
           (rows) => rows
               .map(
                 (row) => entity.ExpenseType(
@@ -182,6 +176,39 @@ class ProjectRepository {
     return (_db.delete(_db.expenseTypes)..where((t) => t.id.equals(id))).go();
   }
 
+  Stream<List<ProjectPhoto>> watchPhotosForProject(int projectId) {
+    return (_db.select(_db.projectPhotos)
+          ..where((t) => t.projectId.equals(projectId))
+          ..orderBy([(t) => OrderingTerm.desc(t.createdAt)]))
+        .watch()
+        .map((rows) => rows
+            .map((row) => ProjectPhoto(
+                  id: row.id,
+                  projectId: row.projectId,
+                  imagePath: row.imagePath,
+                  category: row.category,
+                  comment: row.comment,
+                  createdAt: row.createdAt,
+                ))
+            .toList());
+  }
+
+  Future<int> addProjectPhoto(ProjectPhoto photo) {
+    return _db.into(_db.projectPhotos).insert(
+          ProjectPhotosCompanion.insert(
+            projectId: photo.projectId,
+            imagePath: photo.imagePath,
+            category: photo.category,
+            comment: Value(photo.comment),
+            createdAt: Value(photo.createdAt),
+          ),
+        );
+  }
+
+  Future<void> deleteProjectPhoto(int id) {
+    return (_db.delete(_db.projectPhotos)..where((t) => t.id.equals(id))).go();
+  }
+
   Future<entity.Project> _mapProjectWithTotals(ProjectData row) async {
     final invoiceRows = await (_db.select(
       _db.invoices,
@@ -198,8 +225,8 @@ class ProjectRepository {
       clientName: row.clientId == null
           ? null
           : (await (_db.select(
-                  _db.clients,
-                )..where((t) => t.id.equals(row.clientId!))).getSingleOrNull())
+              _db.clients,
+            )..where((t) => t.id.equals(row.clientId!))).getSingleOrNull())
                 ?.name,
       description: row.description,
       startDate: row.startDate,

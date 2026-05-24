@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:hissab_dz/core/utils/app_formatters.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../../invoices/presentation/providers/invoice_providers.dart';
 import '../../domain/entities/refund.dart';
@@ -47,8 +48,9 @@ class RefundDetailsScreen extends ConsumerWidget {
   }
 
   Widget _buildBody(BuildContext context, WidgetRef ref, Refund refund, AppLocalizations l10n) {
-    final dateFormat = DateFormat.yMMMd(l10n.localeName);
-    final currencyFormat = NumberFormat.currency(symbol: l10n.currencySymbol);
+    final dateFormat = l10n.localeName == 'ar'
+        ? DateFormat('dd/MM/yyyy', 'en')
+        : DateFormat.yMMMd(l10n.localeName);
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -64,7 +66,7 @@ class RefundDetailsScreen extends ConsumerWidget {
                   const Divider(),
                   _buildDetailRow(l10n.refundDate, dateFormat.format(refund.date)),
                   const Divider(),
-                  _buildDetailRow(l10n.refundAmount, '- ${currencyFormat.format(refund.totalAmount)}', isNegative: true),
+                  _buildDetailRow(l10n.refundAmount, '- ${AppFormatters.formatCurrency(refund.totalAmount, l10n)}', isNegative: true),
                 ],
               ),
             ),
@@ -80,8 +82,12 @@ class RefundDetailsScreen extends ConsumerWidget {
           const SizedBox(height: 8),
           ...refund.items.map((item) => ListTile(
             title: Text(item.description ?? ''),
-            subtitle: Text('${l10n.quantity}: ${item.quantity} x ${currencyFormat.format(item.unitPrice)}'),
-            trailing: Text('- ${currencyFormat.format(item.amount)}', style: const TextStyle(color: Colors.red)),
+            subtitle: Text(
+              l10n.localeName == 'ar'
+                  ? '\u200F${l10n.quantity}: ${item.quantity} x ${AppFormatters.formatCurrency(item.unitPrice, l10n)}'
+                  : '${l10n.quantity}: ${item.quantity} x ${AppFormatters.formatCurrency(item.unitPrice, l10n)}',
+            ),
+            trailing: Text('- ${AppFormatters.formatCurrency(item.amount, l10n)}', style: const TextStyle(color: Colors.red)),
           )),
         ],
       ),

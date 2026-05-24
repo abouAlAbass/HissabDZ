@@ -28,10 +28,12 @@ class MetricCard extends StatelessWidget {
       duration: const Duration(milliseconds: 180),
       curve: Curves.easeOut,
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(AppRadii.lg),
         border: Border.all(
-          color: emphasized ? color.withValues(alpha: 0.25) : AppColors.border,
+          color: emphasized
+              ? color.withValues(alpha: 0.25)
+              : Theme.of(context).colorScheme.outline,
         ),
         boxShadow: [
           BoxShadow(

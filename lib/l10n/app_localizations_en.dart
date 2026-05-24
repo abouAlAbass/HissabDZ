@@ -21,6 +21,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get invoiceLabel => 'Invoice';
 
   @override
+  String get quoteLabel => 'Quote';
+
+  @override
   String get clients => 'Clients';
 
   @override
@@ -66,6 +69,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cancelled => 'Cancelled';
 
   @override
+  String get expired => 'Expired';
+
+  @override
   String get language => 'Language';
 
   @override
@@ -76,6 +82,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get lightTheme => 'Light Theme';
+
+  @override
+  String get systemTheme => 'System Default';
+
+  @override
+  String get selectTheme => 'Select Theme';
+
+  @override
+  String get selectLanguage => 'Select Language';
 
   @override
   String get total => 'Total';
@@ -162,6 +177,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pdfSaved => 'PDF saved to Documents';
 
   @override
+  String get viewPdf => 'View PDF';
+
+  @override
   String get share => 'Share';
 
   @override
@@ -214,6 +232,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get selectClient => 'Select Client';
+
+  @override
+  String get selectArticle => 'Select Article';
 
   @override
   String get recordPayment => 'Record Payment';
@@ -352,9 +373,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get addFirstClient => 'Add Your First Client';
-
-  @override
-  String get selectLanguage => 'Select Language';
 
   @override
   String get english => 'English';
@@ -851,4 +869,50 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get validated => 'Validated';
+
+  @override
+  String get includePayments => 'Include Payments';
+
+  @override
+  String get paymentHistoryAndBalance => 'Payment history and balance due';
+
+  @override
+  String get confirm => 'Confirm';
+
+  @override
+  String get cash => 'Cash';
+
+  @override
+  String get transfer => 'Transfer';
+
+  @override
+  String get errorPaymentExceedsBalance =>
+      'Payment amount cannot exceed the remaining balance';
+
+  @override
+  String get before => 'Before';
+
+  @override
+  String get during => 'During';
+
+  @override
+  String get after => 'After';
+
+  @override
+  String get addPhoto => 'Add Photo';
+
+  @override
+  String get camera => 'Camera';
+
+  @override
+  String get gallery => 'Gallery';
+
+  @override
+  String get projectPhotos => 'Project Photos';
+
+  @override
+  String get photoCategory => 'Category';
+
+  @override
+  String get comment => 'Comment';
 }

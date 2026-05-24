@@ -2,9 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:hissab_dz/core/utils/app_formatters.dart';
+import 'dart:io';
+import 'package:hissab_dz/features/quotes/services/pdf_quote_service.dart';
+import 'package:hissab_dz/features/settings/presentation/providers/settings_providers.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as p;
+import 'package:share_plus/share_plus.dart';
+import 'package:open_filex/open_filex.dart';
 import 'package:hissab_dz/features/quotes/data/repositories/quote_repository.dart';
 import 'package:hissab_dz/features/quotes/domain/entities/quote_status.dart';
 import 'package:hissab_dz/features/quotes/presentation/providers/quote_providers.dart';
+import 'package:hissab_dz/features/settings/domain/entities/business_profile.dart';
 import 'package:hissab_dz/features/quotes/presentation/widgets/quote_status_label.dart';
 import 'package:hissab_dz/l10n/app_localizations.dart';
 
@@ -17,13 +26,26 @@ class QuoteDetailsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final quoteAsync = ref.watch(quoteByIdProvider(quoteId));
-    final currencyFormat = NumberFormat.currency(symbol: l10n.currencySymbol);
-    final dateFormat = DateFormat.yMMMd(l10n.localeName);
+    final businessProfileAsync = ref.watch(businessProfileProvider);
+    final businessProfile = businessProfileAsync.value;
+    final dateFormat = l10n.localeName == 'ar'
+        ? DateFormat('dd/MM/yyyy', 'en')
+        : DateFormat.yMMMd(l10n.localeName);
 
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.quoteDetails),
         actions: [
+          IconButton(
+            tooltip: l10n.downloadPdf,
+            icon: const Icon(Icons.download_outlined),
+            onPressed: () => _downloadPdf(context, ref, businessProfile),
+          ),
+          IconButton(
+            tooltip: l10n.share,
+            icon: const Icon(Icons.share),
+            onPressed: () => _sharePdf(context, ref, businessProfile),
+          ),
           IconButton(
             tooltip: l10n.edit,
             icon: const Icon(Icons.edit_outlined),
@@ -78,10 +100,12 @@ class QuoteDetailsScreen extends ConsumerWidget {
                         (item) => ListTile(
                           title: Text(item.description),
                           subtitle: Text(
-                            '${item.quantity} x ${currencyFormat.format(item.unitPrice)}',
+                            l10n.localeName == 'ar'
+                                ? '\u200F${item.quantity} x ${AppFormatters.formatCurrency(item.unitPrice, l10n)}'
+                                : '${item.quantity} x ${AppFormatters.formatCurrency(item.unitPrice, l10n)}',
                           ),
                           trailing: Text(
-                            currencyFormat.format(item.amount),
+                            AppFormatters.formatCurrency(item.amount, l10n),
                             style: const TextStyle(fontWeight: FontWeight.w700),
                           ),
                         ),
@@ -90,19 +114,19 @@ class QuoteDetailsScreen extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: 12),
-              _amountRow(l10n.subtotal, currencyFormat.format(quote.subtotal)),
+              _amountRow(l10n.subtotal, AppFormatters.formatCurrency(quote.subtotal, l10n)),
               _amountRow(
                 l10n.totalTax,
-                currencyFormat.format(quote.subtotal * quote.taxRate / 100),
+                AppFormatters.formatCurrency(quote.subtotal * quote.taxRate / 100, l10n),
               ),
               _amountRow(
                 l10n.discount,
-                currencyFormat.format(quote.discountAmount),
+                '- ${AppFormatters.formatCurrency(quote.discountAmount, l10n)}',
               ),
               const Divider(),
               _amountRow(
                 l10n.total,
-                currencyFormat.format(quote.total),
+                AppFormatters.formatCurrency(quote.total, l10n),
                 isTotal: true,
               ),
               if (quote.notes != null && quote.notes!.isNotEmpty) ...[
@@ -298,6 +322,106 @@ class QuoteDetailsScreen extends ConsumerWidget {
           SnackBar(
             content: Text('${l10n.error}: $e'),
             backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _sharePdf(
+    BuildContext context,
+    WidgetRef ref,
+    BusinessProfile? profile,
+  ) async {
+    final quote = ref.read(quoteByIdProvider(quoteId)).value;
+    if (quote == null) return;
+
+    final l10n = AppLocalizations.of(context)!;
+
+    try {
+      final file = await PdfQuoteService.generateQuotePdf(
+        quote: quote,
+        profile: profile,
+        l10n: l10n,
+      );
+      await Share.shareXFiles([XFile(file.path)],
+          subject: '${l10n.quoteLabel} ${quote.quoteNumber}');
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${l10n.errorGeneratingPdf}: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _downloadPdf(
+    BuildContext context,
+    WidgetRef ref,
+    BusinessProfile? profile,
+  ) async {
+    final quote = ref.read(quoteByIdProvider(quoteId)).value;
+    if (quote == null) return;
+
+    final l10n = AppLocalizations.of(context)!;
+
+    try {
+      final tempFile = await PdfQuoteService.generateQuotePdf(
+        quote: quote,
+        profile: profile,
+        l10n: l10n,
+      );
+
+      Directory? downloadsDir;
+      if (Platform.isWindows) {
+        downloadsDir = await getDownloadsDirectory();
+      } else {
+        downloadsDir = await getApplicationDocumentsDirectory();
+      }
+
+      final saveDir = Directory(p.join(downloadsDir!.path, 'InvoicePro'));
+      if (!saveDir.existsSync()) saveDir.createSync(recursive: true);
+
+      String savedPath = p.join(
+        saveDir.path,
+        'quote_${quote.quoteNumber}.pdf',
+      );
+      final targetFile = File(savedPath);
+
+      try {
+        if (targetFile.existsSync()) {
+          await targetFile.delete();
+        }
+      } catch (e) {
+        final timestamp = DateFormat('HHmmss').format(DateTime.now());
+        savedPath = p.join(
+          saveDir.path,
+          'quote_${quote.quoteNumber}_$timestamp.pdf',
+        );
+      }
+
+      await tempFile.copy(savedPath);
+      await OpenFilex.open(savedPath);
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              '${l10n.pdfDownloadedAndOpened}\n${p.basename(savedPath)}',
+            ),
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${l10n.error}: $e'),
+            backgroundColor: Colors.red,
           ),
         );
       }

@@ -137,7 +137,7 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
                   ),
                   textInputAction: TextInputAction.next,
                   validator: (value) {
-                    final amount = double.tryParse(value ?? '') ?? 0;
+                    final amount = double.tryParse(value?.replaceAll(',', '.') ?? '') ?? 0;
                     return amount <= 0 ? l10n.requiredField : null;
                   },
                 ),
@@ -217,7 +217,7 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
     if (!_formKey.currentState!.validate()) return;
 
     final label = _labelController.text.trim();
-    final amount = double.tryParse(_amountController.text) ?? 0;
+    final amount = double.tryParse(_amountController.text.replaceAll(',', '.')) ?? 0;
     final navigator = Navigator.of(context);
     await ref
         .read(projectRepositoryProvider)

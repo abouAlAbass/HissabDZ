@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:hissab_dz/core/utils/app_formatters.dart';
 import 'package:hissab_dz/core/theme/theme.dart';
 import 'package:hissab_dz/core/widgets/app_drawer.dart';
 import 'package:hissab_dz/features/search/domain/entities/global_search_result.dart';
@@ -29,7 +30,6 @@ class _GlobalSearchScreenState extends ConsumerState<GlobalSearchScreen> {
     final l10n = AppLocalizations.of(context)!;
     final query = ref.watch(globalSearchQueryProvider);
     final resultsAsync = ref.watch(globalSearchResultsProvider);
-    final currencyFormat = NumberFormat.currency(symbol: l10n.currencySymbol);
 
     return Scaffold(
       drawer: MediaQuery.sizeOf(context).width >= 1100
@@ -105,9 +105,9 @@ class _GlobalSearchScreenState extends ConsumerState<GlobalSearchScreen> {
                                     [
                                           result.subtitle,
                                           if (result.date != null)
-                                            DateFormat.yMMMd(
-                                              l10n.localeName,
-                                            ).format(result.date!),
+                                            l10n.localeName == 'ar'
+                                                ? DateFormat('dd/MM/yyyy', 'en').format(result.date!)
+                                                : DateFormat.yMMMd(l10n.localeName).format(result.date!),
                                         ]
                                         .where((value) => value.isNotEmpty)
                                         .join(' - '),
@@ -115,7 +115,7 @@ class _GlobalSearchScreenState extends ConsumerState<GlobalSearchScreen> {
                                   trailing: result.amount == null
                                       ? const Icon(Icons.chevron_right)
                                       : Text(
-                                          currencyFormat.format(result.amount),
+                                          AppFormatters.formatCurrency(result.amount!, l10n),
                                           style: const TextStyle(
                                             fontWeight: FontWeight.w800,
                                           ),

@@ -84,62 +84,64 @@ class QuoteRepositoryImpl implements QuoteRepository {
 
   @override
   Future<int> createQuote(Quote quote) {
+    final quoteToSave = quote.recalculateTotals();
     return _database.transaction(() async {
       final quoteId = await _database
           .into(_database.quotes)
           .insert(
             db.QuotesCompanion.insert(
-              clientId: quote.clientId,
-              projectId: Value(quote.projectId),
-              quoteNumber: quote.quoteNumber,
-              status: quote.status,
-              issueDate: quote.issueDate,
-              validUntil: Value(quote.validUntil),
-              notes: Value(quote.notes),
-              approvalName: Value(quote.approvalName),
-              approvedAt: Value(quote.approvedAt),
-              subtotal: Value(quote.subtotal),
-              taxRate: Value(quote.taxRate),
-              discountAmount: Value(quote.discountAmount),
-              total: Value(quote.total),
-              convertedInvoiceId: Value(quote.convertedInvoiceId),
+              clientId: quoteToSave.clientId,
+              projectId: Value(quoteToSave.projectId),
+              quoteNumber: quoteToSave.quoteNumber,
+              status: quoteToSave.status,
+              issueDate: quoteToSave.issueDate,
+              validUntil: Value(quoteToSave.validUntil),
+              notes: Value(quoteToSave.notes),
+              approvalName: Value(quoteToSave.approvalName),
+              approvedAt: Value(quoteToSave.approvedAt),
+              subtotal: Value(quoteToSave.subtotal),
+              taxRate: Value(quoteToSave.taxRate),
+              discountAmount: Value(quoteToSave.discountAmount),
+              total: Value(quoteToSave.total),
+              convertedInvoiceId: Value(quoteToSave.convertedInvoiceId),
             ),
           );
 
-      await _insertItems(quoteId, quote.items);
+      await _insertItems(quoteId, quoteToSave.items);
       return quoteId;
     });
   }
 
   @override
   Future<void> updateQuote(Quote quote) {
+    final quoteToSave = quote.recalculateTotals();
     return _database.transaction(() async {
       await (_database.update(
         _database.quotes,
-      )..where((t) => t.id.equals(quote.id!))).write(
+      )..where((t) => t.id.equals(quoteToSave.id!))).write(
         db.QuotesCompanion(
-          clientId: Value(quote.clientId),
-          projectId: Value(quote.projectId),
-          quoteNumber: Value(quote.quoteNumber),
-          status: Value(quote.status),
-          issueDate: Value(quote.issueDate),
-          validUntil: Value(quote.validUntil),
-          notes: Value(quote.notes),
-          approvalName: Value(quote.approvalName),
-          approvedAt: Value(quote.approvedAt),
-          subtotal: Value(quote.subtotal),
-          taxRate: Value(quote.taxRate),
-          discountAmount: Value(quote.discountAmount),
-          total: Value(quote.total),
-          convertedInvoiceId: Value(quote.convertedInvoiceId),
+          clientId: Value(quoteToSave.clientId),
+          projectId: Value(quoteToSave.projectId),
+          quoteNumber: Value(quoteToSave.quoteNumber),
+          status: Value(quoteToSave.status),
+          issueDate: Value(quoteToSave.issueDate),
+          validUntil: Value(quoteToSave.validUntil),
+          notes: Value(quoteToSave.notes),
+          approvalName: Value(quoteToSave.approvalName),
+          approvedAt: Value(quoteToSave.approvedAt),
+          subtotal: Value(quoteToSave.subtotal),
+          taxRate: Value(quoteToSave.taxRate),
+          discountAmount: Value(quoteToSave.discountAmount),
+          total: Value(quoteToSave.total),
+          convertedInvoiceId: Value(quoteToSave.convertedInvoiceId),
           updatedAt: Value(DateTime.now()),
         ),
       );
 
       await (_database.delete(
         _database.quoteItems,
-      )..where((t) => t.quoteId.equals(quote.id!))).go();
-      await _insertItems(quote.id!, quote.items);
+      )..where((t) => t.quoteId.equals(quoteToSave.id!))).go();
+      await _insertItems(quoteToSave.id!, quoteToSave.items);
     });
   }
 

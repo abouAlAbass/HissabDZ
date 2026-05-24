@@ -293,7 +293,7 @@ class ScaffoldWithBottomNavBar extends StatelessWidget {
         currentIndex: _mobileSelectedIndex(location),
         type: BottomNavigationBarType.fixed,
         selectedItemColor: AppTheme.primaryIndigo,
-        unselectedItemColor: AppTheme.textSecondary,
+        unselectedItemColor: Theme.of(context).textTheme.bodySmall?.color,
         showUnselectedLabels: true,
         onTap: (index) {
           switch (index) {
