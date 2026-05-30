@@ -7,7 +7,6 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:flutter/services.dart';
 import 'package:printing/printing.dart';
 
-
 import '../../../l10n/app_localizations.dart';
 import '../../settings/domain/entities/business_profile.dart';
 import '../../invoices/domain/entities/invoice.dart';
@@ -27,17 +26,21 @@ class PdfRefundService {
   }) async {
     final isRtl = l10n.localeName == 'ar';
     final textDirection = isRtl ? pw.TextDirection.rtl : pw.TextDirection.ltr;
-    
+
     // Load Fonts
     final notoRegular = await PdfGoogleFonts.notoSansRegular();
     final notoBold = await PdfGoogleFonts.notoSansBold();
-    
+
     pw.Font arabicRegular;
     pw.Font arabicBold;
-    
+
     try {
-      final arabicRegularData = await rootBundle.load('assets/fonts/Amiri-Regular.ttf');
-      final arabicBoldData = await rootBundle.load('assets/fonts/Amiri-Bold.ttf');
+      final arabicRegularData = await rootBundle.load(
+        'assets/fonts/Amiri-Regular.ttf',
+      );
+      final arabicBoldData = await rootBundle.load(
+        'assets/fonts/Amiri-Bold.ttf',
+      );
       arabicRegular = pw.Font.ttf(arabicRegularData);
       arabicBold = pw.Font.ttf(arabicBoldData);
     } catch (e) {
@@ -74,6 +77,7 @@ class PdfRefundService {
           pw.SizedBox(height: 16),
           _infoRow(refund, invoice, l10n, isRtl),
           pw.SizedBox(height: 20),
+          _sectionTitle(l10n.items),
           _itemsTable(refund, l10n, textDirection, isRtl),
           pw.SizedBox(height: 18),
           _totals(refund, invoice, l10n, isRtl),
@@ -83,9 +87,7 @@ class PdfRefundService {
     );
 
     final output = await getTemporaryDirectory();
-    final file = File(
-      p.join(output.path, 'refund_${refund.refundNumber}.pdf'),
-    );
+    final file = File(p.join(output.path, 'refund_${refund.refundNumber}.pdf'));
     await file.writeAsBytes(await pdf.save());
     return file;
   }
@@ -296,7 +298,11 @@ class PdfRefundService {
                   isRtl,
                 ),
                 _thinDivider(),
-                _infoLine(l10n.invoiceNumberShort, invoice.invoiceNumber, isRtl),
+                _infoLine(
+                  l10n.invoiceNumberShort,
+                  invoice.invoiceNumber,
+                  isRtl,
+                ),
               ],
             ),
           ),
@@ -373,57 +379,48 @@ class PdfRefundService {
     pw.TextDirection textDirection,
     bool isRtl,
   ) {
-    return pw.Column(
-      crossAxisAlignment: pw.CrossAxisAlignment.start,
-      children: [
-        _sectionTitle(l10n.items),
-        pw.TableHelper.fromTextArray(
-          headers: isRtl 
-            ? [l10n.amount, l10n.price, l10n.quantity, l10n.description]
-            : [l10n.description, l10n.quantity, l10n.price, l10n.amount],
-          data: refund.items.map((item) {
-            final row = [
-              item.description ?? '',
-              _quantity(item.quantity),
-              _formatCurrency(item.unitPrice, l10n, isRtl),
-              _formatCurrency(item.amount, l10n, isRtl),
-            ];
-            return isRtl ? row.reversed.toList() : row;
-          }).toList(),
-          border: const pw.TableBorder(
-            top: pw.BorderSide(color: _line, width: 0.8),
-            bottom: pw.BorderSide(color: _line, width: 0.8),
-          ),
-          headerDecoration: const pw.BoxDecoration(color: _ink),
-          headerStyle: pw.TextStyle(
-            color: PdfColors.white,
-            fontSize: 9,
-            fontWeight: pw.FontWeight.bold,
-          ),
-          cellStyle: const pw.TextStyle(
-            color: PdfColors.blueGrey800,
-            fontSize: 9,
-          ),
-          headerAlignment: pw.Alignment.center,
-          cellAlignment: pw.Alignment.centerLeft,
-          cellAlignments: isRtl ? {
-            3: pw.Alignment.centerRight,
-          } : {
-            0: pw.Alignment.centerLeft,
-          },
-          columnWidths: isRtl ? const {
-            0: pw.FlexColumnWidth(1.8), // Amount
-            1: pw.FlexColumnWidth(1.8), // Price
-            2: pw.FlexColumnWidth(1.1), // Qty
-            3: pw.FlexColumnWidth(5),   // Description
-          } : const {
-            0: pw.FlexColumnWidth(5),
-            1: pw.FlexColumnWidth(1.1),
-            2: pw.FlexColumnWidth(1.8),
-            3: pw.FlexColumnWidth(1.8),
-          },
-        ),
-      ],
+    return pw.TableHelper.fromTextArray(
+      headers: isRtl
+          ? [l10n.amount, l10n.price, l10n.quantity, l10n.description]
+          : [l10n.description, l10n.quantity, l10n.price, l10n.amount],
+      data: refund.items.map((item) {
+        final row = [
+          item.description ?? '',
+          _quantity(item.quantity),
+          _formatCurrency(item.unitPrice, l10n, isRtl),
+          _formatCurrency(item.amount, l10n, isRtl),
+        ];
+        return isRtl ? row.reversed.toList() : row;
+      }).toList(),
+      border: const pw.TableBorder(
+        top: pw.BorderSide(color: _line, width: 0.8),
+        bottom: pw.BorderSide(color: _line, width: 0.8),
+      ),
+      headerDecoration: const pw.BoxDecoration(color: _ink),
+      headerStyle: pw.TextStyle(
+        color: PdfColors.white,
+        fontSize: 9,
+        fontWeight: pw.FontWeight.bold,
+      ),
+      cellStyle: const pw.TextStyle(color: PdfColors.blueGrey800, fontSize: 9),
+      headerAlignment: pw.Alignment.center,
+      cellAlignment: pw.Alignment.centerLeft,
+      cellAlignments: isRtl
+          ? {3: pw.Alignment.centerRight}
+          : {0: pw.Alignment.centerLeft},
+      columnWidths: isRtl
+          ? const {
+              0: pw.FlexColumnWidth(1.8),
+              1: pw.FlexColumnWidth(1.8),
+              2: pw.FlexColumnWidth(1.1),
+              3: pw.FlexColumnWidth(5),
+            }
+          : const {
+              0: pw.FlexColumnWidth(5),
+              1: pw.FlexColumnWidth(1.1),
+              2: pw.FlexColumnWidth(1.8),
+              3: pw.FlexColumnWidth(1.8),
+            },
     );
   }
 
@@ -576,7 +573,11 @@ class PdfRefundService {
     return DateFormat('dd/MM/yyyy', 'en').format(date);
   }
 
-  static String _formatCurrency(double amount, AppLocalizations l10n, bool isRtl) {
+  static String _formatCurrency(
+    double amount,
+    AppLocalizations l10n,
+    bool isRtl,
+  ) {
     final formatter = NumberFormat.currency(locale: 'en_US', symbol: '');
     final formattedAmount = formatter.format(amount).trim();
     if (!isRtl) return '${l10n.currencySymbol} $formattedAmount';
@@ -586,4 +587,3 @@ class PdfRefundService {
     return '${l10n.currencySymbol} $formattedAmount';
   }
 }
-

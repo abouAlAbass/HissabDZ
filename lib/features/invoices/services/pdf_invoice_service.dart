@@ -8,7 +8,6 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:flutter/services.dart';
 import 'package:printing/printing.dart';
 
-
 import '../../../l10n/app_localizations.dart';
 import '../../settings/domain/entities/business_profile.dart';
 import '../../payments/domain/entities/payment.dart';
@@ -31,17 +30,21 @@ class PdfInvoiceService {
   }) async {
     final isRtl = l10n.localeName == 'ar';
     final textDirection = isRtl ? pw.TextDirection.rtl : pw.TextDirection.ltr;
-    
+
     // Load Fonts
     final notoRegular = await PdfGoogleFonts.notoSansRegular();
     final notoBold = await PdfGoogleFonts.notoSansBold();
-    
+
     pw.Font arabicRegular;
     pw.Font arabicBold;
-    
+
     try {
-      final arabicRegularData = await rootBundle.load('assets/fonts/Amiri-Regular.ttf');
-      final arabicBoldData = await rootBundle.load('assets/fonts/Amiri-Bold.ttf');
+      final arabicRegularData = await rootBundle.load(
+        'assets/fonts/Amiri-Regular.ttf',
+      );
+      final arabicBoldData = await rootBundle.load(
+        'assets/fonts/Amiri-Bold.ttf',
+      );
       arabicRegular = pw.Font.ttf(arabicRegularData);
       arabicBold = pw.Font.ttf(arabicBoldData);
     } catch (e) {
@@ -78,6 +81,7 @@ class PdfInvoiceService {
           pw.SizedBox(height: 16),
           _infoRow(invoice, l10n, isRtl),
           pw.SizedBox(height: 20),
+          _sectionTitle(l10n.items),
           _itemsTable(invoice, l10n, textDirection, isRtl),
           pw.SizedBox(height: 18),
           _totals(
@@ -89,12 +93,8 @@ class PdfInvoiceService {
           ),
           if (showPayments && payments != null && payments.isNotEmpty) ...[
             pw.SizedBox(height: 25),
-            _paymentsSection(
-              payments,
-              l10n,
-              textDirection,
-              isRtl,
-            ),
+            _sectionTitle(l10n.relatedPayments),
+            _paymentsSection(payments, l10n, textDirection, isRtl),
           ],
         ],
         footer: (context) => _footer(context, l10n, isRtl),
@@ -445,72 +445,52 @@ class PdfInvoiceService {
     pw.TextDirection textDirection,
     bool isRtl,
   ) {
-    return pw.Column(
-      crossAxisAlignment: pw.CrossAxisAlignment.start,
-      children: [
-        _sectionTitle(l10n.items),
-        pw.TableHelper.fromTextArray(
-          headers: isRtl 
-            ? [l10n.amount, l10n.price, l10n.quantity, l10n.description]
-            : [l10n.description, l10n.quantity, l10n.price, l10n.amount],
-          data: invoice.items.map((item) {
-            final row = [
-              item.description,
-              _quantity(item.quantity),
-              _formatCurrency(item.unitPrice, l10n, isRtl),
-              _formatCurrency(item.amount, l10n, isRtl),
-            ];
-            return isRtl ? row.reversed.toList() : row;
-          }).toList(),
-          border: const pw.TableBorder(
-            top: pw.BorderSide(color: _line, width: 0.8),
-            bottom: pw.BorderSide(color: _line, width: 0.8),
-            horizontalInside: pw.BorderSide(
-              color: PdfColors.grey200,
-              width: 0.5,
-            ),
-          ),
-          headerDecoration: const pw.BoxDecoration(color: _ink),
-          oddRowDecoration: const pw.BoxDecoration(color: _soft),
-          headerStyle: pw.TextStyle(
-            color: PdfColors.white,
-            fontSize: 9,
-            fontWeight: pw.FontWeight.bold,
-          ),
-          cellStyle: const pw.TextStyle(
-            color: PdfColors.blueGrey800,
-            fontSize: 9,
-          ),
-          cellPadding: const pw.EdgeInsets.symmetric(
-            horizontal: 8,
-            vertical: 8,
-          ),
-          headerPadding: const pw.EdgeInsets.symmetric(
-            horizontal: 8,
-            vertical: 8,
-          ),
-          headerAlignment: pw.Alignment.center, // Center headers for better look
-          cellAlignment: pw.Alignment.centerLeft, // Default for numbers
-          cellAlignments: isRtl ? {
-            3: pw.Alignment.centerRight, // Description on the right
-          } : {
-            0: pw.Alignment.centerLeft, // Description on the left (wait, usually left)
-            // Wait, I'll use explicit alignments for clarity
-          },
-          columnWidths: isRtl ? const {
-            0: pw.FlexColumnWidth(1.8), // Amount
-            1: pw.FlexColumnWidth(1.8), // Price
-            2: pw.FlexColumnWidth(1.1), // Qty
-            3: pw.FlexColumnWidth(5),   // Description
-          } : const {
-            0: pw.FlexColumnWidth(5),
-            1: pw.FlexColumnWidth(1.1),
-            2: pw.FlexColumnWidth(1.8),
-            3: pw.FlexColumnWidth(1.8),
-          },
-          // Remove tableDirection/headerDirection as we handle it manually
-        ),
-      ],
+    return pw.TableHelper.fromTextArray(
+      headers: isRtl
+          ? [l10n.amount, l10n.price, l10n.quantity, l10n.description]
+          : [l10n.description, l10n.quantity, l10n.price, l10n.amount],
+      data: invoice.items.map((item) {
+        final row = [
+          item.description,
+          _quantity(item.quantity),
+          _formatCurrency(item.unitPrice, l10n, isRtl),
+          _formatCurrency(item.amount, l10n, isRtl),
+        ];
+        return isRtl ? row.reversed.toList() : row;
+      }).toList(),
+      border: const pw.TableBorder(
+        top: pw.BorderSide(color: _line, width: 0.8),
+        bottom: pw.BorderSide(color: _line, width: 0.8),
+        horizontalInside: pw.BorderSide(color: PdfColors.grey200, width: 0.5),
+      ),
+      headerDecoration: const pw.BoxDecoration(color: _ink),
+      oddRowDecoration: const pw.BoxDecoration(color: _soft),
+      headerStyle: pw.TextStyle(
+        color: PdfColors.white,
+        fontSize: 9,
+        fontWeight: pw.FontWeight.bold,
+      ),
+      cellStyle: const pw.TextStyle(color: PdfColors.blueGrey800, fontSize: 9),
+      cellPadding: const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+      headerPadding: const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+      headerAlignment: pw.Alignment.center,
+      cellAlignment: pw.Alignment.centerLeft,
+      cellAlignments: isRtl
+          ? {3: pw.Alignment.centerRight}
+          : {0: pw.Alignment.centerLeft},
+      columnWidths: isRtl
+          ? const {
+              0: pw.FlexColumnWidth(1.8),
+              1: pw.FlexColumnWidth(1.8),
+              2: pw.FlexColumnWidth(1.1),
+              3: pw.FlexColumnWidth(5),
+            }
+          : const {
+              0: pw.FlexColumnWidth(5),
+              1: pw.FlexColumnWidth(1.1),
+              2: pw.FlexColumnWidth(1.8),
+              3: pw.FlexColumnWidth(1.8),
+            },
     );
   }
 
@@ -613,39 +593,35 @@ class PdfInvoiceService {
     pw.TextDirection textDirection,
     bool isRtl,
   ) {
-    return pw.Column(
-      crossAxisAlignment: pw.CrossAxisAlignment.start,
-      children: [
-        _sectionTitle(l10n.relatedPayments),
-        pw.TableHelper.fromTextArray(
-          headers: [l10n.date, l10n.paymentMethod, l10n.amount],
-          data: payments.map((p) {
-            return [
-              _formatDate(p.date, l10n, isRtl),
-              p.method == 'cash' ? l10n.cash : p.method == 'transfer' ? l10n.transfer : (p.method ?? '-'),
-              _formatCurrency(p.amount, l10n, isRtl),
-            ];
-          }).toList(),
-          border: const pw.TableBorder(
-            top: pw.BorderSide(color: _line, width: 0.8),
-            bottom: pw.BorderSide(color: _line, width: 0.8),
-            horizontalInside: pw.BorderSide(color: PdfColors.grey200, width: 0.5),
-          ),
-          headerDecoration: const pw.BoxDecoration(color: PdfColors.grey200),
-          headerStyle: pw.TextStyle(
-            color: _ink,
-            fontSize: 9,
-            fontWeight: pw.FontWeight.bold,
-          ),
-          cellStyle: const pw.TextStyle(color: _ink, fontSize: 8.5),
-          cellPadding: const pw.EdgeInsets.all(6),
-          cellAlignment: pw.Alignment.centerLeft,
-          cellAlignments: const {
-            2: pw.Alignment.centerRight,
-          },
-          tableDirection: textDirection,
-        ),
-      ],
+    return pw.TableHelper.fromTextArray(
+      headers: [l10n.date, l10n.paymentMethod, l10n.amount],
+      data: payments.map((p) {
+        return [
+          _formatDate(p.date, l10n, isRtl),
+          p.method == 'cash'
+              ? l10n.cash
+              : p.method == 'transfer'
+              ? l10n.transfer
+              : (p.method ?? '-'),
+          _formatCurrency(p.amount, l10n, isRtl),
+        ];
+      }).toList(),
+      border: const pw.TableBorder(
+        top: pw.BorderSide(color: _line, width: 0.8),
+        bottom: pw.BorderSide(color: _line, width: 0.8),
+        horizontalInside: pw.BorderSide(color: PdfColors.grey200, width: 0.5),
+      ),
+      headerDecoration: const pw.BoxDecoration(color: PdfColors.grey200),
+      headerStyle: pw.TextStyle(
+        color: _ink,
+        fontSize: 9,
+        fontWeight: pw.FontWeight.bold,
+      ),
+      cellStyle: const pw.TextStyle(color: _ink, fontSize: 8.5),
+      cellPadding: const pw.EdgeInsets.all(6),
+      cellAlignment: pw.Alignment.centerLeft,
+      cellAlignments: const {2: pw.Alignment.centerRight},
+      tableDirection: textDirection,
     );
   }
 
@@ -692,7 +668,8 @@ class PdfInvoiceService {
     PdfColor? backgroundColor,
   }) {
     final textColor = color ?? (isHighlighted ? PdfColors.white : _ink);
-    final bgColor = backgroundColor ?? (isHighlighted ? (color ?? _ink) : PdfColors.white);
+    final bgColor =
+        backgroundColor ?? (isHighlighted ? (color ?? _ink) : PdfColors.white);
     return pw.Container(
       color: bgColor,
       padding: pw.EdgeInsets.symmetric(
@@ -832,7 +809,11 @@ class PdfInvoiceService {
     return DateFormat('dd/MM/yyyy', 'en').format(date);
   }
 
-  static String _formatCurrency(double amount, AppLocalizations l10n, bool isRtl) {
+  static String _formatCurrency(
+    double amount,
+    AppLocalizations l10n,
+    bool isRtl,
+  ) {
     final formatter = NumberFormat.currency(locale: 'en_US', symbol: '');
     final formattedAmount = formatter.format(amount).trim();
     if (!isRtl) return '${l10n.currencySymbol} $formattedAmount';
@@ -843,4 +824,3 @@ class PdfInvoiceService {
     return '${l10n.currencySymbol} $formattedAmount';
   }
 }
-

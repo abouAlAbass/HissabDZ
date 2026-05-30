@@ -10,7 +10,7 @@ class Article with _$Article {
     required String name,
     String? code,
     required double price,
-    required String unit, // kg, m2, m3, pieces
+    required String unit, // kg, m, m2, m3, pieces
     @Default('physical') String type, // physical, service
     @Default('materials') String category,
     @Default(0.0) double taxRate,

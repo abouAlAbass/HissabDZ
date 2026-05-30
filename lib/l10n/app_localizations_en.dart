@@ -186,6 +186,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get exportPdf => 'Export PDF';
 
   @override
+  String get articleSalePrices => 'Article sale prices';
+
+  @override
   String get companyInfo => 'Business Profile';
 
   @override
@@ -457,6 +460,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get m3 => 'm³';
+
+  @override
+  String get linearMeter => 'Meter';
 
   @override
   String get pieces => 'Pieces';

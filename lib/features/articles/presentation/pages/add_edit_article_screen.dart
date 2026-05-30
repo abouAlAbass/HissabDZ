@@ -138,6 +138,7 @@ class _AddEditArticleScreenState extends ConsumerState<AddEditArticleScreen> {
       'kg': l10n.kg,
       'm2': l10n.m2,
       'm3': l10n.m3,
+      'm': l10n.linearMeter,
       'pieces': l10n.pieces,
     };
     final categories = {

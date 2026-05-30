@@ -454,6 +454,12 @@ abstract class AppLocalizations {
   /// **'Export PDF'**
   String get exportPdf;
 
+  /// No description provided for @articleSalePrices.
+  ///
+  /// In en, this message translates to:
+  /// **'Article sale prices'**
+  String get articleSalePrices;
+
   /// No description provided for @companyInfo.
   ///
   /// In en, this message translates to:
@@ -993,6 +999,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'m³'**
   String get m3;
+
+  /// No description provided for @linearMeter.
+  ///
+  /// In en, this message translates to:
+  /// **'Meter'**
+  String get linearMeter;
 
   /// No description provided for @pieces.
   ///

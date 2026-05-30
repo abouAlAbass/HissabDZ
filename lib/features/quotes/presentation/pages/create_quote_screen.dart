@@ -12,6 +12,7 @@ import '../../../clients/presentation/providers/client_providers.dart';
 import '../../../projects/domain/entities/project.dart';
 import '../../../projects/presentation/providers/project_providers.dart';
 import '../../../articles/domain/entities/article.dart';
+import '../../../articles/data/repositories/article_repository.dart';
 import '../../../articles/presentation/providers/article_providers.dart';
 import '../../services/pdf_quote_service.dart';
 import '../../../../features/settings/presentation/providers/settings_providers.dart';
@@ -37,7 +38,7 @@ class _CreateQuoteScreenState extends ConsumerState<CreateQuoteScreen> {
   final _quoteNumberController = TextEditingController();
   final _notesController = TextEditingController();
   final _approvalController = TextEditingController();
-  
+
   Client? _selectedClient;
   Project? _selectedProject;
   DateTime _issueDate = DateTime.now();
@@ -46,7 +47,7 @@ class _CreateQuoteScreenState extends ConsumerState<CreateQuoteScreen> {
 
   // Items handling
   final List<_QuoteItemData> _items = [];
-  
+
   double _taxRate = 0;
   double _discount = 0;
   bool _isSaving = false;
@@ -58,8 +59,9 @@ class _CreateQuoteScreenState extends ConsumerState<CreateQuoteScreen> {
   void initState() {
     super.initState();
     _validUntil = DateTime.now().add(const Duration(days: 30));
-    _quoteNumberController.text = 'DEV-${DateTime.now().millisecondsSinceEpoch.toString().substring(7)}';
-    
+    _quoteNumberController.text =
+        'DEV-${DateTime.now().millisecondsSinceEpoch.toString().substring(7)}';
+
     if (!_isEditMode) {
       _addItem();
       _loadNextNumber();
@@ -85,7 +87,9 @@ class _CreateQuoteScreenState extends ConsumerState<CreateQuoteScreen> {
   }
 
   Future<void> _loadNextNumber() async {
-    final number = await ref.read(quoteRepositoryProvider).generateNextQuoteNumber();
+    final number = await ref
+        .read(quoteRepositoryProvider)
+        .generateNextQuoteNumber();
     if (mounted) _quoteNumberController.text = number;
   }
 
@@ -112,19 +116,35 @@ class _CreateQuoteScreenState extends ConsumerState<CreateQuoteScreen> {
 
   void _applyArticleToItem(int index, Article article) {
     final item = _items[index];
-    final quantity = article.defaultQuantity <= 0 ? 1.0 : article.defaultQuantity;
+    final quantity = article.defaultQuantity <= 0
+        ? 1.0
+        : article.defaultQuantity;
     item.descriptionController.text = article.name;
     item.quantityController.text = quantity.toString();
     item.priceController.text = article.price.toStringAsFixed(2);
   }
 
   void _appendItemFromArticle(Article article) {
-    final quantity = article.defaultQuantity <= 0 ? 1.0 : article.defaultQuantity;
-    _items.add(_QuoteItemData(
-      description: article.name,
-      quantity: quantity,
-      price: article.price,
-    ));
+    final quantity = article.defaultQuantity <= 0
+        ? 1.0
+        : article.defaultQuantity;
+    _items.add(
+      _QuoteItemData(
+        description: article.name,
+        quantity: quantity,
+        price: article.price,
+      ),
+    );
+  }
+
+  void _addArticleToQuote(Article article) {
+    setState(() {
+      if (_items.length == 1 && _isItemEmpty(0)) {
+        _applyArticleToItem(0, article);
+      } else {
+        _appendItemFromArticle(article);
+      }
+    });
   }
 
   void _addQuickTemplateArticles(
@@ -132,18 +152,17 @@ class _CreateQuoteScreenState extends ConsumerState<CreateQuoteScreen> {
     List<Article> articles,
     AppLocalizations l10n,
   ) {
-    final matching = articles
-        .where((article) => article.quickTemplate == template)
-        .toList()
-      ..sort((a, b) {
-        final order = a.quickTemplateOrder.compareTo(b.quickTemplateOrder);
-        return order != 0 ? order : a.name.compareTo(b.name);
-      });
+    final matching =
+        articles.where((article) => article.quickTemplate == template).toList()
+          ..sort((a, b) {
+            final order = a.quickTemplateOrder.compareTo(b.quickTemplateOrder);
+            return order != 0 ? order : a.name.compareTo(b.name);
+          });
 
     if (matching.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.noQuickTemplateArticles)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.noQuickTemplateArticles)));
       return;
     }
 
@@ -159,13 +178,12 @@ class _CreateQuoteScreenState extends ConsumerState<CreateQuoteScreen> {
     });
   }
 
-
   Future<void> _showPdf() async {
     if (_selectedClient == null) return;
-    
+
     final l10n = AppLocalizations.of(context)!;
     final profile = ref.read(businessProfileProvider).value;
-    
+
     final quote = Quote(
       id: widget.quoteId,
       quoteNumber: _quoteNumberController.text,
@@ -175,8 +193,14 @@ class _CreateQuoteScreenState extends ConsumerState<CreateQuoteScreen> {
       validUntil: _validUntil,
       status: _status,
       items: _items.map((data) {
-        final q = double.tryParse(data.quantityController.text.replaceAll(',', '.')) ?? 1;
-        final p = double.tryParse(data.priceController.text.replaceAll(',', '.')) ?? 0;
+        final q =
+            double.tryParse(
+              data.quantityController.text.replaceAll(',', '.'),
+            ) ??
+            1;
+        final p =
+            double.tryParse(data.priceController.text.replaceAll(',', '.')) ??
+            0;
         return QuoteItem(
           quoteId: widget.quoteId ?? 0,
           description: data.descriptionController.text,
@@ -198,17 +222,21 @@ class _CreateQuoteScreenState extends ConsumerState<CreateQuoteScreen> {
       profile: profile,
       l10n: l10n,
     );
-    
+
     await Share.shareXFiles([XFile(file.path)], text: l10n.quoteLabel);
   }
 
   Future<void> _loadInitialProject(int projectId) async {
-    final project = await ref.read(projectRepositoryProvider).getProjectById(projectId);
+    final project = await ref
+        .read(projectRepositoryProvider)
+        .getProjectById(projectId);
     if (!mounted || project == null) return;
-    
+
     Client? client;
     if (project.clientId != null) {
-      client = await ref.read(clientRepositoryProvider).getClientById(project.clientId!);
+      client = await ref
+          .read(clientRepositoryProvider)
+          .getClientById(project.clientId!);
     }
 
     setState(() {
@@ -219,7 +247,9 @@ class _CreateQuoteScreenState extends ConsumerState<CreateQuoteScreen> {
 
   Future<void> _loadExistingQuote() async {
     setState(() => _isLoading = true);
-    final quote = await ref.read(quoteRepositoryProvider).getQuoteById(widget.quoteId!);
+    final quote = await ref
+        .read(quoteRepositoryProvider)
+        .getQuoteById(widget.quoteId!);
     if (!mounted) return;
 
     if (quote == null) {
@@ -232,7 +262,7 @@ class _CreateQuoteScreenState extends ConsumerState<CreateQuoteScreen> {
       item.dispose();
     }
     _items.clear();
-    
+
     for (var item in quote.items) {
       _items.add(_QuoteItemData.fromItem(item));
     }
@@ -259,7 +289,8 @@ class _CreateQuoteScreenState extends ConsumerState<CreateQuoteScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final isDesktop = MediaQuery.of(context).size.width >= AppBreakpoints.desktop;
+    final isDesktop =
+        MediaQuery.of(context).size.width >= AppBreakpoints.desktop;
 
     if (_isLoading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
@@ -282,29 +313,39 @@ class _CreateQuoteScreenState extends ConsumerState<CreateQuoteScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: FilledButton.icon(
               onPressed: _isSaving ? null : _saveQuote,
-              icon: _isSaving 
-                ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
-                : const Icon(Icons.check, size: 18),
+              icon: _isSaving
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.check, size: 18),
               label: Text(l10n.save),
             ),
           ),
         ],
       ),
-      bottomNavigationBar: !isDesktop ? StickyActionFooter(
-        label: l10n.total,
-        value: NumberFormat.currency(symbol: l10n.currencySymbol).format(_total),
-        actionLabel: l10n.save,
-        actionIcon: Icons.save,
-        onPressed: _saveQuote,
-        loading: _isSaving,
-      ) : null,
+      bottomNavigationBar: !isDesktop
+          ? StickyActionFooter(
+              label: l10n.total,
+              value: NumberFormat.currency(
+                symbol: l10n.currencySymbol,
+              ).format(_total),
+              actionLabel: l10n.save,
+              actionIcon: Icons.save,
+              onPressed: _saveQuote,
+              loading: _isSaving,
+            )
+          : null,
       body: Form(
         key: _formKey,
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
           child: ResponsiveContent(
             maxWidth: 1200,
-            child: isDesktop ? _buildDesktopLayout(l10n) : _buildMobileLayout(l10n),
+            child: isDesktop
+                ? _buildDesktopLayout(l10n)
+                : _buildMobileLayout(l10n),
           ),
         ),
       ),
@@ -363,7 +404,9 @@ class _CreateQuoteScreenState extends ConsumerState<CreateQuoteScreen> {
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Theme.of(context).dividerTheme.color ?? Colors.transparent),
+        side: BorderSide(
+          color: Theme.of(context).dividerTheme.color ?? Colors.transparent,
+        ),
       ),
       child: Padding(
         padding: const EdgeInsets.all(20),
@@ -375,17 +418,35 @@ class _CreateQuoteScreenState extends ConsumerState<CreateQuoteScreen> {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.primary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Icon(Icons.person_outline, color: Theme.of(context).colorScheme.primary, size: 20),
+                  child: Icon(
+                    Icons.person_outline,
+                    color: Theme.of(context).colorScheme.primary,
+                    size: 20,
+                  ),
                 ),
                 const SizedBox(width: 12),
                 Text(
                   l10n.billTo,
-                  style: GoogleFonts.inter(fontWeight: FontWeight.w700, fontSize: 16),
+                  style: GoogleFonts.inter(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 16,
+                  ),
                 ),
               ],
+            ),
+            const SizedBox(height: 16),
+            Align(
+              alignment: Alignment.centerRight,
+              child: OutlinedButton.icon(
+                onPressed: () => _showQuickClientDialog(l10n),
+                icon: const Icon(Icons.person_add_alt_1_outlined, size: 18),
+                label: Text(l10n.quickClient),
+              ),
             ),
             const SizedBox(height: 20),
             _buildClientSearch(l10n),
@@ -397,7 +458,7 @@ class _CreateQuoteScreenState extends ConsumerState<CreateQuoteScreen> {
 
   Widget _buildClientSearch(AppLocalizations l10n) {
     final clientsAsync = ref.watch(clientsListProvider);
-    
+
     return clientsAsync.when(
       data: (clients) => SearchAnchor(
         builder: (context, controller) {
@@ -405,29 +466,44 @@ class _CreateQuoteScreenState extends ConsumerState<CreateQuoteScreen> {
             controller: controller,
             hintText: _selectedClient?.name ?? l10n.searchClients,
             elevation: WidgetStateProperty.all(0),
-            backgroundColor: WidgetStateProperty.all(Theme.of(context).colorScheme.surface),
-            shape: WidgetStateProperty.all(RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-              side: BorderSide(color: Theme.of(context).dividerTheme.color ?? Colors.grey),
-            )),
-            padding: WidgetStateProperty.all(const EdgeInsets.symmetric(horizontal: 12)),
-            leading: Icon(Icons.search, color: Theme.of(context).colorScheme.onSurfaceVariant),
+            backgroundColor: WidgetStateProperty.all(
+              Theme.of(context).colorScheme.surface,
+            ),
+            shape: WidgetStateProperty.all(
+              RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+                side: BorderSide(
+                  color: Theme.of(context).dividerTheme.color ?? Colors.grey,
+                ),
+              ),
+            ),
+            padding: WidgetStateProperty.all(
+              const EdgeInsets.symmetric(horizontal: 12),
+            ),
+            leading: Icon(
+              Icons.search,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
             onTap: () => controller.openView(),
             onChanged: (_) => controller.openView(),
           );
         },
         suggestionsBuilder: (context, controller) {
           final query = controller.text.toLowerCase();
-          final filtered = clients.where((c) => c.name.toLowerCase().contains(query)).toList();
-          
-          return filtered.map((c) => ListTile(
-            title: Text(c.name),
-            subtitle: Text(c.email ?? ''),
-            onTap: () {
-              setState(() => _selectedClient = c);
-              controller.closeView(c.name);
-            },
-          ));
+          final filtered = clients
+              .where((c) => c.name.toLowerCase().contains(query))
+              .toList();
+
+          return filtered.map(
+            (c) => ListTile(
+              title: Text(c.name),
+              subtitle: Text(c.email ?? ''),
+              onTap: () {
+                setState(() => _selectedClient = c);
+                controller.closeView(c.name);
+              },
+            ),
+          );
         },
       ),
       loading: () => const LinearProgressIndicator(),
@@ -440,7 +516,10 @@ class _CreateQuoteScreenState extends ConsumerState<CreateQuoteScreen> {
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Theme.of(context).dividerTheme.color ?? Colors.grey.withAlpha(50)),
+        side: BorderSide(
+          color:
+              Theme.of(context).dividerTheme.color ?? Colors.grey.withAlpha(50),
+        ),
       ),
       child: Padding(
         padding: const EdgeInsets.all(20),
@@ -452,24 +531,31 @@ class _CreateQuoteScreenState extends ConsumerState<CreateQuoteScreen> {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.primary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Icon(Icons.request_quote_outlined, color: Theme.of(context).colorScheme.primary, size: 20),
+                  child: Icon(
+                    Icons.request_quote_outlined,
+                    color: Theme.of(context).colorScheme.primary,
+                    size: 20,
+                  ),
                 ),
                 const SizedBox(width: 12),
                 Text(
                   l10n.quoteDetails,
-                  style: GoogleFonts.inter(fontWeight: FontWeight.w700, fontSize: 16),
+                  style: GoogleFonts.inter(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 16,
+                  ),
                 ),
               ],
             ),
             const SizedBox(height: 20),
             TextFormField(
               controller: _quoteNumberController,
-              decoration: InputDecoration(
-                labelText: l10n.quoteNumber,
-              ),
+              decoration: InputDecoration(labelText: l10n.quoteNumber),
               validator: (v) => v?.isEmpty ?? true ? l10n.requiredField : null,
             ),
             const SizedBox(height: 16),
@@ -514,7 +600,11 @@ class _CreateQuoteScreenState extends ConsumerState<CreateQuoteScreen> {
     );
   }
 
-  Widget _buildDatePickerField({required String label, required DateTime value, required VoidCallback onTap}) {
+  Widget _buildDatePickerField({
+    required String label,
+    required DateTime value,
+    required VoidCallback onTap,
+  }) {
     return InkWell(
       onTap: onTap,
       child: InputDecorator(
@@ -544,36 +634,70 @@ class _CreateQuoteScreenState extends ConsumerState<CreateQuoteScreen> {
           children: [
             Text(
               l10n.items,
-              style: GoogleFonts.inter(fontWeight: FontWeight.w700, fontSize: 18),
-            ),
-            FilledButton.icon(
-              onPressed: _addItem,
-              icon: const Icon(Icons.add, size: 18),
-              label: Text(l10n.addItem),
-              style: FilledButton.styleFrom(
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              style: GoogleFonts.inter(
+                fontWeight: FontWeight.w700,
+                fontSize: 18,
               ),
+            ),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              alignment: WrapAlignment.end,
+              children: [
+                OutlinedButton.icon(
+                  onPressed: () => _showQuickArticleDialog(l10n),
+                  icon: const Icon(Icons.inventory_2_outlined, size: 18),
+                  label: Text(l10n.quickArticle),
+                ),
+                FilledButton.icon(
+                  onPressed: _addItem,
+                  icon: const Icon(Icons.add, size: 18),
+                  label: Text(l10n.addItem),
+                  style: FilledButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
         const SizedBox(height: 16),
         if (isMobile)
-          ..._items.map((item) => _buildMobileItem(_items.indexOf(item), l10n, articlesAsync))
+          ..._items.map(
+            (item) =>
+                _buildMobileItem(_items.indexOf(item), l10n, articlesAsync),
+          )
         else
           _buildDesktopItemTable(l10n, articlesAsync),
       ],
     );
   }
 
-  Widget _buildArticleAutocomplete(int index, AppLocalizations l10n, List<Article> articles, {bool isDense = false}) {
+  Widget _buildArticleAutocomplete(
+    int index,
+    AppLocalizations l10n,
+    List<Article> articles, {
+    bool isDense = false,
+  }) {
     final item = _items[index];
     return Autocomplete<Article>(
       displayStringForOption: (option) => option.name,
       optionsBuilder: (TextEditingValue textEditingValue) {
-        if (textEditingValue.text.isEmpty) return const Iterable<Article>.empty();
-        return articles.where((article) =>
-            article.name.toLowerCase().contains(textEditingValue.text.toLowerCase()) ||
-            (article.code?.toLowerCase().contains(textEditingValue.text.toLowerCase()) ?? false));
+        if (textEditingValue.text.isEmpty) {
+          return const Iterable<Article>.empty();
+        }
+        return articles.where(
+          (article) =>
+              article.name.toLowerCase().contains(
+                textEditingValue.text.toLowerCase(),
+              ) ||
+              (article.code?.toLowerCase().contains(
+                    textEditingValue.text.toLowerCase(),
+                  ) ??
+                  false),
+        );
       },
       onSelected: (Article article) {
         setState(() {
@@ -584,7 +708,7 @@ class _CreateQuoteScreenState extends ConsumerState<CreateQuoteScreen> {
         if (controller.text != item.descriptionController.text) {
           controller.text = item.descriptionController.text;
         }
-        
+
         return TextFormField(
           controller: controller,
           focusNode: focusNode,
@@ -593,7 +717,11 @@ class _CreateQuoteScreenState extends ConsumerState<CreateQuoteScreen> {
             border: isDense ? InputBorder.none : const OutlineInputBorder(),
             isDense: isDense,
             suffixIcon: IconButton(
-              icon: Icon(Icons.list_alt, size: 20, color: Theme.of(context).colorScheme.primary),
+              icon: Icon(
+                Icons.list_alt,
+                size: 20,
+                color: Theme.of(context).colorScheme.primary,
+              ),
               onPressed: () => _showArticlePicker(index, articles),
               tooltip: l10n.selectArticle,
             ),
@@ -645,7 +773,9 @@ class _CreateQuoteScreenState extends ConsumerState<CreateQuoteScreen> {
               final article = articles[i];
               return ListTile(
                 title: Text(article.name),
-                subtitle: Text('${article.price} ${AppLocalizations.of(context)!.currencySymbol}'),
+                subtitle: Text(
+                  '${article.price} ${AppLocalizations.of(context)!.currencySymbol}',
+                ),
                 onTap: () {
                   setState(() => _applyArticleToItem(index, article));
                   Navigator.pop(context);
@@ -658,7 +788,10 @@ class _CreateQuoteScreenState extends ConsumerState<CreateQuoteScreen> {
     );
   }
 
-  Widget _buildQuickTemplates(AppLocalizations l10n, AsyncValue<List<Article>> articlesAsync) {
+  Widget _buildQuickTemplates(
+    AppLocalizations l10n,
+    AsyncValue<List<Article>> articlesAsync,
+  ) {
     final templateLabels = {
       'painting': l10n.paintingRoom,
       'plumbing': l10n.plumbingRepair,
@@ -674,14 +807,18 @@ class _CreateQuoteScreenState extends ConsumerState<CreateQuoteScreen> {
 
     return articlesAsync.when(
       data: (articles) {
-        final configured = articles.where((a) => a.quickTemplate != null).toList();
+        final configured = articles
+            .where((a) => a.quickTemplate != null)
+            .toList();
         if (configured.isEmpty) return const SizedBox.shrink();
 
         return Card(
           elevation: 0,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
-            side: BorderSide(color: Theme.of(context).dividerTheme.color ?? Colors.transparent),
+            side: BorderSide(
+              color: Theme.of(context).dividerTheme.color ?? Colors.transparent,
+            ),
           ),
           child: Padding(
             padding: const EdgeInsets.all(16),
@@ -690,21 +827,29 @@ class _CreateQuoteScreenState extends ConsumerState<CreateQuoteScreen> {
               children: [
                 Text(
                   l10n.quickTemplates,
-                  style: GoogleFonts.inter(fontWeight: FontWeight.w700, fontSize: 14),
+                  style: GoogleFonts.inter(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 14,
+                  ),
                 ),
                 const SizedBox(height: 12),
                 Wrap(
                   spacing: 8,
                   runSpacing: 8,
                   children: templateLabels.entries.map((entry) {
-                    final count = configured.where((a) => a.quickTemplate == entry.key).length;
+                    final count = configured
+                        .where((a) => a.quickTemplate == entry.key)
+                        .length;
                     if (count == 0) return const SizedBox.shrink();
                     return ActionChip(
                       key: ValueKey('template_${entry.key}'),
                       avatar: Icon(templateIcons[entry.key], size: 16),
                       label: Text('${entry.value} ($count)'),
-                      onPressed: () => _addQuickTemplateArticles(entry.key, articles, l10n),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      onPressed: () =>
+                          _addQuickTemplateArticles(entry.key, articles, l10n),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
                     );
                   }).toList(),
                 ),
@@ -718,7 +863,11 @@ class _CreateQuoteScreenState extends ConsumerState<CreateQuoteScreen> {
     );
   }
 
-  Widget _buildMobileItem(int index, AppLocalizations l10n, AsyncValue<List<Article>> articlesAsync) {
+  Widget _buildMobileItem(
+    int index,
+    AppLocalizations l10n,
+    AsyncValue<List<Article>> articlesAsync,
+  ) {
     final item = _items[index];
     return Card(
       key: item.key,
@@ -726,7 +875,9 @@ class _CreateQuoteScreenState extends ConsumerState<CreateQuoteScreen> {
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Theme.of(context).dividerTheme.color ?? Colors.transparent),
+        side: BorderSide(
+          color: Theme.of(context).dividerTheme.color ?? Colors.transparent,
+        ),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -735,7 +886,11 @@ class _CreateQuoteScreenState extends ConsumerState<CreateQuoteScreen> {
             Row(
               children: [
                 Expanded(
-                  child: _buildArticleAutocomplete(index, l10n, articlesAsync.value ?? []),
+                  child: _buildArticleAutocomplete(
+                    index,
+                    l10n,
+                    articlesAsync.value ?? [],
+                  ),
                 ),
                 IconButton(
                   onPressed: () => _removeItem(index),
@@ -770,7 +925,10 @@ class _CreateQuoteScreenState extends ConsumerState<CreateQuoteScreen> {
               alignment: Alignment.centerRight,
               child: Text(
                 'Total: ${NumberFormat.currency(symbol: '').format(item.total)}',
-                style: GoogleFonts.inter(fontWeight: FontWeight.w700, color: Theme.of(context).colorScheme.primary),
+                style: GoogleFonts.inter(
+                  fontWeight: FontWeight.w700,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
               ),
             ),
           ],
@@ -779,25 +937,52 @@ class _CreateQuoteScreenState extends ConsumerState<CreateQuoteScreen> {
     );
   }
 
-  Widget _buildDesktopItemTable(AppLocalizations l10n, AsyncValue<List<Article>> articlesAsync) {
+  Widget _buildDesktopItemTable(
+    AppLocalizations l10n,
+    AsyncValue<List<Article>> articlesAsync,
+  ) {
     return Card(
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Theme.of(context).dividerTheme.color ?? Colors.transparent),
+        side: BorderSide(
+          color: Theme.of(context).dividerTheme.color ?? Colors.transparent,
+        ),
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(12),
         child: DataTable(
-          headingRowColor: WidgetStateProperty.all(Theme.of(context).brightness == Brightness.dark 
-            ? AppColors.darkSurfaceAlt 
-            : AppColors.surfaceAlt),
+          headingRowColor: WidgetStateProperty.all(
+            Theme.of(context).brightness == Brightness.dark
+                ? AppColors.darkSurfaceAlt
+                : AppColors.surfaceAlt,
+          ),
           columnSpacing: 24,
           columns: [
-            DataColumn(label: Text(l10n.description, style: const TextStyle(fontWeight: FontWeight.bold))),
-            DataColumn(label: Text(l10n.quantity, style: const TextStyle(fontWeight: FontWeight.bold))),
-            DataColumn(label: Text(l10n.price, style: const TextStyle(fontWeight: FontWeight.bold))),
-            DataColumn(label: Text(l10n.total, style: const TextStyle(fontWeight: FontWeight.bold))),
+            DataColumn(
+              label: Text(
+                l10n.description,
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
+            DataColumn(
+              label: Text(
+                l10n.quantity,
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
+            DataColumn(
+              label: Text(
+                l10n.price,
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
+            DataColumn(
+              label: Text(
+                l10n.total,
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
             const DataColumn(label: SizedBox()),
           ],
           rows: _items.asMap().entries.map((entry) {
@@ -807,45 +992,62 @@ class _CreateQuoteScreenState extends ConsumerState<CreateQuoteScreen> {
               key: item.key,
               cells: [
                 DataCell(
-                  _buildArticleAutocomplete(index, l10n, articlesAsync.value ?? [], isDense: true),
-                ),
-              DataCell(
-                SizedBox(
-                  width: 80,
-                  child: TextFormField(
-                    controller: item.quantityController,
-                    textAlign: TextAlign.center,
-                    decoration: const InputDecoration(border: InputBorder.none),
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    onChanged: (v) => setState(() {}),
+                  _buildArticleAutocomplete(
+                    index,
+                    l10n,
+                    articlesAsync.value ?? [],
+                    isDense: true,
                   ),
                 ),
-              ),
-              DataCell(
-                SizedBox(
-                  width: 100,
-                  child: TextFormField(
-                    controller: item.priceController,
-                    textAlign: TextAlign.right,
-                    decoration: const InputDecoration(border: InputBorder.none),
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    onChanged: (v) => setState(() {}),
+                DataCell(
+                  SizedBox(
+                    width: 80,
+                    child: TextFormField(
+                      controller: item.quantityController,
+                      textAlign: TextAlign.center,
+                      decoration: const InputDecoration(
+                        border: InputBorder.none,
+                      ),
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      onChanged: (v) => setState(() {}),
+                    ),
                   ),
                 ),
-              ),
-              DataCell(
-                Text(
-                  NumberFormat.currency(symbol: '').format(item.total),
-                  style: const TextStyle(fontWeight: FontWeight.w600),
+                DataCell(
+                  SizedBox(
+                    width: 100,
+                    child: TextFormField(
+                      controller: item.priceController,
+                      textAlign: TextAlign.right,
+                      decoration: const InputDecoration(
+                        border: InputBorder.none,
+                      ),
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      onChanged: (v) => setState(() {}),
+                    ),
+                  ),
                 ),
-              ),
-              DataCell(
-                IconButton(
-                  onPressed: () => _removeItem(index),
-                  icon: const Icon(Icons.remove_circle_outline, color: Colors.red),
+                DataCell(
+                  Text(
+                    NumberFormat.currency(symbol: '').format(item.total),
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
                 ),
-              ),
-            ]);
+                DataCell(
+                  IconButton(
+                    onPressed: () => _removeItem(index),
+                    icon: const Icon(
+                      Icons.remove_circle_outline,
+                      color: Colors.red,
+                    ),
+                  ),
+                ),
+              ],
+            );
           }).toList(),
         ),
       ),
@@ -857,7 +1059,9 @@ class _CreateQuoteScreenState extends ConsumerState<CreateQuoteScreen> {
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Theme.of(context).dividerTheme.color ?? Colors.transparent),
+        side: BorderSide(
+          color: Theme.of(context).dividerTheme.color ?? Colors.transparent,
+        ),
       ),
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -886,19 +1090,23 @@ class _CreateQuoteScreenState extends ConsumerState<CreateQuoteScreen> {
           style: GoogleFonts.inter(
             fontSize: isTotal ? 20 : 14,
             fontWeight: isTotal ? FontWeight.w900 : FontWeight.w500,
-            color: isTotal 
-              ? (isDark ? AppColors.darkTextPrimary : AppColors.textPrimary) 
-              : (isDark ? AppColors.darkTextSecondary : AppColors.textSecondary),
+            color: isTotal
+                ? (isDark ? AppColors.darkTextPrimary : AppColors.textPrimary)
+                : (isDark
+                      ? AppColors.darkTextSecondary
+                      : AppColors.textSecondary),
           ),
         ),
         Text(
-          NumberFormat.currency(symbol: AppLocalizations.of(context)!.currencySymbol).format(value),
+          NumberFormat.currency(
+            symbol: AppLocalizations.of(context)!.currencySymbol,
+          ).format(value),
           style: GoogleFonts.inter(
             fontSize: isTotal ? 24 : 16,
             fontWeight: isTotal ? FontWeight.w900 : FontWeight.w600,
-            color: isTotal 
-              ? (isDark ? AppColors.darkAccent : AppColors.primary) 
-              : (isDark ? AppColors.darkTextPrimary : AppColors.textPrimary),
+            color: isTotal
+                ? (isDark ? AppColors.darkAccent : AppColors.primary)
+                : (isDark ? AppColors.darkTextPrimary : AppColors.textPrimary),
           ),
         ),
       ],
@@ -916,7 +1124,8 @@ class _CreateQuoteScreenState extends ConsumerState<CreateQuoteScreen> {
               isDense: true,
             ),
             keyboardType: TextInputType.number,
-            onChanged: (v) => setState(() => _taxRate = double.tryParse(v) ?? 0),
+            onChanged: (v) =>
+                setState(() => _taxRate = double.tryParse(v) ?? 0),
           ),
         ),
         const SizedBox(width: 16),
@@ -928,7 +1137,8 @@ class _CreateQuoteScreenState extends ConsumerState<CreateQuoteScreen> {
               isDense: true,
             ),
             keyboardType: TextInputType.number,
-            onChanged: (v) => setState(() => _discount = double.tryParse(v) ?? 0),
+            onChanged: (v) =>
+                setState(() => _discount = double.tryParse(v) ?? 0),
           ),
         ),
       ],
@@ -940,31 +1150,32 @@ class _CreateQuoteScreenState extends ConsumerState<CreateQuoteScreen> {
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Theme.of(context).dividerTheme.color ?? Colors.transparent),
+        side: BorderSide(
+          color: Theme.of(context).dividerTheme.color ?? Colors.transparent,
+        ),
       ),
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-             Text(
+            Text(
               l10n.notes,
-              style: GoogleFonts.inter(fontWeight: FontWeight.w700, fontSize: 16),
+              style: GoogleFonts.inter(
+                fontWeight: FontWeight.w700,
+                fontSize: 16,
+              ),
             ),
             const SizedBox(height: 12),
             TextFormField(
               controller: _notesController,
               maxLines: 4,
-              decoration: InputDecoration(
-                hintText: l10n.notes,
-              ),
+              decoration: InputDecoration(hintText: l10n.notes),
             ),
             const SizedBox(height: 16),
             TextFormField(
               controller: _approvalController,
-              decoration: InputDecoration(
-                labelText: l10n.approvalSignature,
-              ),
+              decoration: InputDecoration(labelText: l10n.approvalSignature),
             ),
           ],
         ),
@@ -983,13 +1194,33 @@ class _CreateQuoteScreenState extends ConsumerState<CreateQuoteScreen> {
 
     setState(() => _isSaving = true);
 
-    final quoteItems = _items.map((data) => QuoteItem(
-      quoteId: widget.quoteId ?? 0,
-      description: data.descriptionController.text,
-      quantity: double.tryParse(data.quantityController.text.replaceAll(',', '.')) ?? 1,
-      unitPrice: double.tryParse(data.priceController.text.replaceAll(',', '.')) ?? 0,
-      amount: (double.tryParse(data.quantityController.text.replaceAll(',', '.')) ?? 1) * (double.tryParse(data.priceController.text.replaceAll(',', '.')) ?? 0),
-    )).toList();
+    final quoteItems = _items
+        .map(
+          (data) => QuoteItem(
+            quoteId: widget.quoteId ?? 0,
+            description: data.descriptionController.text,
+            quantity:
+                double.tryParse(
+                  data.quantityController.text.replaceAll(',', '.'),
+                ) ??
+                1,
+            unitPrice:
+                double.tryParse(
+                  data.priceController.text.replaceAll(',', '.'),
+                ) ??
+                0,
+            amount:
+                (double.tryParse(
+                      data.quantityController.text.replaceAll(',', '.'),
+                    ) ??
+                    1) *
+                (double.tryParse(
+                      data.priceController.text.replaceAll(',', '.'),
+                    ) ??
+                    0),
+          ),
+        )
+        .toList();
 
     final quote = Quote(
       id: widget.quoteId,
@@ -1005,7 +1236,9 @@ class _CreateQuoteScreenState extends ConsumerState<CreateQuoteScreen> {
       discountAmount: _discount,
       total: _total,
       notes: _notesController.text,
-      approvalName: _approvalController.text.isEmpty ? null : _approvalController.text,
+      approvalName: _approvalController.text.isEmpty
+          ? null
+          : _approvalController.text,
       approvedAt: _approvalController.text.isEmpty ? null : DateTime.now(),
       client: _selectedClient,
     );
@@ -1020,13 +1253,293 @@ class _CreateQuoteScreenState extends ConsumerState<CreateQuoteScreen> {
       if (mounted) context.pop();
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: $e')));
       }
     } finally {
       if (mounted) setState(() => _isSaving = false);
     }
+  }
+
+  Future<void> _showQuickClientDialog(AppLocalizations l10n) async {
+    final nameController = TextEditingController();
+    final phoneController = TextEditingController();
+    final emailController = TextEditingController();
+    final addressController = TextEditingController();
+    String? nameError;
+
+    final clientDraft = await showDialog<Client>(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: Text(l10n.quickClient),
+          content: SizedBox(
+            width: 420,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: nameController,
+                  decoration: InputDecoration(
+                    labelText: l10n.name,
+                    errorText: nameError,
+                  ),
+                  onChanged: (_) {
+                    if (nameError != null) {
+                      setDialogState(() => nameError = null);
+                    }
+                  },
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: phoneController,
+                  decoration: InputDecoration(labelText: l10n.phone),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: emailController,
+                  decoration: InputDecoration(labelText: l10n.email),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: addressController,
+                  decoration: InputDecoration(labelText: l10n.address),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: Text(l10n.cancel),
+            ),
+            FilledButton(
+              onPressed: () {
+                if (nameController.text.trim().isEmpty) {
+                  setDialogState(() => nameError = l10n.requiredField);
+                  return;
+                }
+                final draft = Client(
+                  name: nameController.text.trim(),
+                  phone: phoneController.text.trim().isEmpty
+                      ? null
+                      : phoneController.text.trim(),
+                  email: emailController.text.trim().isEmpty
+                      ? null
+                      : emailController.text.trim(),
+                  address: addressController.text.trim().isEmpty
+                      ? null
+                      : addressController.text.trim(),
+                );
+                Navigator.pop(dialogContext, draft);
+              },
+              child: Text(l10n.save),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    nameController.dispose();
+    phoneController.dispose();
+    emailController.dispose();
+    addressController.dispose();
+
+    if (clientDraft == null || !mounted) return;
+    final id = await ref
+        .read(clientRepositoryProvider)
+        .createClient(clientDraft);
+    if (!mounted) return;
+    final client = clientDraft.copyWith(id: id);
+    ref.invalidate(clientsListProvider);
+    setState(() => _selectedClient = client);
+  }
+
+  Future<void> _showQuickArticleDialog(AppLocalizations l10n) async {
+    final nameController = TextEditingController();
+    final codeController = TextEditingController();
+    final priceController = TextEditingController();
+    String? nameError;
+    String? priceError;
+    var selectedUnit = 'pieces';
+    var selectedType = 'physical';
+    var selectedCategory = 'materials';
+
+    final articleDraft = await showDialog<Article>(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setDialogState) {
+          final units = {
+            'kg': l10n.kg,
+            'm': l10n.linearMeter,
+            'm2': l10n.m2,
+            'm3': l10n.m3,
+            'pieces': l10n.pieces,
+          };
+          final categories = {
+            'labor': l10n.laborCategory,
+            'materials': l10n.materialsCategory,
+            'travel': l10n.travelCategory,
+            'rental': l10n.rentalCategory,
+            'service': l10n.service,
+            'supply': l10n.supplyCategory,
+          };
+
+          return AlertDialog(
+            title: Text(l10n.quickArticle),
+            content: SizedBox(
+              width: 460,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SegmentedButton<String>(
+                      segments: [
+                        ButtonSegment(
+                          value: 'physical',
+                          label: Text(l10n.physical),
+                          icon: const Icon(Icons.inventory_2_outlined),
+                        ),
+                        ButtonSegment(
+                          value: 'service',
+                          label: Text(l10n.service),
+                          icon: const Icon(Icons.build_circle_outlined),
+                        ),
+                      ],
+                      selected: {selectedType},
+                      onSelectionChanged: (value) =>
+                          setDialogState(() => selectedType = value.first),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: nameController,
+                      decoration: InputDecoration(
+                        labelText: l10n.name,
+                        errorText: nameError,
+                      ),
+                      onChanged: (_) {
+                        if (nameError != null) {
+                          setDialogState(() => nameError = null);
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: codeController,
+                      decoration: InputDecoration(labelText: l10n.code),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: priceController,
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      decoration: InputDecoration(
+                        labelText: l10n.price,
+                        prefixText: '${l10n.currencySymbol} ',
+                        errorText: priceError,
+                      ),
+                      onChanged: (_) {
+                        if (priceError != null) {
+                          setDialogState(() => priceError = null);
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    DropdownButtonFormField<String>(
+                      initialValue: selectedUnit,
+                      decoration: InputDecoration(labelText: l10n.unit),
+                      items: units.entries
+                          .map(
+                            (entry) => DropdownMenuItem(
+                              value: entry.key,
+                              child: Text(entry.value),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (value) => setDialogState(
+                        () => selectedUnit = value ?? selectedUnit,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    DropdownButtonFormField<String>(
+                      initialValue: selectedCategory,
+                      decoration: InputDecoration(
+                        labelText: l10n.articleCategory,
+                      ),
+                      items: categories.entries
+                          .map(
+                            (entry) => DropdownMenuItem(
+                              value: entry.key,
+                              child: Text(entry.value),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (value) => setDialogState(
+                        () => selectedCategory = value ?? selectedCategory,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext),
+                child: Text(l10n.cancel),
+              ),
+              FilledButton(
+                onPressed: () {
+                  var hasError = false;
+                  if (nameController.text.trim().isEmpty) {
+                    nameError = l10n.requiredField;
+                    hasError = true;
+                  }
+                  if (priceController.text.trim().isEmpty) {
+                    priceError = l10n.requiredField;
+                    hasError = true;
+                  }
+                  if (hasError) {
+                    setDialogState(() {});
+                    return;
+                  }
+                  final draft = Article(
+                    name: nameController.text.trim(),
+                    code: codeController.text.trim().isEmpty
+                        ? null
+                        : codeController.text.trim(),
+                    price:
+                        double.tryParse(
+                          priceController.text.replaceAll(',', '.'),
+                        ) ??
+                        0,
+                    unit: selectedUnit,
+                    type: selectedType,
+                    category: selectedCategory,
+                  );
+                  Navigator.pop(dialogContext, draft);
+                },
+                child: Text(l10n.save),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+
+    nameController.dispose();
+    codeController.dispose();
+    priceController.dispose();
+
+    if (articleDraft == null || !mounted) return;
+    final id = await ref
+        .read(articleRepositoryProvider)
+        .addArticle(articleDraft);
+    if (!mounted) return;
+    final article = articleDraft.copyWith(id: id);
+    ref.invalidate(articlesListProvider);
+    _addArticleToQuote(article);
   }
 }
 
@@ -1054,7 +1567,8 @@ class _QuoteItemData {
   }
 
   double get total {
-    final q = double.tryParse(quantityController.text.replaceAll(',', '.')) ?? 0;
+    final q =
+        double.tryParse(quantityController.text.replaceAll(',', '.')) ?? 0;
     final p = double.tryParse(priceController.text.replaceAll(',', '.')) ?? 0;
     return q * p;
   }

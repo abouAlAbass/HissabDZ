@@ -180,6 +180,7 @@ class Articles extends Table {
       integer().withDefault(const Constant(0))();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 }
+
 @DataClassName('RefundData')
 class Refunds extends Table {
   IntColumn get id => integer().autoIncrement()();
@@ -209,7 +210,8 @@ class RefundItems extends Table {
 class UserPreferences extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get language => text().withDefault(const Constant('en'))();
-  TextColumn get themeMode => text().withDefault(const Constant('system'))(); // light, dark, system
+  TextColumn get themeMode =>
+      text().withDefault(const Constant('system'))(); // light, dark, system
 }
 
 @DataClassName('ProjectPhotoData')

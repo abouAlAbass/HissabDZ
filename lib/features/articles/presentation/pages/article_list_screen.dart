@@ -1,15 +1,22 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:open_filex/open_filex.dart';
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
 import 'package:hissab_dz/core/theme/theme.dart';
 import 'package:hissab_dz/core/widgets/app_empty_state.dart';
 import 'package:hissab_dz/core/widgets/contextual_fab.dart';
 import 'package:hissab_dz/core/widgets/entity_card.dart';
 import 'package:hissab_dz/core/widgets/responsive_content.dart';
+import 'package:hissab_dz/features/articles/domain/entities/article.dart';
 import 'package:hissab_dz/l10n/app_localizations.dart';
 import 'package:hissab_dz/core/widgets/app_drawer.dart';
 import 'package:hissab_dz/features/articles/presentation/providers/article_providers.dart';
+import 'package:hissab_dz/features/articles/services/pdf_article_prices_service.dart';
 
 class ArticleListScreen extends ConsumerWidget {
   const ArticleListScreen({super.key});
@@ -23,6 +30,29 @@ class ArticleListScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.articles),
+        actions: [
+          PopupMenuButton<_ArticleMenuAction>(
+            tooltip: l10n.exportPdf,
+            onSelected: (action) {
+              switch (action) {
+                case _ArticleMenuAction.exportPricesPdf:
+                  final articles = articlesAsync.value ?? const <Article>[];
+                  _exportPricesPdf(context, articles, l10n);
+              }
+            },
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                value: _ArticleMenuAction.exportPricesPdf,
+                enabled: (articlesAsync.value ?? const <Article>[]).isNotEmpty,
+                child: ListTile(
+                  leading: const Icon(Icons.picture_as_pdf_outlined),
+                  title: Text(l10n.articleSalePrices),
+                  contentPadding: EdgeInsets.zero,
+                ),
+              ),
+            ],
+          ),
+        ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(60),
           child: Padding(
@@ -110,4 +140,61 @@ class ArticleListScreen extends ConsumerWidget {
         return category;
     }
   }
+
+  Future<void> _exportPricesPdf(
+    BuildContext context,
+    List<Article> articles,
+    AppLocalizations l10n,
+  ) async {
+    if (articles.isEmpty) return;
+
+    try {
+      final tempFile = await PdfArticlePricesService.generateArticlePricesPdf(
+        articles: articles,
+        l10n: l10n,
+      );
+
+      final downloadsDir = Platform.isWindows
+          ? await getDownloadsDirectory()
+          : await getApplicationDocumentsDirectory();
+
+      final saveDir = Directory(p.join(downloadsDir!.path, 'InvoicePro'));
+      if (!saveDir.existsSync()) saveDir.createSync(recursive: true);
+
+      var savedPath = p.join(saveDir.path, 'article_prices.pdf');
+      final targetFile = File(savedPath);
+
+      try {
+        if (targetFile.existsSync()) {
+          await targetFile.delete();
+        }
+      } catch (_) {
+        final timestamp = DateFormat('HHmmss').format(DateTime.now());
+        savedPath = p.join(saveDir.path, 'article_prices_$timestamp.pdf');
+      }
+
+      await tempFile.copy(savedPath);
+      await OpenFilex.open(savedPath);
+
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            '${l10n.pdfDownloadedAndOpened}\n${p.basename(savedPath)}',
+          ),
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('${l10n.errorGeneratingPdf}: $e'),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        ),
+      );
+    }
+  }
 }
+
+enum _ArticleMenuAction { exportPricesPdf }
