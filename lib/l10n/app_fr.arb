@@ -307,5 +307,10 @@
   "gallery": "Galerie",
   "projectPhotos": "Photos du projet",
   "photoCategory": "Catégorie",
-  "comment": "Commentaire"
+  "comment": "Commentaire",
+  "from": "Du",
+  "to": "Au",
+  "filterByDateRange": "Filtrer par date",
+  "selectDateRange": "Sélectionner la période",
+  "loadMore": "Charger plus"
 }

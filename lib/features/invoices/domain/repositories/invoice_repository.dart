@@ -2,7 +2,14 @@ import '../../domain/entities/invoice.dart';
 import '../../domain/entities/invoice_status.dart';
 
 abstract class InvoiceRepository {
-  Future<List<Invoice>> getInvoices({InvoiceStatus? status, String? query});
+  Future<List<Invoice>> getInvoices({
+    InvoiceStatus? status,
+    String? query,
+    DateTime? startDate,
+    DateTime? endDate,
+    int? limit,
+    int? offset,
+  });
   Stream<List<Invoice>> watchInvoices({InvoiceStatus? status});
   Future<Invoice?> getInvoiceById(int id);
   Future<int> createInvoice(Invoice invoice);

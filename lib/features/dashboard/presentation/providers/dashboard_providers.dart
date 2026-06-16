@@ -37,7 +37,8 @@ class DashboardStats extends _$DashboardStats {
 
     final outstandingAmount = invoices.fold(0.0, (sum, invoice) {
       if (invoice.status == InvoiceStatus.paid ||
-          invoice.status == InvoiceStatus.cancelled) {
+          invoice.status == InvoiceStatus.cancelled ||
+          invoice.status == InvoiceStatus.draft) {
         return sum;
       }
       final remaining = invoice.total - (paidByInvoice[invoice.id] ?? 0);

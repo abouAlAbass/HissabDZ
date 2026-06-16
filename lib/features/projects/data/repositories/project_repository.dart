@@ -8,6 +8,7 @@ import 'package:hissab_dz/features/projects/domain/entities/project_expense.dart
     as entity;
 import 'package:hissab_dz/features/projects/domain/entities/project_photo.dart';
 import 'package:hissab_dz/features/projects/domain/entities/project_status.dart';
+import 'package:hissab_dz/features/invoices/domain/entities/invoice_status.dart';
 
 class ProjectRepository {
   final AppDatabase _db;
@@ -232,10 +233,14 @@ class ProjectRepository {
       startDate: row.startDate,
       endDate: row.endDate,
       createdAt: row.createdAt,
-      invoiceTotal: invoiceRows.fold(
-        0.0,
-        (sum, invoice) => sum + invoice.total,
-      ),
+      invoiceTotal: invoiceRows
+          .where((invoice) =>
+              invoice.status != InvoiceStatus.cancelled &&
+              invoice.status != InvoiceStatus.draft)
+          .fold(
+            0.0,
+            (sum, invoice) => sum + invoice.total,
+          ),
       expenseTotal: expenseRows.fold(
         0.0,
         (sum, expense) => sum + expense.amount,

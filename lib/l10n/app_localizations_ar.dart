@@ -920,4 +920,19 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get comment => 'تعليق';
+
+  @override
+  String get from => 'من';
+
+  @override
+  String get to => 'إلى';
+
+  @override
+  String get filterByDateRange => 'تصفية حسب التاريخ';
+
+  @override
+  String get selectDateRange => 'اختر الفترة الزمنية';
+
+  @override
+  String get loadMore => 'تحميل المزيد';
 }

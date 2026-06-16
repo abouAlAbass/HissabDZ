@@ -307,5 +307,10 @@
   "gallery": "Gallery",
   "projectPhotos": "Project Photos",
   "photoCategory": "Category",
-  "comment": "Comment"
+  "comment": "Comment",
+  "from": "From",
+  "to": "To",
+  "filterByDateRange": "Filter by date range",
+  "selectDateRange": "Select date range",
+  "loadMore": "Load More"
 }

@@ -14,6 +14,7 @@ import 'package:hissab_dz/features/invoices/domain/entities/invoice.dart';
 import 'package:hissab_dz/features/invoices/domain/entities/invoice_status.dart';
 import 'package:hissab_dz/features/invoices/presentation/providers/invoice_providers.dart';
 import 'package:hissab_dz/features/payments/presentation/providers/payment_providers.dart';
+import 'package:hissab_dz/features/payments/domain/entities/payment.dart';
 import 'package:hissab_dz/features/projects/domain/entities/project.dart';
 import 'package:hissab_dz/features/projects/domain/entities/project_status.dart';
 import 'package:hissab_dz/features/projects/domain/entities/project_expense.dart';
@@ -68,11 +69,16 @@ class ProjectDetailsScreen extends ConsumerWidget {
                   final projectInvoices = allInvoices
                       .where((invoice) => invoice.projectId == projectId)
                       .toList();
-                  final paidTotal = projectInvoices.fold(
+                  final invoiceIds = projectInvoices.map((invoice) => invoice.id).whereType<int>().toSet();
+                  final projectPayments = payments
+                      .where((payment) => invoiceIds.contains(payment.invoiceId))
+                      .toList();
+                  final activeProjectInvoices = projectInvoices.where((i) => i.status != InvoiceStatus.cancelled && i.status != InvoiceStatus.draft).toList();
+                  final paidTotal = activeProjectInvoices.fold(
                     0.0,
                     (sum, invoice) => sum + (paidByInvoice[invoice.id] ?? 0),
                   );
-                  final unpaidTotal = projectInvoices.fold(0.0, (sum, invoice) {
+                  final unpaidTotal = activeProjectInvoices.fold(0.0, (sum, invoice) {
                     final remaining =
                         invoice.total - (paidByInvoice[invoice.id] ?? 0);
                     return sum + (remaining > 0 ? remaining : 0);
@@ -85,6 +91,7 @@ class ProjectDetailsScreen extends ConsumerWidget {
                     currencyFormat,
                     project,
                     projectInvoices,
+                    projectPayments,
                     paidByInvoice,
                     paidTotal,
                     unpaidTotal,
@@ -118,6 +125,7 @@ class ProjectDetailsScreen extends ConsumerWidget {
     NumberFormat currencyFormat,
     Project project,
     List<Invoice> projectInvoices,
+    List<Payment> projectPayments,
     Map<int, double> paidByInvoice,
     double paidTotal,
     double unpaidTotal,
@@ -358,6 +366,59 @@ class ProjectDetailsScreen extends ConsumerWidget {
                 ),
               ),
         ],
+        const SizedBox(height: 16),
+        Text(
+          l10n.payments,
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
+        const SizedBox(height: 8),
+        if (projectPayments.isEmpty)
+          Card(child: ListTile(title: Text(l10n.noPayments)))
+        else
+          Column(
+            children: projectPayments.map<Widget>((payment) {
+              final invoice = projectInvoices.firstWhere(
+                (i) => i.id == payment.invoiceId,
+                orElse: () => Invoice(
+                  clientId: payment.clientId,
+                  invoiceNumber: '#${payment.invoiceId}',
+                  issueDate: payment.date,
+                ),
+              );
+              return Card(
+                child: ListTile(
+                  leading: const Icon(
+                    Icons.call_received,
+                    color: Colors.green,
+                  ),
+                  title: Text(
+                    invoice.invoiceNumber,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  subtitle: Text(
+                    [
+                      payment.method == 'cash'
+                          ? l10n.cash
+                          : payment.method == 'transfer'
+                              ? l10n.transfer
+                              : payment.method,
+                      l10n.localeName == 'ar'
+                          ? DateFormat('dd/MM/yyyy', 'en').format(payment.date)
+                          : DateFormat.yMMMd(l10n.localeName).format(payment.date),
+                      payment.notes,
+                    ].where((x) => x != null && x.isNotEmpty).join(' - '),
+                  ),
+                  trailing: Text(
+                    AppFormatters.formatCurrency(payment.amount, l10n),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.green,
+                    ),
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
         const SizedBox(height: 16),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,

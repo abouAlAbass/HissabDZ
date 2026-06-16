@@ -60,10 +60,11 @@ class PdfProjectReportService {
           (paidByInvoice[payment.invoiceId] ?? 0) + payment.amount;
     }
 
-    final invoiceTotal = invoices.fold(0.0, (sum, item) => sum + item.total);
+    final activeInvoices = invoices.where((i) => i.status != InvoiceStatus.cancelled && i.status != InvoiceStatus.draft).toList();
+    final invoiceTotal = activeInvoices.fold(0.0, (sum, item) => sum + item.total);
     final expenseTotal = expenses.fold(0.0, (sum, item) => sum + item.amount);
     final paidTotal = payments.fold(0.0, (sum, item) => sum + item.amount);
-    final remainingTotal = invoices.fold(0.0, (sum, invoice) {
+    final remainingTotal = activeInvoices.fold(0.0, (sum, invoice) {
       final remaining = invoice.total - (paidByInvoice[invoice.id] ?? 0);
       return sum + (remaining > 0 ? remaining : 0);
     });

@@ -1899,6 +1899,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Comment'**
   String get comment;
+
+  /// No description provided for @from.
+  ///
+  /// In en, this message translates to:
+  /// **'From'**
+  String get from;
+
+  /// No description provided for @to.
+  ///
+  /// In en, this message translates to:
+  /// **'To'**
+  String get to;
+
+  /// No description provided for @filterByDateRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter by date range'**
+  String get filterByDateRange;
+
+  /// No description provided for @selectDateRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Select date range'**
+  String get selectDateRange;
+
+  /// No description provided for @loadMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Load More'**
+  String get loadMore;
 }
 
 class _AppLocalizationsDelegate

@@ -10,6 +10,7 @@ import 'package:hissab_dz/core/widgets/contextual_fab.dart';
 import 'package:hissab_dz/core/widgets/entity_card.dart';
 import 'package:hissab_dz/core/widgets/status_badge.dart';
 import 'package:hissab_dz/features/invoices/domain/entities/invoice.dart';
+import 'package:hissab_dz/features/invoices/domain/entities/invoice_status.dart';
 import 'package:hissab_dz/features/invoices/presentation/providers/invoice_providers.dart';
 import 'package:hissab_dz/l10n/app_localizations.dart';
 
@@ -27,10 +28,16 @@ class _InvoiceListScreenState extends ConsumerState<InvoiceListScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 3, vsync: this, initialIndex: 1);
+    
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(invoicePeriodTabProvider.notifier).set(1);
+    });
+
     _tabController.addListener(() {
       if (!_tabController.indexIsChanging) {
-        setState(() {});
+        ref.read(invoicePeriodTabProvider.notifier).set(_tabController.index);
+        ref.read(invoiceDateRangeProvider.notifier).set(null);
       }
     });
   }
@@ -41,10 +48,24 @@ class _InvoiceListScreenState extends ConsumerState<InvoiceListScreen>
     super.dispose();
   }
 
+  Future<void> _selectDateRange() async {
+    final currentRange = ref.read(invoiceDateRangeProvider);
+    final picked = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+      initialDateRange: currentRange,
+    );
+    if (picked != null) {
+      ref.read(invoiceDateRangeProvider.notifier).set(picked);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final invoicesAsync = ref.watch(filteredInvoicesProvider);
+    final invoicesAsync = ref.watch(paginatedInvoicesProvider);
+    final selectedDateRange = ref.watch(invoiceDateRangeProvider);
 
     return Scaffold(
       drawer: MediaQuery.sizeOf(context).width >= 1100
@@ -52,27 +73,77 @@ class _InvoiceListScreenState extends ConsumerState<InvoiceListScreen>
           : const AppDrawer(),
       appBar: AppBar(
         title: Text(l10n.invoices),
+        actions: [
+          IconButton(
+            icon: Icon(
+              selectedDateRange != null
+                  ? Icons.date_range
+                  : Icons.date_range_outlined,
+              color: selectedDateRange != null ? AppTheme.primaryIndigo : null,
+            ),
+            onPressed: _selectDateRange,
+            tooltip: l10n.selectDateRange,
+          ),
+        ],
         bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(116),
+          preferredSize: Size.fromHeight(selectedDateRange != null ? 166 : 116),
           child: Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
             child: Column(
               children: [
-                TextField(
-                  onChanged: (value) => ref
-                      .read(invoiceSearchQueryProvider.notifier)
-                      .update(value),
-                  decoration: InputDecoration(
-                    hintText: l10n.searchInvoices,
-                    prefixIcon: const Icon(Icons.search),
-                    contentPadding: const EdgeInsets.symmetric(vertical: 0),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(30),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        onChanged: (value) => ref
+                            .read(invoiceSearchQueryProvider.notifier)
+                            .update(value),
+                        decoration: InputDecoration(
+                          hintText: l10n.searchInvoices,
+                          prefixIcon: const Icon(Icons.search),
+                          contentPadding: const EdgeInsets.symmetric(vertical: 0),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
+                    const SizedBox(width: 8),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: selectedDateRange != null
+                            ? AppTheme.primaryIndigo.withValues(alpha: 0.1)
+                            : Colors.black.withValues(alpha: 0.04),
+                        shape: BoxShape.circle,
+                      ),
+                      child: IconButton(
+                        onPressed: _selectDateRange,
+                        icon: Icon(
+                          selectedDateRange != null
+                              ? Icons.date_range
+                              : Icons.date_range_outlined,
+                          color: selectedDateRange != null ? AppTheme.primaryIndigo : null,
+                        ),
+                        tooltip: l10n.selectDateRange,
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 12),
                 _buildPeriodTabs(l10n),
+                if (selectedDateRange != null) ...[
+                  const SizedBox(height: 8),
+                  InputChip(
+                    label: Text(
+                      '${l10n.from} ${l10n.localeName == 'ar' ? DateFormat('dd/MM/yyyy', 'en').format(selectedDateRange.start) : DateFormat.yMMMd(l10n.localeName).format(selectedDateRange.start)} ${l10n.to} ${l10n.localeName == 'ar' ? DateFormat('dd/MM/yyyy', 'en').format(selectedDateRange.end) : DateFormat.yMMMd(l10n.localeName).format(selectedDateRange.end)}',
+                      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                    ),
+                    onDeleted: () {
+                      ref.read(invoiceDateRangeProvider.notifier).set(null);
+                    },
+                    deleteIconColor: Colors.red,
+                  ),
+                ],
               ],
             ),
           ),
@@ -80,22 +151,38 @@ class _InvoiceListScreenState extends ConsumerState<InvoiceListScreen>
       ),
       body: invoicesAsync.when(
         data: (invoices) {
-          final visibleInvoices = _filterInvoicesBySelectedTab(invoices);
           return CustomScrollView(
             slivers: [
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
-                  child: _buildStatsCard(visibleInvoices, l10n),
+                  child: _buildStatsCard(invoices, l10n),
                 ),
               ),
-              if (visibleInvoices.isEmpty)
+              if (invoices.isEmpty)
                 SliverFillRemaining(
                   hasScrollBody: false,
                   child: _buildEmptyState(l10n),
                 )
-              else
-                _buildGroupedSliverList(context, visibleInvoices, l10n),
+              else ...[
+                _buildGroupedSliverList(context, invoices, l10n),
+                if (ref.watch(paginatedInvoicesProvider.notifier).hasMore)
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      child: Center(
+                        child: OutlinedButton(
+                          onPressed: () {
+                            ref
+                                .read(paginatedInvoicesProvider.notifier)
+                                .loadMore();
+                          },
+                          child: Text(l10n.loadMore),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
               const SliverToBoxAdapter(child: SizedBox(height: 100)),
             ],
           );
@@ -144,20 +231,21 @@ class _InvoiceListScreenState extends ConsumerState<InvoiceListScreen>
   }
 
   Widget _buildStatsCard(List<Invoice> invoices, AppLocalizations l10n) {
-    final paidCount = invoices
-        .where((invoice) => invoice.status.name == 'paid')
+    final activeInvoices = invoices.where((i) => i.status != InvoiceStatus.cancelled && i.status != InvoiceStatus.draft).toList();
+    final paidCount = activeInvoices
+        .where((invoice) => invoice.status == InvoiceStatus.paid)
         .length;
-    final overdueCount = invoices
-        .where((invoice) => invoice.status.name == 'overdue')
+    final overdueCount = activeInvoices
+        .where((invoice) => invoice.status == InvoiceStatus.overdue)
         .length;
-    final total = invoices.fold(0.0, (sum, invoice) => sum + invoice.total);
+    final total = activeInvoices.fold(0.0, (sum, invoice) => sum + invoice.total);
 
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            Expanded(child: _statItem(invoices.length.toString(), l10n.issued)),
+            Expanded(child: _statItem(activeInvoices.length.toString(), l10n.issued)),
             _statDivider(),
             Expanded(child: _statItem(paidCount.toString(), l10n.paid)),
             _statDivider(),
@@ -249,35 +337,6 @@ class _InvoiceListScreenState extends ConsumerState<InvoiceListScreen>
     }
 
     return SliverList(delegate: SliverChildListDelegate(children));
-  }
-
-  List<Invoice> _filterInvoicesBySelectedTab(List<Invoice> invoices) {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final startOfThisWeek = today.subtract(Duration(days: today.weekday - 1));
-    final startOfThisMonth = DateTime(now.year, now.month);
-    final startOfLastMonth = DateTime(now.year, now.month - 1);
-    final startOfNextMonth = DateTime(now.year, now.month + 1);
-
-    return invoices.where((invoice) {
-      final date = DateTime(
-        invoice.issueDate.year,
-        invoice.issueDate.month,
-        invoice.issueDate.day,
-      );
-      switch (_tabController.index) {
-        case 0:
-          return !date.isBefore(startOfThisWeek);
-        case 1:
-          return !date.isBefore(startOfThisMonth) &&
-              date.isBefore(startOfNextMonth);
-        case 2:
-          return !date.isBefore(startOfLastMonth) &&
-              date.isBefore(startOfThisMonth);
-        default:
-          return true;
-      }
-    }).toList();
   }
 
   Widget _buildInvoiceCard(

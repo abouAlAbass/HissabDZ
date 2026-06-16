@@ -923,4 +923,19 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get comment => 'Commentaire';
+
+  @override
+  String get from => 'Du';
+
+  @override
+  String get to => 'Au';
+
+  @override
+  String get filterByDateRange => 'Filtrer par date';
+
+  @override
+  String get selectDateRange => 'Sélectionner la période';
+
+  @override
+  String get loadMore => 'Charger plus';
 }

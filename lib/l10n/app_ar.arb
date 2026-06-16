@@ -307,5 +307,10 @@
   "gallery": "المعرض",
   "projectPhotos": "صور المشروع",
   "photoCategory": "الفئة",
-  "comment": "تعليق"
+  "comment": "تعليق",
+  "from": "من",
+  "to": "إلى",
+  "filterByDateRange": "تصفية حسب التاريخ",
+  "selectDateRange": "اختر الفترة الزمنية",
+  "loadMore": "تحميل المزيد"
 }

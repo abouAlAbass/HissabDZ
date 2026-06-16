@@ -25,7 +25,8 @@ mixin _$Article {
   String get name => throw _privateConstructorUsedError;
   String? get code => throw _privateConstructorUsedError;
   double get price => throw _privateConstructorUsedError;
-  String get unit => throw _privateConstructorUsedError; // kg, m2, m3, pieces
+  String get unit =>
+      throw _privateConstructorUsedError; // kg, m, m2, m3, pieces
   String get type => throw _privateConstructorUsedError; // physical, service
   String get category => throw _privateConstructorUsedError;
   double get taxRate => throw _privateConstructorUsedError;
@@ -299,7 +300,7 @@ class _$ArticleImpl implements _Article {
   final double price;
   @override
   final String unit;
-  // kg, m2, m3, pieces
+  // kg, m, m2, m3, pieces
   @override
   @JsonKey()
   final String type;
@@ -416,7 +417,7 @@ abstract class _Article implements Article {
   @override
   double get price;
   @override
-  String get unit; // kg, m2, m3, pieces
+  String get unit; // kg, m, m2, m3, pieces
   @override
   String get type; // physical, service
   @override

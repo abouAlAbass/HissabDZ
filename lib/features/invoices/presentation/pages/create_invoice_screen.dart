@@ -258,9 +258,16 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
       _items.add(_InvoiceItemData.fromItem(item));
     }
 
+    Project? project;
+    if (invoice.projectId != null) {
+      project = await ref
+          .read(projectRepositoryProvider)
+          .getProjectById(invoice.projectId!);
+    }
+
     setState(() {
       _selectedClient = invoice.client;
-      _selectedProject = null; // We could find it if needed
+      _selectedProject = project;
       _invoiceNumberController.text = invoice.invoiceNumber;
       _issueDate = invoice.issueDate;
       _dueDate = invoice.dueDate;
@@ -446,9 +453,92 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
             ),
             const SizedBox(height: 20),
             _buildClientSearch(l10n),
+            const SizedBox(height: 16),
+            _buildProjectSearch(l10n),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildProjectSearch(AppLocalizations l10n) {
+    final projectsAsync = ref.watch(projectsListProvider);
+
+    return projectsAsync.when(
+      data: (projects) => SearchAnchor(
+        builder: (context, controller) {
+          return SearchBar(
+            controller: controller,
+            hintText: _selectedProject?.name ?? l10n.optionalProject,
+            elevation: WidgetStateProperty.all(0),
+            backgroundColor: WidgetStateProperty.all(
+              Theme.of(context).colorScheme.surface,
+            ),
+            shape: WidgetStateProperty.all(
+              RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+                side: BorderSide(
+                  color: Theme.of(context).dividerTheme.color ?? Colors.grey,
+                ),
+              ),
+            ),
+            padding: WidgetStateProperty.all(
+              const EdgeInsets.symmetric(horizontal: 12),
+            ),
+            leading: const Icon(Icons.work_outline, color: AppColors.textMuted),
+            trailing: _selectedProject != null
+                ? [
+                    IconButton(
+                      icon: const Icon(Icons.clear),
+                      onPressed: () {
+                        setState(() {
+                          _selectedProject = null;
+                          controller.clear();
+                        });
+                      },
+                    )
+                  ]
+                : null,
+            onTap: () => controller.openView(),
+            onChanged: (_) => controller.openView(),
+          );
+        },
+        suggestionsBuilder: (context, controller) {
+          final query = controller.text.toLowerCase();
+          final filtered = projects.where((p) {
+            final matchesQuery = p.name.toLowerCase().contains(query);
+            if (_selectedClient != null) {
+              return matchesQuery && p.clientId == _selectedClient!.id;
+            }
+            return matchesQuery;
+          }).toList();
+
+          return filtered.map(
+            (p) => ListTile(
+              title: Text(p.name),
+              subtitle: Text(p.clientName ?? ''),
+              onTap: () async {
+                setState(() {
+                  _selectedProject = p;
+                });
+                controller.closeView(p.name);
+                if (_selectedClient == null && p.clientId != null) {
+                  final client = await ref
+                      .read(clientRepositoryProvider)
+                      .getClientById(p.clientId!);
+                  if (client != null && mounted) {
+                    setState(() {
+                      _selectedClient = client;
+                    });
+                  }
+                }
+              },
+            ),
+          );
+        },
+      ),
+      loading: () => const LinearProgressIndicator(),
+      error: (_, __) => const Text('Error loading projects'),
     );
   }
 
@@ -492,7 +582,12 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
               title: Text(c.name),
               subtitle: Text(c.email ?? ''),
               onTap: () {
-                setState(() => _selectedClient = c);
+                setState(() {
+                  _selectedClient = c;
+                  if (_selectedProject != null && _selectedProject!.clientId != c.id) {
+                    _selectedProject = null;
+                  }
+                });
                 controller.closeView(c.name);
               },
             ),

@@ -336,5 +336,53 @@ final invoiceSearchQueryProvider =
     );
 
 typedef _$InvoiceSearchQuery = AutoDisposeNotifier<String>;
+String _$invoicePeriodTabHash() => r'34d64632cc489a809ccabad78da2560b503c5fb7';
+
+/// See also [InvoicePeriodTab].
+@ProviderFor(InvoicePeriodTab)
+final invoicePeriodTabProvider =
+    AutoDisposeNotifierProvider<InvoicePeriodTab, int>.internal(
+      InvoicePeriodTab.new,
+      name: r'invoicePeriodTabProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$invoicePeriodTabHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
+
+typedef _$InvoicePeriodTab = AutoDisposeNotifier<int>;
+String _$invoiceDateRangeHash() => r'f949deb6cb20b17d935a03915ccaef72b7d2233f';
+
+/// See also [InvoiceDateRange].
+@ProviderFor(InvoiceDateRange)
+final invoiceDateRangeProvider =
+    AutoDisposeNotifierProvider<InvoiceDateRange, DateTimeRange?>.internal(
+      InvoiceDateRange.new,
+      name: r'invoiceDateRangeProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$invoiceDateRangeHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
+
+typedef _$InvoiceDateRange = AutoDisposeNotifier<DateTimeRange?>;
+String _$paginatedInvoicesHash() => r'e8237d5aae107a9a4aa7dc3423f9ebe8be4c449b';
+
+/// See also [PaginatedInvoices].
+@ProviderFor(PaginatedInvoices)
+final paginatedInvoicesProvider =
+    AutoDisposeAsyncNotifierProvider<PaginatedInvoices, List<Invoice>>.internal(
+      PaginatedInvoices.new,
+      name: r'paginatedInvoicesProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$paginatedInvoicesHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
+
+typedef _$PaginatedInvoices = AutoDisposeAsyncNotifier<List<Invoice>>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

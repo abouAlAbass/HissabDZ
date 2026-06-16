@@ -13,17 +13,72 @@ import '../../../invoices/domain/entities/invoice_status.dart';
 import '../../../invoices/presentation/providers/invoice_providers.dart';
 import '../providers/payment_providers.dart';
 
-class PaymentListScreen extends ConsumerWidget {
+class PaymentListScreen extends ConsumerStatefulWidget {
   const PaymentListScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<PaymentListScreen> createState() => _PaymentListScreenState();
+}
+
+class _PaymentListScreenState extends ConsumerState<PaymentListScreen> {
+  DateTimeRange? _selectedDateRange;
+
+  Future<void> _selectDateRange() async {
+    final picked = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+      initialDateRange: _selectedDateRange,
+    );
+    if (picked != null) {
+      setState(() {
+        _selectedDateRange = picked;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final paymentsAsync = ref.watch(paymentsListProvider);
     final invoicesAsync = ref.watch(invoicesListProvider());
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.payments)),
+      appBar: AppBar(
+        title: Text(l10n.payments),
+        actions: [
+          IconButton(
+            icon: Icon(
+              _selectedDateRange != null
+                  ? Icons.date_range
+                  : Icons.date_range_outlined,
+              color: _selectedDateRange != null ? AppTheme.primaryIndigo : null,
+            ),
+            onPressed: _selectDateRange,
+            tooltip: l10n.selectDateRange,
+          ),
+        ],
+        bottom: _selectedDateRange != null
+            ? PreferredSize(
+                preferredSize: const Size.fromHeight(48),
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 8.0),
+                  child: InputChip(
+                    label: Text(
+                      '${l10n.from} ${l10n.localeName == 'ar' ? DateFormat('dd/MM/yyyy', 'en').format(_selectedDateRange!.start) : DateFormat.yMMMd(l10n.localeName).format(_selectedDateRange!.start)} ${l10n.to} ${l10n.localeName == 'ar' ? DateFormat('dd/MM/yyyy', 'en').format(_selectedDateRange!.end) : DateFormat.yMMMd(l10n.localeName).format(_selectedDateRange!.end)}',
+                      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                    ),
+                    onDeleted: () {
+                      setState(() {
+                        _selectedDateRange = null;
+                      });
+                    },
+                    deleteIconColor: Colors.red,
+                  ),
+                ),
+              )
+            : null,
+      ),
       drawer: MediaQuery.sizeOf(context).width >= 1100
           ? null
           : const AppDrawer(),
@@ -38,7 +93,10 @@ class PaymentListScreen extends ConsumerWidget {
             final unpaidInvoices = invoices.where((invoice) {
               final remaining =
                   invoice.total - (paidByInvoice[invoice.id] ?? 0);
-              return invoice.status != InvoiceStatus.paid && remaining > 0;
+              return invoice.status != InvoiceStatus.paid &&
+                  invoice.status != InvoiceStatus.cancelled &&
+                  invoice.status != InvoiceStatus.draft &&
+                  remaining > 0;
             }).toList();
             final unpaidTotal = unpaidInvoices.fold(0.0, (sum, invoice) {
               return sum + invoice.total - (paidByInvoice[invoice.id] ?? 0);
@@ -48,6 +106,15 @@ class PaymentListScreen extends ConsumerWidget {
               final dueDate = invoice.dueDate;
               return dueDate != null && dueDate.isBefore(today);
             }).length;
+
+            final filteredPayments = _selectedDateRange == null
+                ? payments
+                : payments.where((p) {
+                    final pDate = DateTime(p.date.year, p.date.month, p.date.day);
+                    final start = DateTime(_selectedDateRange!.start.year, _selectedDateRange!.start.month, _selectedDateRange!.start.day);
+                    final end = DateTime(_selectedDateRange!.end.year, _selectedDateRange!.end.month, _selectedDateRange!.end.day);
+                    return !pDate.isBefore(start) && !pDate.isAfter(end);
+                  }).toList();
 
             if (payments.isEmpty && unpaidInvoices.isEmpty) {
               return AppEmptyState(
@@ -133,8 +200,10 @@ class PaymentListScreen extends ConsumerWidget {
                       spacing: 8,
                       runSpacing: 8,
                       children: unpaidInvoices.take(3).map((invoice) {
+                        final paid = paidByInvoice[invoice.id] ?? 0;
+                        final remaining = invoice.total - paid;
                         return OutlinedButton.icon(
-                          onPressed: () => _sendReminder(context, ref, invoice),
+                          onPressed: () => _sendReminder(context, ref, invoice, remaining),
                           icon: const Icon(Icons.notifications_active_outlined),
                           label: Text(
                             '${l10n.sendReminder} ${invoice.invoiceNumber}',
@@ -143,15 +212,41 @@ class PaymentListScreen extends ConsumerWidget {
                       }).toList(),
                     ),
                   const SizedBox(height: 24),
-                  Text(
-                    l10n.history,
-                    style: Theme.of(context).textTheme.titleMedium,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        l10n.history,
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      TextButton.icon(
+                        onPressed: _selectDateRange,
+                        icon: Icon(
+                          _selectedDateRange != null
+                              ? Icons.date_range
+                              : Icons.date_range_outlined,
+                          size: 18,
+                        ),
+                        label: Text(
+                          _selectedDateRange != null
+                              ? '${l10n.from} ${l10n.localeName == 'ar' ? DateFormat('dd/MM/yyyy', 'en').format(_selectedDateRange!.start) : DateFormat.yMMMd(l10n.localeName).format(_selectedDateRange!.start)} ${l10n.to} ${l10n.localeName == 'ar' ? DateFormat('dd/MM/yyyy', 'en').format(_selectedDateRange!.end) : DateFormat.yMMMd(l10n.localeName).format(_selectedDateRange!.end)}'
+                              : l10n.filterByDateRange,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: _selectedDateRange != null
+                                ? AppTheme.primaryIndigo
+                                : Theme.of(context).textTheme.bodySmall?.color,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 8),
-                  if (payments.isEmpty)
+                  if (filteredPayments.isEmpty)
                     Card(child: ListTile(title: Text(l10n.noPayments)))
                   else
-                    ...payments.map((payment) {
+                    ...filteredPayments.map((payment) {
                       return Card(
                         elevation: 0,
                         shape: RoundedRectangleBorder(
@@ -315,13 +410,14 @@ class PaymentListScreen extends ConsumerWidget {
     BuildContext context,
     WidgetRef ref,
     dynamic invoice,
+    double remainingAmount,
   ) async {
     final l10n = AppLocalizations.of(context)!;
     final clientName = invoice.client?.name ?? l10n.unknownClient;
     await Share.share(
       '${l10n.sendReminder}: ${invoice.invoiceNumber}\n'
       '${l10n.clientName}: $clientName\n'
-      '${l10n.remainingToPay}: ${AppFormatters.formatCurrency(invoice.total, l10n)}',
+      '${l10n.remainingToPay}: ${AppFormatters.formatCurrency(remainingAmount, l10n)}',
       subject: '${l10n.sendReminder} ${invoice.invoiceNumber}',
     );
     await ref

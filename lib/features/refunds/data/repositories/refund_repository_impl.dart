@@ -5,6 +5,7 @@ import '../../../../core/database/database_provider.dart';
 import '../../domain/entities/refund.dart';
 import '../../domain/entities/refund_item.dart';
 import '../../domain/repositories/refund_repository.dart';
+import '../../../invoices/domain/entities/invoice_status.dart';
 
 class RefundRepositoryImpl implements RefundRepository {
   final db.AppDatabase _database;
@@ -142,7 +143,9 @@ class RefundRepositoryImpl implements RefundRepository {
     final invoices = await (_database.select(_database.invoices)
           ..where((t) => t.projectId.equals(projectId)))
         .get();
-    final totalInvoiced = invoices.fold(0.0, (sum, i) => sum + i.total);
+    final totalInvoiced = invoices
+        .where((i) => i.status != InvoiceStatus.cancelled && i.status != InvoiceStatus.draft)
+        .fold(0.0, (sum, i) => sum + i.total);
 
     final refundRows = await (_database.select(_database.refunds).join([
       innerJoin(_database.invoices,

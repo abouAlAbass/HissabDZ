@@ -921,4 +921,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get comment => 'Comment';
+
+  @override
+  String get from => 'From';
+
+  @override
+  String get to => 'To';
+
+  @override
+  String get filterByDateRange => 'Filter by date range';
+
+  @override
+  String get selectDateRange => 'Select date range';
+
+  @override
+  String get loadMore => 'Load More';
 }

@@ -15,6 +15,10 @@ class InvoiceRepositoryImpl implements InvoiceRepository {
   Future<List<entity.Invoice>> getInvoices({
     InvoiceStatus? status,
     String? query,
+    DateTime? startDate,
+    DateTime? endDate,
+    int? limit,
+    int? offset,
   }) async {
     final statement = _database.select(_database.invoices).join([
       leftOuterJoin(
@@ -36,6 +40,18 @@ class InvoiceRepositoryImpl implements InvoiceRepository {
         _database.invoices.invoiceNumber.like('%$query%') |
             _database.clients.name.like('%$query%'),
       );
+    }
+
+    if (startDate != null) {
+      statement.where(_database.invoices.issueDate.isBiggerOrEqualValue(startDate));
+    }
+
+    if (endDate != null) {
+      statement.where(_database.invoices.issueDate.isSmallerThanValue(endDate.add(const Duration(days: 1))));
+    }
+
+    if (limit != null) {
+      statement.limit(limit, offset: offset);
     }
 
     final rows = await statement.get();
